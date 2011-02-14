@@ -31,8 +31,8 @@ function rimraf (p, cb_) {
         }, timeout ++)
         return
       }
-      timout = 0
     }
+    timout = 0
     cb_(er)
   })
 }
