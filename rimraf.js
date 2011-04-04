@@ -15,7 +15,7 @@ var resetTimer = null
 function rimraf (p, cb_) {
   rimraf_(p, function cb (er) {
     if (er) {
-      if (er.mesage.match(/^EBUSY/)) {
+      if (er.message.match(/^EBUSY/)) {
         // windows is annoying.
         if (!waitBusy.hasOwnProperty(p)) waitBusy[p] = maxBusyTries
         if (waitBusy[p]) {
