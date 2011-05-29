@@ -32,7 +32,7 @@ function rimraf (p, cb_) {
         return
       }
     }
-    timout = 0
+    timeout = 0
     cb_(er)
   })
 }
