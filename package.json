@@ -3,6 +3,5 @@
 ,"main":"rimraf.js"
 ,"description":"A deep deletion module for node (like `rm -rf`)"
 ,"author":"Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)"
-,"contributors":["Wayne Larsen (http://github.com/wvl)"]
 ,"repository":"git://github.com/isaacs/rimraf.git"
 ,"scripts":{"test":"cd test && bash run.sh"}}
