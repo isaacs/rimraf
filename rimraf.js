@@ -13,34 +13,38 @@ try {
 
 // for EBUSY handling
 var waitBusy = {}
-  , maxBusyTries = 3
 
 // for EMFILE handling
 var resetTimer = null
   , timeout = 0
 
-function rimraf (p, cb_) {
-  rimraf_(p, function cb (er) {
+function rimraf (p, opts, cb) {
+  if (typeof opts === "function") cb = opts, opts = {}
+
+  opts.maxBusyTries = opts.maxBusyTries || 3
+
+  rimraf_(p, opts, function (er) {
     if (er) {
       if (er.message.match(/^EBUSY/)) {
         // windows is annoying.
-        if (!waitBusy.hasOwnProperty(p)) waitBusy[p] = maxBusyTries
+        if (!waitBusy.hasOwnProperty(p)) waitBusy[p] = opts.maxBusyTries
         if (waitBusy[p]) {
           waitBusy[p] --
           // give it 100ms more each time
-          var time = (maxBusyTries - waitBusy[p]) * 100
-          return setTimeout(function () { rimraf_(p, cb) }, time)
+          var time = (opts.maxBusyTries - waitBusy[p]) * 100
+          return setTimeout(function () { rimraf_(p, opts, cb) }, time)
         }
       }
+
+      // this one won't happen if graceful-fs is used.
       if (er.message.match(/^EMFILE/)) {
-        setTimeout(function () {
-          rimraf_(p, cb)
+        return setTimeout(function () {
+          rimraf_(p, opts, cb)
         }, timeout ++)
-        return
       }
     }
     timeout = 0
-    cb_(er)
+    cb(er)
   })
 }
 
@@ -57,27 +61,55 @@ function asyncForEach (list, fn, cb) {
   })
 }
 
-function rimraf_ (p, cb) {
+function rimraf_ (p, opts, cb) {
   fs.lstat(p, function (er, s) {
+    // if the stat fails, then assume it's already gone.
     if (er) return cb()
-    if (!s.isDirectory()) return fs.unlink(p, cb)
-    fs.readdir(p, function (er, files) {
+
+    // don't delete that don't point actually live in the "gently" path
+    if (opts.gently) return clobberTest(p, s, opts, cb)
+    return rm_(p, s, opts, cb)
+  })
+}
+
+function rm_ (p, s, opts, cb) {
+  if (!s.isDirectory()) return fs.unlink(p, cb)
+  fs.readdir(p, function (er, files) {
+    if (er) return cb(er)
+    asyncForEach(files.map(function (f) {
+      return path.join(p, f)
+    }), function (file, cb) {
+      rimraf(file, opts, cb)
+    }, function (er) {
       if (er) return cb(er)
-      asyncForEach(files.map(function (f) {
-        return path.join(p, f)
-      }), rimraf, function (er) {
-        if (er) return cb(er)
-        fs.rmdir(p, cb)
-      })
+      fs.rmdir(p, cb)
     })
+  })
+}
+
+function clobberTest (p, s, opts, cb) {
+  var gently = opts.gently
+  if (!s.isSymbolicLink()) next(null, path.resolve(p))
+  else realish(p, next)
+
+  function next (er, rp) {
+    if (er) return rm_(p, s, cb)
+    if (rp.indexOf(gently) !== 0) return clobberFail(p, cb)
+    else return rm_(p, s, opts, cb)
+  }
+}
+
+function realish (p, cb) {
+  fs.readlink(p, function (er, r) {
+    if (er) return cb(er)
+    return cb(null, path.resolve(path.dirname(p), r))
   })
 }
 
 // this looks simpler, but it will fail with big directory trees,
 // or on slow stupid awful windows filesystems,
-// and it's much slower, since the functional async version will
-// actually delete up to 4 things at once, or whatever eio is
-// configured to handle.
+// and it's potentially slower, since the functional async version will
+// actually delete several things at once.
 function rimrafSync (p) {
   var s = fs.lstatSync(p)
   if (!s.isDirectory()) return fs.unlinkSync(p)
