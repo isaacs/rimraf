@@ -1,8 +1,15 @@
 module.exports = rimraf
 rimraf.sync = rimrafSync
 
-var fs = require("fs")
-  , path = require("path")
+var path = require("path")
+  , fs
+
+try {
+  // optional dependency
+  fs = require("graceful-fs")
+} catch (ex) {
+  fs = require("fs")
+}
 
 // for EBUSY handling
 var waitBusy = {}
