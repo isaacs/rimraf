@@ -94,7 +94,7 @@ function clobberTest (p, s, opts, cb) {
 
   function next (er, rp) {
     if (er) return rm_(p, s, cb)
-    if (rp.indexOf(gently) !== 0) return clobberFail(p, cb)
+    if (rp.indexOf(gently) !== 0) return clobberFail(p, gently, cb)
     else return rm_(p, s, opts, cb)
   }
 }
@@ -106,10 +106,17 @@ function realish (p, cb) {
   })
 }
 
+function clobberFail (p, g, cb) {
+  var er = new Error("Refusing to delete: "+p+" not in "+g)
+    , constants = require("constants")
+  er.errno = constants.EEXIST
+  er.code = "EEXIST"
+  er.path = p
+  return cb(er)
+}
+
 // this looks simpler, but it will fail with big directory trees,
-// or on slow stupid awful windows filesystems,
-// and it's potentially slower, since the functional async version will
-// actually delete several things at once.
+// or on slow stupid awful windows filesystems
 function rimrafSync (p) {
   var s = fs.lstatSync(p)
   if (!s.isDirectory()) return fs.unlinkSync(p)
