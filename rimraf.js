@@ -11,53 +11,37 @@ try {
   fs = require("fs")
 }
 
-// for EBUSY handling
-var waitBusy = {}
-
 // for EMFILE handling
-var resetTimer = null
-  , timeout = 0
+var timeout = 0
+  , EMFILE_MAX = 1000
 
 function rimraf (p, opts, cb) {
   if (typeof opts === "function") cb = opts, opts = {}
 
+  var busyTries = 0
   opts.maxBusyTries = opts.maxBusyTries || 3
 
-  rimraf_(p, opts, function (er) {
+  rimraf_(p, opts, function CB (er) {
     if (er) {
-      if (er.message.match(/^EBUSY/)) {
-        // windows is annoying.
-        if (!waitBusy.hasOwnProperty(p)) waitBusy[p] = opts.maxBusyTries
-        if (waitBusy[p]) {
-          waitBusy[p] --
-          // give it 100ms more each time
-          var time = (opts.maxBusyTries - waitBusy[p]) * 100
-          return setTimeout(function () { rimraf_(p, opts, cb) }, time)
-        }
+      if (er.message.match(/^EBUSY/) && busyTries < opts.maxBusyTries) {
+        var time = (opts.maxBusyTries - busyTries) * 100
+        busyTries ++
+        // try again, with the same exact callback as this one.
+        return setTimeout(function () {
+          rimraf_(p, opts, CB)
+        })
       }
 
       // this one won't happen if graceful-fs is used.
-      if (er.message.match(/^EMFILE/)) {
+      if (er.message.match(/^EMFILE/) && timeout < EMFILE_MAX) {
         return setTimeout(function () {
-          rimraf_(p, opts, cb)
+          rimraf_(p, opts, CB)
         }, timeout ++)
       }
     }
+
     timeout = 0
     cb(er)
-  })
-}
-
-function asyncForEach (list, fn, cb) {
-  if (!list.length) cb()
-  var c = list.length
-    , errState = null
-  list.forEach(function (item, i, list) {
-    fn(item, function (er) {
-      if (errState) return
-      if (er) return cb(errState = er)
-      if (-- c === 0) return cb()
-    })
   })
 }
 
@@ -115,8 +99,21 @@ function clobberFail (p, g, cb) {
   return cb(er)
 }
 
+function asyncForEach (list, fn, cb) {
+  if (!list.length) cb()
+  var c = list.length
+    , errState = null
+  list.forEach(function (item, i, list) {
+    fn(item, function (er) {
+      if (errState) return
+      if (er) return cb(errState = er)
+      if (-- c === 0) return cb()
+    })
+  })
+}
+
 // this looks simpler, but it will fail with big directory trees,
-// or on slow stupid awful windows filesystems
+// or on slow stupid awful cygwin filesystems
 function rimrafSync (p) {
   var s = fs.lstatSync(p)
   if (!s.isDirectory()) return fs.unlinkSync(p)
