@@ -10,6 +10,6 @@ try {
 if (rimraf) {
   Fiber(function () {
     rimraf(path.join(__dirname, "target")).wait()
-  })
+  }).run()
 }
 
