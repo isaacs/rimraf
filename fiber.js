@@ -19,7 +19,7 @@ for (var ii in fs) {
 function timer (ms) {
   var future = new Future
   setTimeout(function () {
-    future.return ()
+    future.return()
   }, ms)
   return future
 }
