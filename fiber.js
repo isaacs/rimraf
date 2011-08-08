@@ -43,9 +43,11 @@ function rimraf_ (p, opts) {
     try {
       try {
         var stat = fs2.lstat(p).wait()
-      } catch (ex) {
+      } catch (er) {
         // already gone
-        return
+        if (er.message.match(/^ENOENT/)) return
+        // some other kind of error, permissions, etc.
+        throw er
       }
 
       // check to make sure that symlinks are ours.
@@ -71,14 +73,14 @@ function rimraf_ (p, opts) {
       timeout = 0
       return
 
-    } catch (ex) {
-      if (ex.message.match(/^EMFILE/) && timeout < EMFILE_MAX) {
+    } catch (er) {
+      if (er.message.match(/^EMFILE/) && timeout < EMFILE_MAX) {
         timer(timeout++).wait()
-      } else if (ex.message.match(/^EBUSY/)
+      } else if (er.message.match(/^EBUSY/)
                  && busyTries < opt.maxBusyTries) {
         timer(++busyTries * 100).wait()
       } else {
-        throw ex
+        throw er
       }
     }
   }

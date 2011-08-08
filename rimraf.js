@@ -7,7 +7,7 @@ var path = require("path")
 try {
   // optional dependency
   fs = require("graceful-fs")
-} catch (ex) {
+} catch (er) {
   fs = require("fs")
 }
 
@@ -48,7 +48,12 @@ function rimraf (p, opts, cb) {
 function rimraf_ (p, opts, cb) {
   fs.lstat(p, function (er, s) {
     // if the stat fails, then assume it's already gone.
-    if (er) return cb()
+    if (er) {
+      // already gone
+      if (er.message.match(/^ENOENT/)) return cb()
+      // some other kind of error, permissions, etc.
+      return cb(er)
+    }
 
     // don't delete that don't point actually live in the "gently" path
     if (opts.gently) return clobberTest(p, s, opts, cb)
