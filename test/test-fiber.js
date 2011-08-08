@@ -7,5 +7,9 @@ try {
   console.error("skipping fiber test")
 }
 
-if (rimraf) rimraf(path.join(__dirname, "target"))
+if (rimraf) {
+  Fiber(function () {
+    rimraf(path.join(__dirname, "target")).wait()
+  })
+}
 
