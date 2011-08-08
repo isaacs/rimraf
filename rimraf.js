@@ -38,6 +38,9 @@ function rimraf (p, opts, cb) {
           rimraf_(p, opts, CB)
         }, timeout ++)
       }
+
+      // already gone
+      if (er.message.match(/^ENOENT/)) er = null
     }
 
     timeout = 0

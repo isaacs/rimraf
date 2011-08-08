@@ -79,6 +79,9 @@ function rimraf_ (p, opts) {
       } else if (er.message.match(/^EBUSY/)
                  && busyTries < opt.maxBusyTries) {
         timer(++busyTries * 100).wait()
+      } else if (er.message.match(/^ENOENT/)) {
+        // already gone
+        return
       } else {
         throw er
       }
