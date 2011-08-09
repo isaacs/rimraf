@@ -26,27 +26,6 @@ function rimraf (p, opts) {
   opts.maxBusyTries = opts.maxBusyTries || 3
 
   return rimraf_(p, opts)
-  (function (r) {
-    timeout = 0; return r;
-  }, function CB (er) {
-    if (er.message.match(/^EBUSY/) && busyTries < opts.maxBusyTries) {
-      var time = (opts.maxBusyTries - busyTries) * 100
-      busyTries ++
-      // try again, with the same exact callback as this one.
-      return rimraf_(p, opts)(i, CB);
-    }
-
-    // this one won't happen if graceful-fs is used.
-    if (er.message.match(/^EMFILE/) && timeout < EMFILE_MAX) {
-      return delay(curry(rimraf_, p, opts), timeout ++)(i, CB);
-    }
-
-    // already gone
-    if (er.message.match(/^ENOENT/)) er = null
-
-    timeout = 0
-    return er
-  })
 }
 
 function rimraf_ (p, opts) {
@@ -66,7 +45,28 @@ function rimraf_ (p, opts) {
       return rimraf(path.join(p, f), opts);
     }))
     (lock(rmdir, p))
-  });
+  })
+  (function (r) {
+    timeout = 0; return r;
+  }, function CB (er) {
+    if (er.message.match(/^EBUSY/) && busyTries < opts.maxBusyTries) {
+      var time = (opts.maxBusyTries - busyTries) * 100
+      busyTries ++
+      // try again, with the same exact callback as this one.
+      return rimraf_(p, opts);
+    }
+
+    // this one won't happen if graceful-fs is used.
+    if (er.message.match(/^EMFILE/) && timeout < EMFILE_MAX) {
+      return delay(curry(rimraf_, p, opts), timeout ++);
+    }
+
+    // already gone
+    if (er.message.match(/^ENOENT/)) er = null
+
+    timeout = 0
+    return er
+  })
 
   function clobberFail () {
     var er = new Error("Refusing to delete: "+p+" not in "+opts.gently)
