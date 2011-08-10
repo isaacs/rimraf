@@ -41,12 +41,12 @@ function rimraf_ (p, opts) {
   // loops on handled errors.
   while (true) {
     try {
-      var stat = fs2.lstat(p).wait()
+      var stat = fs2.lstat(p).wait(), g
 	  
       // check to make sure that symlinks are ours.
-      if (opts.gently) {
+      if (g = opts.gently) {
         var rp = stat.isSymbolicLink() ? realish(p) : path.resolve(p)
-        if (rp.indexOf(opts.gently) !== 0) {
+        if (rp.indexOf(g) !== 0) {
           var er = new Error("Refusing to delete: "+p+" not in "+g)
           er.errno = require("constants").EEXIST
           er.code = "EEXIST"
