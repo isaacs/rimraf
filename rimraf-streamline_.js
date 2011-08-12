@@ -4,17 +4,17 @@ fs = require('fs');
 
 var timeout = 0;
 var rimraf = module.exports = function(p, opts, wait) {
-  opts = opts || {};
+  opts = opts || {}, gently = opts.gently;
   opts.maxBusyTries = opts.maxBusyTries || 3;
   var busyTries = 0;
   
   while (true) {
     try {
-      var stat = fs.lstat(p, wait), g;
+      var stat = fs.lstat(p, wait);
       // check to make sure that symlinks are ours.
-      if ((g = opts.gently) && 
-	    path.resolve(stat.isSymbolicLink() ? path.dirname(fs.readlink(p, wait)) : p).indexOf(g) !== 0) {
-        var er = new Error("Refusing to delete: " + p + " not in " + g);
+      if (gently && 
+	    path.resolve(stat.isSymbolicLink() ? path.dirname(fs.readlink(p, wait)) : p).indexOf(gently) !== 0) {
+        var er = new Error("Refusing to delete: " + p + " not in " + gently);
         er.errno = require("constants").EEXIST;
         er.code = "EEXIST";
         er.path = p;

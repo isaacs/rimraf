@@ -14,9 +14,9 @@ function __tryCatch(_, fn){ try { fn(); } catch (e) { try { _(e); } catch (ex) {
                 return __future(__1, arguments, 2);
               }
             ;
-              var busyTries, stat, g, er, rimrafs, i;
+              var busyTries, stat, er, rimrafs, i;
 /*     7 */   opts = (opts || {
-              });
+/*     7 */   }), gently = opts.gently;
 /*     8 */   opts.maxBusyTries = (opts.maxBusyTries || 3);
 /*     9 */   busyTries = 0;
               return (function(__break) {
@@ -29,7 +29,7 @@ function __tryCatch(_, fn){ try { fn(); } catch (e) { try { _(e); } catch (ex) {
 /*    13 */               return fs.lstat(p, __cb(wait, function(__0, __2) {
                             stat = __2;
                             return (function(wait) {
-/*    15 */                   var __1 = (g = opts.gently);
+/*    15 */                   var __1 = gently;
                               if (!__1) {
                                 return wait(null, __1);
                               }
@@ -51,13 +51,13 @@ function __tryCatch(_, fn){ try { fn(); } catch (e) { try { _(e); } catch (ex) {
 /*    16 */                       return wait(null, p);
                                 });
                               })(__cb(wait, function(__0, __4) {
-/*    16 */                     var __3 = (path.resolve(__4).indexOf(g) !== 0);
+/*    16 */                     var __3 = (path.resolve(__4).indexOf(gently) !== 0);
                                 return wait(null, __3);
                               }));
                             })(__cb(wait, function(__0, __3) {
                               return (function(__then) {
                                 if (__3) {
-/*    17 */                       er = new Error(((("Refusing to delete: " + p) + " not in ") + g));
+/*    17 */                       er = new Error(((("Refusing to delete: " + p) + " not in ") + gently));
 /*    18 */                       er.errno = require("constants").EEXIST;
 /*    19 */                       er.code = "EEXIST";
 /*    20 */                       er.path = p;

@@ -33,7 +33,7 @@ var timeout = 0
   , EMFILE_MAX = 1000
 
 function rimraf_ (p, opts) {
-  opts = opts || {}
+  opts = opts || {}, gently = opts.gently
   opts.maxBusyTries = opts.maxBusyTries || 3
   var busyTries = 0
 
@@ -41,13 +41,13 @@ function rimraf_ (p, opts) {
   // loops on handled errors.
   while (true) {
     try {
-      var stat = fs2.lstat(p).wait(), g
+      var stat = fs2.lstat(p).wait()
 	  
       // check to make sure that symlinks are ours.
-      if (g = opts.gently) {
+      if (gently) {
         var rp = stat.isSymbolicLink() ? realish(p) : path.resolve(p)
-        if (rp.indexOf(g) !== 0) {
-          var er = new Error("Refusing to delete: "+p+" not in "+g)
+        if (rp.indexOf(gently) !== 0) {
+          var er = new Error("Refusing to delete: "+p+" not in "+gently)
           er.errno = require("constants").EEXIST
           er.code = "EEXIST"
           er.path = p
