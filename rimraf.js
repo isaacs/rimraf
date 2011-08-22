@@ -49,7 +49,7 @@ function rimraf (p, opts, cb) {
 }
 
 function rimraf_ (p, opts, cb) {
-  fs.lstat(p, function (er, s) {
+  fs.stat(p, function (er, s) {
     // if the stat fails, then assume it's already gone.
     if (er) {
       // already gone
