@@ -11,6 +11,9 @@ try {
   fs = require("fs")
 }
 
+var lstat = fs.lstat ? "lstat" : "stat"
+  , lstatSync = lstat + "Sync"
+
 // for EMFILE handling
 var timeout = 0
   , EMFILE_MAX = 1000
@@ -49,7 +52,7 @@ function rimraf (p, opts, cb) {
 }
 
 function rimraf_ (p, opts, cb) {
-  fs.lstat(p, function (er, s) {
+  fs[lstat](p, function (er, s) {
     // if the stat fails, then assume it's already gone.
     if (er) {
       // already gone
@@ -123,7 +126,7 @@ function asyncForEach (list, fn, cb) {
 // this looks simpler, but it will fail with big directory trees,
 // or on slow stupid awful cygwin filesystems
 function rimrafSync (p) {
-  var s = fs.lstatSync(p)
+  var s = fs[lstatSync](p)
   if (!s.isDirectory()) return fs.unlinkSync(p)
   fs.readdirSync(p).forEach(function (f) {
     rimrafSync(path.join(p, f))
