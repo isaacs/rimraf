@@ -11,7 +11,7 @@ try {
   fs = require("fs")
 }
 
-var lstat = fs.lstat ? "lstat" : "stat"
+var lstat = process.platform === "win32" ? "stat" : "lstat"
   , lstatSync = lstat + "Sync"
 
 // for EMFILE handling
