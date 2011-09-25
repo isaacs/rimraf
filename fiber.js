@@ -35,6 +35,7 @@ var timeout = 0
 function rimraf_ (p, opts) {
   opts = opts || {}
   opts.maxBusyTries = opts.maxBusyTries || 3
+  if (opts.gently) opts.gently = path.resolve(opts.gently)
   var busyTries = 0
 
   // exits by throwing or returning.

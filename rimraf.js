@@ -24,6 +24,8 @@ function rimraf (p, opts, cb) {
   var busyTries = 0
   opts.maxBusyTries = opts.maxBusyTries || 3
 
+  if (opts.gently) opts.gently = path.resolve(opts.gently)
+
   rimraf_(p, opts, function CB (er) {
     if (er) {
       if (er.message.match(/^EBUSY/) && busyTries < opts.maxBusyTries) {
