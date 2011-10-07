@@ -21,6 +21,9 @@ var timeout = 0
 function rimraf (p, opts, cb) {
   if (typeof opts === "function") cb = opts, opts = {}
 
+  if (!cb) throw new Error("No callback passed to rimraf()")
+  if (!opts) opts = {}
+
   var busyTries = 0
   opts.maxBusyTries = opts.maxBusyTries || 3
 
