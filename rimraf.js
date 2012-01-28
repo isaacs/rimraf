@@ -73,7 +73,13 @@ function rimraf_ (p, opts, cb) {
 }
 
 function rm_ (p, s, opts, cb) {
-  if (!s.isDirectory()) return fs.unlink(p, cb)
+  if (!s.isDirectory()) {
+    // In case the file is read-only, make it read-write.
+    return fs.chmod(p, s.mode | 0777, function (er) {
+      if (er) return cb(er)
+      return fs.unlink(p, cb)
+    });
+  }
   fs.readdir(p, function (er, files) {
     if (er) return cb(er)
     asyncForEach(files.map(function (f) {
