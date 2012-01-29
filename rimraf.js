@@ -58,7 +58,6 @@ function rimraf (p, opts, cb) {
 
 function rimraf_ (p, opts, cb) {
   fs[lstat](p, function (er, s) {
-    // if the stat fails, then assume it's already gone.
     if (er) {
       // already gone
       if (er.code === "ENOENT") return cb()
@@ -73,7 +72,18 @@ function rimraf_ (p, opts, cb) {
 }
 
 function rm_ (p, s, opts, cb) {
-  if (!s.isDirectory()) return fs.unlink(p, cb)
+  if (!s.isDirectory()) {
+    // check if the file is writable
+    if ((s.mode & 0222) !== 0222) {
+      // make file writable
+      return fs.chmod(p, s.mode | 0222, function (er) {
+        if (er) return cb(er)
+        fs.unlink(p, cb)
+      })
+    }
+    return fs.unlink(p, cb)
+  }
+  // directory
   fs.readdir(p, function (er, files) {
     if (er) return cb(er)
     asyncForEach(files.map(function (f) {
@@ -93,7 +103,7 @@ function clobberTest (p, s, opts, cb) {
   else realish(p, next)
 
   function next (er, rp) {
-    if (er) return rm_(p, s, cb)
+    if (er) return rm_(p, s, opts, cb)
     if (rp.indexOf(gently) !== 0) return clobberFail(p, gently, cb)
     else return rm_(p, s, opts, cb)
   }
