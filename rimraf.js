@@ -71,11 +71,36 @@ function rimraf_ (p, opts, cb) {
   })
 }
 
+
+var myGid = function myGid () {
+  var g = process.getuid && process.getgid()
+  myGid = function myGid () { return g }
+  return g
+}
+
+var myUid = function myUid () {
+  var u = process.getuid && process.getuid()
+  myUid = function myUid () { return u }
+  return u
+}
+
+
+function writable (s) {
+  var mode = s.mode && 0777
+    , uid = myUid()
+    , gid = myGid()
+  return (mode & 0002)
+      || (gid === s.gid && (mode & 0020))
+      || (uid === s.uid && (mode & 0200))
+}
+
 function rm_ (p, s, opts, cb) {
   if (!s.isDirectory()) {
     // check if the file is writable
-    if ((s.mode & 0222) !== 0222) {
+    if (!writable(s)) {
       // make file writable
+      // user/group/world, doesn't matter at this point
+      // since it's about to get nuked.
       return fs.chmod(p, s.mode | 0222, function (er) {
         if (er) return cb(er)
         fs.unlink(p, cb)
