@@ -156,7 +156,13 @@ function rimrafSync (p) {
     if (er.code === "ENOENT") return
     throw er
   }
+
+  if (!writable(s)) {
+    fs.chmodSync(p, s.mode | 0222), function (er) {
+  }
+
   if (!s.isDirectory()) return fs.unlinkSync(p)
+
   fs.readdirSync(p).forEach(function (f) {
     rimrafSync(path.join(p, f))
   })
