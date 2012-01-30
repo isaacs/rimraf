@@ -37,7 +37,7 @@ function rimraf (p, cb) {
       }
 
       // this one won't happen if graceful-fs is used.
-      if (er.code === "EMFILE" && timeout < export.EMFILE_MAX) {
+      if (er.code === "EMFILE" && timeout < exports.EMFILE_MAX) {
         return setTimeout(function () {
           rimraf_(p, CB)
         }, timeout ++)
@@ -157,7 +157,7 @@ function rimrafSync (p) {
   }
 
   if (!writable(s)) {
-    fs.chmodSync(p, s.mode | 0222), function (er) {
+    fs.chmodSync(p, s.mode | 0222)
   }
 
   if (!s.isDirectory()) return fs.unlinkSync(p)
