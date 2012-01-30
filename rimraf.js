@@ -27,8 +27,6 @@ function rimraf (p, opts, cb) {
   var busyTries = 0
   opts.maxBusyTries = opts.maxBusyTries || 3
 
-  if (opts.gently) opts.gently = path.resolve(opts.gently)
-
   rimraf_(p, opts, function CB (er) {
     if (er) {
       if (er.code === "EBUSY" && busyTries < opts.maxBusyTries) {
@@ -65,8 +63,6 @@ function rimraf_ (p, opts, cb) {
       return cb(er)
     }
 
-    // don't delete that don't point actually live in the "gently" path
-    if (opts.gently) return clobberTest(p, s, opts, cb)
     return rm_(p, s, opts, cb)
   })
 }
@@ -120,18 +116,6 @@ function rm_ (p, s, opts, cb) {
       fs.rmdir(p, cb)
     })
   })
-}
-
-function clobberTest (p, s, opts, cb) {
-  var gently = opts.gently
-  if (!s.isSymbolicLink()) next(null, path.resolve(p))
-  else realish(p, next)
-
-  function next (er, rp) {
-    if (er) return rm_(p, s, opts, cb)
-    if (rp.indexOf(gently) !== 0) return clobberFail(p, gently, cb)
-    else return rm_(p, s, opts, cb)
-  }
 }
 
 function realish (p, cb) {
