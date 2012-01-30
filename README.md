@@ -4,7 +4,7 @@ Install with `npm install rimraf`, or just drop rimraf.js somewhere.
 
 ## API
 
-`rimraf(f, [options,] callback)`
+`rimraf(f, callback)`
 
 The callback will be called with an error if there is one.  Certain
 errors are handled for you:
@@ -13,13 +13,6 @@ errors are handled for you:
   before giving up.
 * `EMFILE` - If too many file descriptors get opened, rimraf will
   patiently wait until more become available.
-
-## Options
-
-The options object is optional.  These fields are respected:
-
-* `maxBusyTries` -  The number of times to retry a file or folder in the
-  event of an `EBUSY` error.  The default is 3.
 
 
 ## rimraf.sync
