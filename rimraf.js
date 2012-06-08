@@ -11,8 +11,16 @@ try {
   fs = require("fs")
 }
 
-var lstat = process.platform === "win32" ? "stat" : "lstat"
-  , lstatSync = lstat + "Sync"
+var lstat = "lstat"
+if (process.platform === "win32") {
+  // not reliable on windows prior to 0.7.9
+  var v = process.version.replace(/^v/, '').split(/\.|-/).map(Number)
+  if (v[0] === 0 && (v[1] < 7 || v[1] == 7 && v[2] < 9)) {
+    lstat = "stat"
+  }
+}
+if (!fs[lstat]) lstat = "stat"
+var lstatSync = lstat + "Sync"
 
 // for EMFILE handling
 var timeout = 0
