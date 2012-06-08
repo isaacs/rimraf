@@ -36,12 +36,12 @@ function rimraf (p, cb) {
   rimraf_(p, function CB (er) {
     if (er) {
       if (er.code === "EBUSY" && busyTries < exports.BUSYTRIES_MAX) {
-        var time = (exports.BUSYTRIES_MAX - busyTries) * 100
         busyTries ++
+        var time = busyTries * 100
         // try again, with the same exact callback as this one.
         return setTimeout(function () {
           rimraf_(p, CB)
-        })
+        }, time)
       }
 
       // this one won't happen if graceful-fs is used.
