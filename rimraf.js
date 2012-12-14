@@ -75,7 +75,7 @@ function rimraf_ (p, cb) {
 
 
 var myGid = function myGid () {
-  var g = process.getuid && process.getgid()
+  var g = process.getgid && process.getgid()
   myGid = function myGid () { return g }
   return g
 }
