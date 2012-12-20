@@ -47,65 +47,62 @@ function rimraf (p, cb) {
   })
 }
 
+// Two possible strategies.
+// 1. Assume it's a file.  unlink it, then do the dir stuff on EPERM
+// 2. Assume it's a directory.  readdir, then do the file stuff on ENOTDIR
+//
+// Both result in an extra syscall when you guess wrong.  However, there
+// are likely far more normal files in the world than directories.  This
+// is based on the assumption that a the average number of files per
+// directory is >= 1.
+//
+// If anyone ever complains about this, then I guess the strategy could
+// be made configurable somehow.  But until then, YAGNI.
 function rimraf_ (p, cb) {
-  fs.lstat(p, function (er, s) {
-    if (er) {
-      // already gone
-      if (er.code === "ENOENT") return cb()
-      // some other kind of error, permissions, etc.
-      return cb(er)
-    }
-
-    return rm_(p, s, cb)
+  fs.unlink(p, function (er) {
+    if (er && er.code === "ENOENT")
+      return cb()
+    if (er && er.code === "EPERM")
+      return rmdir(p, cb)
+    return cb(er)
   })
 }
 
-function rm_ (p, s, cb) {
-  if (!s.isDirectory()) {
-    return fs.unlink(p, cb)
-  }
-
-  // directory
+function rmdir (p, cb) {
   fs.readdir(p, function (er, files) {
-    if (er) return cb(er)
-    asyncForEach(files.map(function (f) {
-      return path.join(p, f)
-    }), function (file, cb) {
-      rimraf(file, cb)
-    }, function (er) {
-      if (er) return cb(er)
-      fs.rmdir(p, cb)
+    if (er)
+      return cb(er)
+    var n = files.length
+    if (n === 0)
+      return fs.rmdir(p, cb)
+    var errState
+    files.forEach(function (f) {
+      rimraf(path.join(p, f), function (er) {
+        if (errState)
+          return
+        if (er)
+          return cb(errState = er)
+        if (--n === 0)
+          fs.rmdir(p, cb)
+      })
     })
   })
 }
 
-function asyncForEach (list, fn, cb) {
-  if (!list.length) cb()
-  var c = list.length
-    , errState = null
-  list.forEach(function (item, i, list) {
-    fn(item, function (er) {
-      if (errState) return
-      if (er) return cb(errState = er)
-      if (-- c === 0) return cb()
-    })
-  })
-}
-
-// this looks simpler, but it will fail with big directory trees,
-// or on slow stupid awful cygwin filesystems
+// this looks simpler, and is strictly *faster*, but will
+// tie up the JavaScript thread and fail on excessively
+// deep directory trees.
 function rimrafSync (p) {
   try {
-    var s = fs.lstatSync(p)
+    fs.unlinkSync(p)
   } catch (er) {
-    if (er.code === "ENOENT") return
-    throw er
+    if (er.code === "ENOENT")
+      return
+    if (er.code !== "EPERM")
+      throw er
+    fs.readdirSync(p).forEach(function (f) {
+      rimrafSync(path.join(p, f))
+    })
+    fs.rmdirSync(p)
   }
-
-  if (!s.isDirectory()) return fs.unlinkSync(p)
-
-  fs.readdirSync(p).forEach(function (f) {
-    rimrafSync(path.join(p, f))
-  })
-  fs.rmdirSync(p)
 }
