@@ -56,44 +56,11 @@ function rimraf_ (p, cb) {
       return cb(er)
     }
 
-    return rm_(p, s, false, cb)
+    return rm_(p, s, cb)
   })
 }
 
-
-var myGid = function myGid () {
-  var g = process.getgid && process.getgid()
-  myGid = function myGid () { return g }
-  return g
-}
-
-var myUid = function myUid () {
-  var u = process.getuid && process.getuid()
-  myUid = function myUid () { return u }
-  return u
-}
-
-
-function writable (s) {
-  var mode = s.mode || 0777
-    , uid = myUid()
-    , gid = myGid()
-  return (mode & 0002)
-      || (gid === s.gid && (mode & 0020))
-      || (uid === s.uid && (mode & 0200))
-}
-
-function rm_ (p, s, didWritableCheck, cb) {
-  if (!didWritableCheck && !writable(s)) {
-    // make file writable
-    // user/group/world, doesn't matter at this point
-    // since it's about to get nuked.
-    return fs.chmod(p, s.mode | 0222, function (er) {
-      if (er) return cb(er)
-      rm_(p, s, true, cb)
-    })
-  }
-
+function rm_ (p, s, cb) {
   if (!s.isDirectory()) {
     return fs.unlink(p, cb)
   }
@@ -133,10 +100,6 @@ function rimrafSync (p) {
   } catch (er) {
     if (er.code === "ENOENT") return
     throw er
-  }
-
-  if (!writable(s)) {
-    fs.chmodSync(p, s.mode | 0222)
   }
 
   if (!s.isDirectory()) return fs.unlinkSync(p)
