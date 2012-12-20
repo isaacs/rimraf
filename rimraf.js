@@ -11,28 +11,15 @@ try {
   fs = require("fs")
 }
 
-var lstat = "lstat"
-if (process.platform === "win32") {
-  // not reliable on windows prior to 0.7.9
-  var v = process.version.replace(/^v/, '').split(/\.|-/).map(Number)
-  if (v[0] === 0 && (v[1] < 7 || v[1] == 7 && v[2] < 9)) {
-    lstat = "stat"
-  }
-}
-if (!fs[lstat]) lstat = "stat"
-var lstatSync = lstat + "Sync"
-
 // for EMFILE handling
 var timeout = 0
 exports.EMFILE_MAX = 1000
 exports.BUSYTRIES_MAX = 3
 
 function rimraf (p, cb) {
-
   if (!cb) throw new Error("No callback passed to rimraf()")
 
   var busyTries = 0
-
   rimraf_(p, function CB (er) {
     if (er) {
       if (er.code === "EBUSY" && busyTries < exports.BUSYTRIES_MAX) {
@@ -61,7 +48,7 @@ function rimraf (p, cb) {
 }
 
 function rimraf_ (p, cb) {
-  fs[lstat](p, function (er, s) {
+  fs.lstat(p, function (er, s) {
     if (er) {
       // already gone
       if (er.code === "ENOENT") return cb()
@@ -142,7 +129,7 @@ function asyncForEach (list, fn, cb) {
 // or on slow stupid awful cygwin filesystems
 function rimrafSync (p) {
   try {
-    var s = fs[lstatSync](p)
+    var s = fs.lstatSync(p)
   } catch (er) {
     if (er.code === "ENOENT") return
     throw er
