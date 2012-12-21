@@ -48,7 +48,7 @@ function rimraf (p, cb) {
 }
 
 // Two possible strategies.
-// 1. Assume it's a file.  unlink it, then do the dir stuff on EPERM
+// 1. Assume it's a file.  unlink it, then do the dir stuff on EPERM or EISDIR
 // 2. Assume it's a directory.  readdir, then do the file stuff on ENOTDIR
 //
 // Both result in an extra syscall when you guess wrong.  However, there
@@ -62,7 +62,7 @@ function rimraf_ (p, cb) {
   fs.unlink(p, function (er) {
     if (er && er.code === "ENOENT")
       return cb()
-    if (er && er.code === "EPERM")
+    if (er && (er.code === "EPERM" || er.code === "EISDIR"))
       return rmdir(p, cb)
     return cb(er)
   })
@@ -98,7 +98,7 @@ function rimrafSync (p) {
   } catch (er) {
     if (er.code === "ENOENT")
       return
-    if (er.code !== "EPERM")
+    if (er.code !== "EPERM" && er.code !== "EISDIR")
       throw er
     fs.readdirSync(p).forEach(function (f) {
       rimrafSync(path.join(p, f))
