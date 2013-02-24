@@ -19,3 +19,7 @@ errors are handled for you:
 
 It can remove stuff synchronously, too.  But that's not so good.  Use
 the async API.  It's better.
+
+## mkdirp
+
+If you need to create a directory recursively, check out [mkdirp](https://github.com/substack/node-mkdirp)
