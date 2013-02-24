@@ -23,3 +23,8 @@ the async API.  It's better.
 
 If installed with `npm install rimraf -g` it can be used as a global
 command `rimraf <path>` which is useful for cross platform support.
+
+## mkdirp
+
+If you need to create a directory recursively, check out
+[mkdirp](https://github.com/substack/node-mkdirp).
