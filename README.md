@@ -19,3 +19,7 @@ errors are handled for you:
 
 It can remove stuff synchronously, too.  But that's not so good.  Use
 the async API.  It's better.
+
+## CLI
+
+If you need a cross platform CLI version of this use [obliterate](https://npmjs.org/package/obliterate)
