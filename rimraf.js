@@ -23,8 +23,7 @@ function rimraf (p, cb) {
   rimraf_(p, function CB (er) {
     if (er) {
       if (er.code === "EBUSY" && busyTries < exports.BUSYTRIES_MAX) {
-        if(process.cwd() === p){
-          //For lucky Windows users
+        if(process.cwd() === p && process.platform === "win32"){
           process.chdir(path.join(p, '..'));
         }
         busyTries ++
