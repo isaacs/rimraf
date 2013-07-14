@@ -16,6 +16,8 @@ var timeout = 0
 exports.EMFILE_MAX = 1000
 exports.BUSYTRIES_MAX = 3
 
+var isWindows = (process.platform === "win32")
+
 function rimraf (p, cb) {
   if (!cb) throw new Error("No callback passed to rimraf()")
 
@@ -60,10 +62,27 @@ function rimraf (p, cb) {
 // be made configurable somehow.  But until then, YAGNI.
 function rimraf_ (p, cb) {
   fs.unlink(p, function (er) {
-    if (er && er.code === "ENOENT")
-      return cb()
-    if (er && (er.code === "EPERM" || er.code === "EISDIR"))
-      return rmdir(p, er, cb)
+    if (er) {
+      if (er.code === "ENOENT")
+        return cb()
+      if (er.code === "EPERM")
+        if (isWindows)
+          return fs.chmod(p, 666, function (er2) {
+            if (er2) return cb(er2)
+            fs.stat(p, function(er3, stats) {
+              if (er3) return cb(er3)
+              if (stats.isDirectory()) {
+                rmdir(p, er, cb)
+              } else {
+                fs.unlink(p, cb)
+              }
+            })
+          })
+        else
+          return rmdir(p, er, cb)
+      if (er.code === "EISDIR")
+        return rmdir(p, er, cb)
+    }
     return cb(er)
   })
 }
@@ -112,7 +131,18 @@ function rimrafSync (p) {
   } catch (er) {
     if (er.code === "ENOENT")
       return
-    if (er.code !== "EPERM" && er.code !== "EISDIR")
+    if (er.code === "EPERM")
+      if (isWindows) {
+        fs.chmodSync(p,666)
+        var stats = fs.statSync(p)
+        if (!stats.isDirectory()) {
+          fs.unlinkSync(p)
+          return
+        }
+      } else {
+        throw er
+      }
+    if (er.code !== "EISDIR" && !(er.code === "EPERM" && isWindows))
       throw er
     try {
       fs.rmdirSync(p)
