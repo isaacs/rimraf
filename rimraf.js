@@ -66,25 +66,49 @@ function rimraf_ (p, cb) {
       if (er.code === "ENOENT")
         return cb()
       if (er.code === "EPERM")
-        if (isWindows)
-          return fs.chmod(p, 666, function (er2) {
-            if (er2) return cb(er2)
-            fs.stat(p, function(er3, stats) {
-              if (er3) return cb(er3)
-              if (stats.isDirectory()) {
-                rmdir(p, er, cb)
-              } else {
-                fs.unlink(p, cb)
-              }
-            })
-          })
-        else
-          return rmdir(p, er, cb)
+        return (isWindows) ? fixWinEPERM(p, er, cb) : rmdir(p, er, cb)
       if (er.code === "EISDIR")
         return rmdir(p, er, cb)
     }
     return cb(er)
   })
+}
+
+function fixWinEPERM (p, er, cb) {
+  fs.chmod(p, 666, function (er2) {
+    if (er2)
+      cb(er2.code === "ENOENT" ? null : er)
+    else
+      fs.stat(p, function(er3, stats) {
+        if (er3)
+          cb(er3.code === "ENOENT" ? null : er)
+        else if (stats.isDirectory())
+          rmdir(p, er, cb)
+        else
+          fs.unlink(p, cb)
+      })
+  })
+}
+
+function fixWinEPERMSync (p, er, cb) {
+  try {
+    fs.chmodSync(p, 666)
+  } catch (er2) {
+    if (er2.code !== "ENOENT")
+      throw er
+  }
+
+  try {
+    var stats = fs.statSync(p)
+  } catch (er3) {
+    if (er3 !== "ENOENT")
+      throw er
+  }
+
+  if (stats.isDirectory())
+    rmdirSync(p, er)
+  else
+    fs.unlinkSync(p)
 }
 
 function rmdir (p, originalEr, cb) {
@@ -132,31 +156,29 @@ function rimrafSync (p) {
     if (er.code === "ENOENT")
       return
     if (er.code === "EPERM")
-      if (isWindows) {
-        fs.chmodSync(p,666)
-        var stats = fs.statSync(p)
-        if (!stats.isDirectory()) {
-          fs.unlinkSync(p)
-          return
-        }
-      } else {
-        throw er
-      }
-    if (er.code !== "EISDIR" && !(er.code === "EPERM" && isWindows))
+      return isWindows ? fixWinEPERMSync(p, er) : rmdirSync(p, er)
+    if (er.code !== "EISDIR")
       throw er
-    try {
-      fs.rmdirSync(p)
-    } catch (er2) {
-      if (er2.code === "ENOENT")
-        return
-      if (er2.code === "ENOTDIR")
-        throw er
-      if (er2.code === "ENOTEMPTY") {
-        fs.readdirSync(p).forEach(function (f) {
-          rimrafSync(path.join(p, f))
-        })
-        fs.rmdirSync(p)
-      }
-    }
+    rmdirSync(p, er)
   }
+}
+
+function rmdirSync (p, originalEr) {
+  try {
+    fs.rmdirSync(p)
+  } catch (er) {
+    if (er.code === "ENOENT")
+      return
+    if (er.code === "ENOTDIR")
+      throw originalEr
+    if (er.code === "ENOTEMPTY" || er.code === "EEXIST")
+      rmkidsSync(p)
+  }
+}
+
+function rmkidsSync (p) {
+  fs.readdirSync(p).forEach(function (f) {
+    rimrafSync(path.join(p, f))
+  })
+  fs.rmdirSync(p)
 }
