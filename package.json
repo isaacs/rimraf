@@ -9,7 +9,7 @@
     "url": "https://github.com/isaacs/rimraf/raw/master/LICENSE"
   },
   "optionalDependencies": {
-    "graceful-fs": "~1"
+    "graceful-fs": "~2"
   },
   "repository": "git://github.com/isaacs/rimraf.git",
   "scripts": {
