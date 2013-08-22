@@ -25,6 +25,9 @@ function rimraf (p, cb) {
   rimraf_(p, function CB (er) {
     if (er) {
       if (er.code === "EBUSY" && busyTries < exports.BUSYTRIES_MAX) {
+        if(process.cwd() === p && process.platform === "win32"){
+          process.chdir(path.join(p, '..'));
+        }
         busyTries ++
         var time = busyTries * 100
         // try again, with the same exact callback as this one.
