@@ -24,7 +24,8 @@ function rimraf (p, cb) {
   var busyTries = 0
   rimraf_(p, function CB (er) {
     if (er) {
-      if (er.code === "EBUSY" && busyTries < exports.BUSYTRIES_MAX) {
+      if (isWindows && (er.code === "EBUSY" || er.code === "ENOTEMPTY") &&
+          busyTries < exports.BUSYTRIES_MAX) {
         busyTries ++
         var time = busyTries * 100
         // try again, with the same exact callback as this one.
