@@ -61,6 +61,7 @@ function rimraf (p, cb) {
 // If anyone ever complains about this, then I guess the strategy could
 // be made configurable somehow.  But until then, YAGNI.
 function rimraf_ (p, cb) {
+  if (process.platform === "win32") fs.chmodSync(p,666)
   fs.unlink(p, function (er) {
     if (er) {
       if (er.code === "ENOENT")
@@ -150,6 +151,7 @@ function rmkids(p, cb) {
 // tie up the JavaScript thread and fail on excessively
 // deep directory trees.
 function rimrafSync (p) {
+  if (process.platform === "win32") fs.chmodSync(p,666)
   try {
     fs.unlinkSync(p)
   } catch (er) {
