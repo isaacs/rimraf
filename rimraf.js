@@ -65,7 +65,7 @@ function rimraf_ (p, cb) {
   fs.unlink(p, function (er) {
     if (er) {
       if (er.code === "ENOENT")
-        return cb()
+        return cb(null)
       if (er.code === "EPERM")
         return (isWindows) ? fixWinEPERM(p, er, cb) : rmdir(p, er, cb)
       if (er.code === "EISDIR")
