@@ -1,6 +1,6 @@
 {
   "name": "rimraf",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "main": "rimraf.js",
   "description": "A deep deletion module for node (like `rm -rf`)",
   "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
