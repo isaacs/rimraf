@@ -2,14 +2,7 @@ module.exports = rimraf
 rimraf.sync = rimrafSync
 
 var path = require("path")
-  , fs
-
-try {
-  // optional dependency
-  fs = require("graceful-fs")
-} catch (er) {
-  fs = require("fs")
-}
+var fs = require("fs")
 
 // for EMFILE handling
 var timeout = 0
