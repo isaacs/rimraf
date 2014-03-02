@@ -11,13 +11,28 @@ exports.BUSYTRIES_MAX = 3
 
 var isWindows = (process.platform === "win32")
 
+function defaults (options) {
+  var methods = [
+    'unlink',
+    'chmod',
+    'stat',
+    'rmdir',
+    'readdir'
+  ]
+  methods.forEach(function(m) {
+    options[m] = options[m] || fs[m]
+    m = m + 'Sync'
+    options[m] = options[m] || fs[m]
+  })
+}
+
 function rimraf (p, options, cb) {
   if (typeof options === 'function') {
     cb = options
     options = {}
   }
 
-  options.path = p
+  defaults(options)
 
   if (!cb) throw new Error("No callback passed to rimraf()")
 
@@ -62,7 +77,7 @@ function rimraf (p, options, cb) {
 // If anyone ever complains about this, then I guess the strategy could
 // be made configurable somehow.  But until then, YAGNI.
 function rimraf_ (p, options, cb) {
-  fs.unlink(p, function (er) {
+  options.unlink(p, function (er) {
     if (er) {
       if (er.code === "ENOENT")
         return cb(null)
@@ -78,31 +93,31 @@ function rimraf_ (p, options, cb) {
 }
 
 function fixWinEPERM (p, options, er, cb) {
-  fs.chmod(p, 666, function (er2) {
+  options.chmod(p, 666, function (er2) {
     if (er2)
       cb(er2.code === "ENOENT" ? null : er)
     else
-      fs.stat(p, function(er3, stats) {
+      options.stat(p, function(er3, stats) {
         if (er3)
           cb(er3.code === "ENOENT" ? null : er)
         else if (stats.isDirectory())
           rmdir(p, options, er, cb)
         else
-          fs.unlink(p, cb)
+          options.unlink(p, cb)
       })
   })
 }
 
 function fixWinEPERMSync (p, er, cb) {
   try {
-    fs.chmodSync(p, 666)
+    options.chmodSync(p, 666)
   } catch (er2) {
     if (er2.code !== "ENOENT")
       throw er
   }
 
   try {
-    var stats = fs.statSync(p)
+    var stats = options.statSync(p)
   } catch (er3) {
     if (er3 !== "ENOENT")
       throw er
@@ -111,14 +126,14 @@ function fixWinEPERMSync (p, er, cb) {
   if (stats.isDirectory())
     rmdirSync(p, er)
   else
-    fs.unlinkSync(p)
+    options.unlinkSync(p)
 }
 
 function rmdir (p, options, originalEr, cb) {
   // try to rmdir first, and only readdir on ENOTEMPTY or EEXIST (SunOS)
   // if we guessed wrong, and it's not a directory, then
   // raise the original error.
-  fs.rmdir(p, function (er) {
+  options.rmdir(p, function (er) {
     if (er && (er.code === "ENOTEMPTY" || er.code === "EEXIST" || er.code === "EPERM"))
       rmkids(p, options, cb)
     else if (er && er.code === "ENOTDIR")
@@ -129,12 +144,12 @@ function rmdir (p, options, originalEr, cb) {
 }
 
 function rmkids(p, options, cb) {
-  fs.readdir(p, function (er, files) {
+  options.readdir(p, function (er, files) {
     if (er)
       return cb(er)
     var n = files.length
     if (n === 0)
-      return fs.rmdir(p, cb)
+      return options.rmdir(p, cb)
     var errState
     files.forEach(function (f) {
       rimraf(path.join(p, f), options, function (er) {
@@ -143,7 +158,7 @@ function rmkids(p, options, cb) {
         if (er)
           return cb(errState = er)
         if (--n === 0)
-          fs.rmdir(p, cb)
+          options.rmdir(p, cb)
       })
     })
   })
@@ -153,8 +168,11 @@ function rmkids(p, options, cb) {
 // tie up the JavaScript thread and fail on excessively
 // deep directory trees.
 function rimrafSync (p, options) {
+  options = options || {}
+  defaults(options)
+
   try {
-    fs.unlinkSync(p)
+    options.unlinkSync(p)
   } catch (er) {
     if (er.code === "ENOENT")
       return
@@ -168,7 +186,7 @@ function rimrafSync (p, options) {
 
 function rmdirSync (p, options, originalEr) {
   try {
-    fs.rmdirSync(p)
+    options.rmdirSync(p)
   } catch (er) {
     if (er.code === "ENOENT")
       return
@@ -180,8 +198,8 @@ function rmdirSync (p, options, originalEr) {
 }
 
 function rmkidsSync (p, options) {
-  fs.readdirSync(p).forEach(function (f) {
+  options.readdirSync(p).forEach(function (f) {
     rimrafSync(path.join(p, f), options)
   })
-  fs.rmdirSync(p)
+  options.rmdirSync(p)
 }
