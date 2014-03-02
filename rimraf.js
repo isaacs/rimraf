@@ -11,11 +11,18 @@ exports.BUSYTRIES_MAX = 3
 
 var isWindows = (process.platform === "win32")
 
-function rimraf (p, cb) {
+function rimraf (p, options, cb) {
+  if (typeof options === 'function') {
+    cb = options
+    options = {}
+  }
+
+  options.path = p
+
   if (!cb) throw new Error("No callback passed to rimraf()")
 
   var busyTries = 0
-  rimraf_(p, function CB (er) {
+  rimraf_(p, options, function CB (er) {
     if (er) {
       if (isWindows && (er.code === "EBUSY" || er.code === "ENOTEMPTY") &&
           busyTries < exports.BUSYTRIES_MAX) {
@@ -23,14 +30,14 @@ function rimraf (p, cb) {
         var time = busyTries * 100
         // try again, with the same exact callback as this one.
         return setTimeout(function () {
-          rimraf_(p, CB)
+          rimraf_(p, options, CB)
         }, time)
       }
 
       // this one won't happen if graceful-fs is used.
       if (er.code === "EMFILE" && timeout < exports.EMFILE_MAX) {
         return setTimeout(function () {
-          rimraf_(p, CB)
+          rimraf_(p, options, CB)
         }, timeout ++)
       }
 
@@ -54,21 +61,23 @@ function rimraf (p, cb) {
 //
 // If anyone ever complains about this, then I guess the strategy could
 // be made configurable somehow.  But until then, YAGNI.
-function rimraf_ (p, cb) {
+function rimraf_ (p, options, cb) {
   fs.unlink(p, function (er) {
     if (er) {
       if (er.code === "ENOENT")
         return cb(null)
       if (er.code === "EPERM")
-        return (isWindows) ? fixWinEPERM(p, er, cb) : rmdir(p, er, cb)
+        return (isWindows)
+          ? fixWinEPERM(p, options, er, cb)
+          : rmdir(p, options, er, cb)
       if (er.code === "EISDIR")
-        return rmdir(p, er, cb)
+        return rmdir(p, options, er, cb)
     }
     return cb(er)
   })
 }
 
-function fixWinEPERM (p, er, cb) {
+function fixWinEPERM (p, options, er, cb) {
   fs.chmod(p, 666, function (er2) {
     if (er2)
       cb(er2.code === "ENOENT" ? null : er)
@@ -77,7 +86,7 @@ function fixWinEPERM (p, er, cb) {
         if (er3)
           cb(er3.code === "ENOENT" ? null : er)
         else if (stats.isDirectory())
-          rmdir(p, er, cb)
+          rmdir(p, options, er, cb)
         else
           fs.unlink(p, cb)
       })
@@ -105,13 +114,13 @@ function fixWinEPERMSync (p, er, cb) {
     fs.unlinkSync(p)
 }
 
-function rmdir (p, originalEr, cb) {
+function rmdir (p, options, originalEr, cb) {
   // try to rmdir first, and only readdir on ENOTEMPTY or EEXIST (SunOS)
   // if we guessed wrong, and it's not a directory, then
   // raise the original error.
   fs.rmdir(p, function (er) {
     if (er && (er.code === "ENOTEMPTY" || er.code === "EEXIST" || er.code === "EPERM"))
-      rmkids(p, cb)
+      rmkids(p, options, cb)
     else if (er && er.code === "ENOTDIR")
       cb(originalEr)
     else
@@ -119,7 +128,7 @@ function rmdir (p, originalEr, cb) {
   })
 }
 
-function rmkids(p, cb) {
+function rmkids(p, options, cb) {
   fs.readdir(p, function (er, files) {
     if (er)
       return cb(er)
@@ -128,7 +137,7 @@ function rmkids(p, cb) {
       return fs.rmdir(p, cb)
     var errState
     files.forEach(function (f) {
-      rimraf(path.join(p, f), function (er) {
+      rimraf(path.join(p, f), options, function (er) {
         if (errState)
           return
         if (er)
@@ -143,7 +152,7 @@ function rmkids(p, cb) {
 // this looks simpler, and is strictly *faster*, but will
 // tie up the JavaScript thread and fail on excessively
 // deep directory trees.
-function rimrafSync (p) {
+function rimrafSync (p, options) {
   try {
     fs.unlinkSync(p)
   } catch (er) {
@@ -153,11 +162,11 @@ function rimrafSync (p) {
       return isWindows ? fixWinEPERMSync(p, er) : rmdirSync(p, er)
     if (er.code !== "EISDIR")
       throw er
-    rmdirSync(p, er)
+    rmdirSync(p, options, er)
   }
 }
 
-function rmdirSync (p, originalEr) {
+function rmdirSync (p, options, originalEr) {
   try {
     fs.rmdirSync(p)
   } catch (er) {
@@ -166,13 +175,13 @@ function rmdirSync (p, originalEr) {
     if (er.code === "ENOTDIR")
       throw originalEr
     if (er.code === "ENOTEMPTY" || er.code === "EEXIST" || er.code === "EPERM")
-      rmkidsSync(p)
+      rmkidsSync(p, options)
   }
 }
 
-function rmkidsSync (p) {
+function rmkidsSync (p, options) {
   fs.readdirSync(p).forEach(function (f) {
-    rimrafSync(path.join(p, f))
+    rimrafSync(path.join(p, f), options)
   })
   fs.rmdirSync(p)
 }
