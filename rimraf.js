@@ -112,14 +112,18 @@ function fixWinEPERMSync (p, er, cb) {
   try {
     options.chmodSync(p, 666)
   } catch (er2) {
-    if (er2.code !== "ENOENT")
+    if (er2.code === "ENOENT")
+      return
+    else
       throw er
   }
 
   try {
     var stats = options.statSync(p)
   } catch (er3) {
-    if (er3 !== "ENOENT")
+    if (er3.code === "ENOENT")
+      return
+    else
       throw er
   }
 
