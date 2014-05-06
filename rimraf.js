@@ -1,6 +1,7 @@
 module.exports = rimraf
 rimraf.sync = rimrafSync
 
+var assert = require("assert")
 var path = require("path")
 var fs = require("fs")
 
@@ -31,6 +32,9 @@ function rimraf (p, options, cb) {
     cb = options
     options = {}
   }
+  assert(p)
+  assert(options)
+  assert(typeof cb === 'function')
 
   defaults(options)
 
@@ -77,6 +81,10 @@ function rimraf (p, options, cb) {
 // If anyone ever complains about this, then I guess the strategy could
 // be made configurable somehow.  But until then, YAGNI.
 function rimraf_ (p, options, cb) {
+  assert(p)
+  assert(options)
+  assert(typeof cb === 'function')
+
   options.unlink(p, function (er) {
     if (er) {
       if (er.code === "ENOENT")
@@ -93,6 +101,12 @@ function rimraf_ (p, options, cb) {
 }
 
 function fixWinEPERM (p, options, er, cb) {
+  assert(p)
+  assert(options)
+  assert(typeof cb === 'function')
+  if (er)
+    assert(er instanceof Error)
+
   options.chmod(p, 666, function (er2) {
     if (er2)
       cb(er2.code === "ENOENT" ? null : er)
@@ -108,7 +122,12 @@ function fixWinEPERM (p, options, er, cb) {
   })
 }
 
-function fixWinEPERMSync (p, er, cb) {
+function fixWinEPERMSync (p, options, er) {
+  assert(p)
+  assert(options)
+  if (er)
+    assert(er instanceof Error)
+
   try {
     options.chmodSync(p, 666)
   } catch (er2) {
@@ -128,12 +147,18 @@ function fixWinEPERMSync (p, er, cb) {
   }
 
   if (stats.isDirectory())
-    rmdirSync(p, er)
+    rmdirSync(p, options, er)
   else
     options.unlinkSync(p)
 }
 
 function rmdir (p, options, originalEr, cb) {
+  assert(p)
+  assert(options)
+  if (originalEr)
+    assert(originalEr instanceof Error)
+  assert(typeof cb === 'function')
+
   // try to rmdir first, and only readdir on ENOTEMPTY or EEXIST (SunOS)
   // if we guessed wrong, and it's not a directory, then
   // raise the original error.
@@ -148,6 +173,10 @@ function rmdir (p, options, originalEr, cb) {
 }
 
 function rmkids(p, options, cb) {
+  assert(p)
+  assert(options)
+  assert(typeof cb === 'function')
+
   options.readdir(p, function (er, files) {
     if (er)
       return cb(er)
@@ -175,13 +204,16 @@ function rimrafSync (p, options) {
   options = options || {}
   defaults(options)
 
+  assert(p)
+  assert(options)
+
   try {
     options.unlinkSync(p)
   } catch (er) {
     if (er.code === "ENOENT")
       return
     if (er.code === "EPERM")
-      return isWindows ? fixWinEPERMSync(p, er) : rmdirSync(p, options, er)
+      return isWindows ? fixWinEPERMSync(p, options, er) : rmdirSync(p, options, er)
     if (er.code !== "EISDIR")
       throw er
     rmdirSync(p, options, er)
@@ -189,6 +221,11 @@ function rimrafSync (p, options) {
 }
 
 function rmdirSync (p, options, originalEr) {
+  assert(p)
+  assert(options)
+  if (originalEr)
+    assert(originalEr instanceof Error)
+
   try {
     options.rmdirSync(p)
   } catch (er) {
@@ -202,8 +239,10 @@ function rmdirSync (p, options, originalEr) {
 }
 
 function rmkidsSync (p, options) {
+  assert(p)
+  assert(options)
   options.readdirSync(p).forEach(function (f) {
     rimrafSync(path.join(p, f), options)
   })
-  options.rmdirSync(p)
+  options.rmdirSync(p, options)
 }
