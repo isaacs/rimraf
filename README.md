@@ -1,4 +1,4 @@
-`rm -rf` for node.
+The [UNIX command](http://en.wikipedia.org/wiki/Rm_(Unix)) `rm -rf` for node.  
 
 Install with `npm install rimraf`, or just drop rimraf.js somewhere.
 
