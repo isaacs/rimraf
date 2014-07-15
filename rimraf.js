@@ -1,5 +1,7 @@
 module.exports = rimraf
 rimraf.sync = rimrafSync
+rimraf.rmChildren = rmChildren
+rimraf.rmChildrenSync = rmChildrenSync
 
 var assert = require("assert")
 var path = require("path")
@@ -173,16 +175,32 @@ function rmdir (p, options, originalEr, cb) {
 }
 
 function rmkids(p, options, cb) {
+  rmChildren(p, options, function(err) {
+    if(err) {
+      return cb(err)
+    } else {
+      return options.rmdir(p, cb)
+    }
+  });
+}
+
+function rmChildren(p, options, cb) {
+  if (typeof options === 'function') {
+    cb = options
+    options = {}
+  }
   assert(p)
   assert(options)
   assert(typeof cb === 'function')
+
+  defaults(options)
 
   options.readdir(p, function (er, files) {
     if (er)
       return cb(er)
     var n = files.length
     if (n === 0)
-      return options.rmdir(p, cb)
+      return cb()
     var errState
     files.forEach(function (f) {
       rimraf(path.join(p, f), options, function (er) {
@@ -191,7 +209,7 @@ function rmkids(p, options, cb) {
         if (er)
           return cb(errState = er)
         if (--n === 0)
-          options.rmdir(p, cb)
+          cb()
       })
     })
   })
@@ -239,10 +257,17 @@ function rmdirSync (p, options, originalEr) {
 }
 
 function rmkidsSync (p, options) {
+  rmChildren(p, options);
+  options.rmdirSync(p, options)
+}
+
+function rmChildrenSync (p, options) {
+  options = options || {}
+  defaults(options)
+
   assert(p)
   assert(options)
   options.readdirSync(p).forEach(function (f) {
     rimrafSync(path.join(p, f), options)
   })
-  options.rmdirSync(p, options)
 }

@@ -19,6 +19,16 @@ errors are handled for you:
 It can remove stuff synchronously, too.  But that's not so good.  Use
 the async API.  It's better.
 
+## rimraf.rmChildren
+
+`rimraf.rmChildren(f, callback)`
+
+Removes all children of `f` (empties `f`).
+
+## rimraf.rmChildrenSync
+
+Synchronous version of `rimraf.rmChildren`. Still better to use async API.
+
 ## CLI
 
 If installed with `npm install rimraf -g` it can be used as a global
