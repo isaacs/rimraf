@@ -10,7 +10,7 @@ The callback will be called with an error if there is one.  Certain
 errors are handled for you:
 
 * Windows: `EBUSY` and `ENOTEMPTY` - rimraf will back off a maximum of
-  `opts.maxBusyTries` times before giving up.
+  `rimraf.BUSYTRIES_MAX` times before giving up.
 * `ENOENT` - If the file doesn't exist, rimraf will return
   successfully, since your desired outcome is already the case.
 
