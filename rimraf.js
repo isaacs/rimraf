@@ -4,6 +4,14 @@ rimraf.sync = rimrafSync
 var assert = require("assert")
 var path = require("path")
 var fs = require("fs")
+var glob = require("glob")
+
+var globOpts = {
+  nosort: true,
+  nocomment: true,
+  nonegate: true,
+  silent: true
+}
 
 // for EMFILE handling
 var timeout = 0
@@ -41,32 +49,54 @@ function rimraf (p, options, cb) {
   if (!cb) throw new Error("No callback passed to rimraf()")
 
   var busyTries = 0
-  rimraf_(p, options, function CB (er) {
-    if (er) {
-      if (isWindows && (er.code === "EBUSY" || er.code === "ENOTEMPTY") &&
-          busyTries < exports.BUSYTRIES_MAX) {
-        busyTries ++
-        var time = busyTries * 100
-        // try again, with the same exact callback as this one.
-        return setTimeout(function () {
-          rimraf_(p, options, CB)
-        }, time)
-      }
+  var errState = null
+  var n = 0
 
-      // this one won't happen if graceful-fs is used.
-      if (er.code === "EMFILE" && timeout < exports.EMFILE_MAX) {
-        return setTimeout(function () {
-          rimraf_(p, options, CB)
-        }, timeout ++)
-      }
+  glob(p, globOpts, afterGlob)
 
-      // already gone
-      if (er.code === "ENOENT") er = null
-    }
+  function next (er) {
+    errState = errState || er
+    if (--n === 0)
+      cb(errState)
+  }
 
-    timeout = 0
-    cb(er)
-  })
+  function afterGlob (er, results) {
+    if (er)
+      return cb(er)
+
+    n = results.length
+    if (n === 0)
+      return cb()
+
+    results.forEach(function (p) {
+      rimraf_(p, options, function CB (er) {
+        if (er) {
+          if (isWindows && (er.code === "EBUSY" || er.code === "ENOTEMPTY") &&
+              busyTries < exports.BUSYTRIES_MAX) {
+            busyTries ++
+            var time = busyTries * 100
+            // try again, with the same exact callback as this one.
+            return setTimeout(function () {
+              rimraf_(p, options, CB)
+            }, time)
+          }
+
+          // this one won't happen if graceful-fs is used.
+          if (er.code === "EMFILE" && timeout < exports.EMFILE_MAX) {
+            return setTimeout(function () {
+              rimraf_(p, options, CB)
+            }, timeout ++)
+          }
+
+          // already gone
+          if (er.code === "ENOENT") er = null
+        }
+
+        timeout = 0
+        next(er)
+      })
+    })
+  }
 }
 
 // Two possible strategies.
@@ -207,16 +237,23 @@ function rimrafSync (p, options) {
   assert(p)
   assert(options)
 
-  try {
-    options.unlinkSync(p)
-  } catch (er) {
-    if (er.code === "ENOENT")
-      return
-    if (er.code === "EPERM")
-      return isWindows ? fixWinEPERMSync(p, options, er) : rmdirSync(p, options, er)
-    if (er.code !== "EISDIR")
-      throw er
-    rmdirSync(p, options, er)
+  var results = glob.sync(p, globOpts)
+  if (!results.length)
+    return
+
+  for (var i = 0; i < results.length; i++) {
+    var p = results[i]
+    try {
+      options.unlinkSync(p)
+    } catch (er) {
+      if (er.code === "ENOENT")
+        return
+      if (er.code === "EPERM")
+        return isWindows ? fixWinEPERMSync(p, options, er) : rmdirSync(p, options, er)
+      if (er.code !== "EISDIR")
+        throw er
+      rmdirSync(p, options, er)
+    }
   }
 }
 
