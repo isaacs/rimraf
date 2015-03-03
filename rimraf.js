@@ -15,8 +15,6 @@ var globOpts = {
 
 // for EMFILE handling
 var timeout = 0
-exports.EMFILE_MAX = 1000
-exports.BUSYTRIES_MAX = 3
 
 var isWindows = (process.platform === "win32")
 
@@ -34,6 +32,9 @@ function defaults (options) {
     m = m + 'Sync'
     options[m] = options[m] || fs[m]
   })
+
+  options.maxBusyTries = options.maxBusyTries || 3
+  options.emfileWait = options.emfileWait || 1000
 }
 
 function rimraf (p, options, cb) {
@@ -73,7 +74,7 @@ function rimraf (p, options, cb) {
       rimraf_(p, options, function CB (er) {
         if (er) {
           if (isWindows && (er.code === "EBUSY" || er.code === "ENOTEMPTY") &&
-              busyTries < exports.BUSYTRIES_MAX) {
+              busyTries < options.maxBusyTries) {
             busyTries ++
             var time = busyTries * 100
             // try again, with the same exact callback as this one.
@@ -83,7 +84,7 @@ function rimraf (p, options, cb) {
           }
 
           // this one won't happen if graceful-fs is used.
-          if (er.code === "EMFILE" && timeout < exports.EMFILE_MAX) {
+          if (er.code === "EMFILE" && timeout < options.emfileWait) {
             return setTimeout(function () {
               rimraf_(p, options, CB)
             }, timeout ++)
