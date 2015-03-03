@@ -15,5 +15,11 @@
   "bin": "./bin.js",
   "dependencies": {
     "glob": "^4.4.1"
-  }
+  },
+  "files": [
+    "bin.js",
+    "rimraf.js",
+    "LICENSE",
+    "README.md"
+  ]
 }
