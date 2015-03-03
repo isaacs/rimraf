@@ -25,6 +25,7 @@ function defaults (options) {
     'unlink',
     'chmod',
     'stat',
+    'lstat',
     'rmdir',
     'readdir'
   ]
@@ -115,18 +116,28 @@ function rimraf_ (p, options, cb) {
   assert(options)
   assert(typeof cb === 'function')
 
-  options.unlink(p, function (er) {
-    if (er) {
-      if (er.code === "ENOENT")
-        return cb(null)
-      if (er.code === "EPERM")
-        return (isWindows)
-          ? fixWinEPERM(p, options, er, cb)
-          : rmdir(p, options, er, cb)
-      if (er.code === "EISDIR")
-        return rmdir(p, options, er, cb)
-    }
-    return cb(er)
+  // sunos lets the root user unlink directories, which is... weird.
+  // so we have to lstat here and make sure it's not a dir.
+  options.lstat(p, function (er, st) {
+    if (er && er.code === "ENOENT")
+      return cb(null)
+
+    if (st && st.isDirectory())
+      return rmdir(p, options, er, cb)
+
+    options.unlink(p, function (er) {
+      if (er) {
+        if (er.code === "ENOENT")
+          return cb(null)
+        if (er.code === "EPERM")
+          return (isWindows)
+            ? fixWinEPERM(p, options, er, cb)
+            : rmdir(p, options, er, cb)
+        if (er.code === "EISDIR")
+          return rmdir(p, options, er, cb)
+      }
+      return cb(er)
+    })
   })
 }
 
@@ -243,8 +254,20 @@ function rimrafSync (p, options) {
 
   for (var i = 0; i < results.length; i++) {
     var p = results[i]
+
     try {
-      options.unlinkSync(p)
+      var st = options.lstatSync(p)
+    } catch (er) {
+      if (er.code === "ENOENT")
+        return
+    }
+
+    try {
+      // sunos lets the root user unlink directories, which is... weird.
+      if (st && st.isDirectory())
+        rmdirSync(p, options, null)
+      else
+        options.unlinkSync(p)
     } catch (er) {
       if (er.code === "ENOENT")
         return
