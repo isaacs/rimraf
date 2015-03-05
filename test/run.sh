@@ -5,6 +5,10 @@ for i in test-*.js; do
   echo -n $i ...
   bash setup.sh
   node $i
+  if [ $? -ne 0 ]; then
+    echo "fail"
+    code=1
+  fi
   if [ -d target ]; then
     echo "fail"
     code=1

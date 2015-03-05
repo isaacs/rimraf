@@ -27,6 +27,12 @@ fill () {
     let f--
   done
 
+  # valid symlink
+  ln -s "f-$depth-1" "$target/link-$depth-good"
+
+  # invalid symlink
+  ln -s "does-not-exist" "$target/link-$depth-bad"
+
   let depth--
 
   if [ $depth -le 0 ]; then

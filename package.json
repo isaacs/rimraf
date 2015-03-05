@@ -14,7 +14,7 @@
   },
   "bin": "./bin.js",
   "dependencies": {
-    "glob": "^4.4.1"
+    "glob": "^4.4.2"
   },
   "files": [
     "bin.js",
