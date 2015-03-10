@@ -33,6 +33,9 @@ fill () {
   # invalid symlink
   ln -s "does-not-exist" "$target/link-$depth-bad"
 
+  # a file with a name that looks like a glob
+  touch "$target/"'[a-z0-9].txt'
+
   let depth--
 
   if [ $depth -le 0 ]; then
