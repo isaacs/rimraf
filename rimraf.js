@@ -35,7 +35,7 @@ function defaults (options) {
 
   options.maxBusyTries = options.maxBusyTries || 3
   options.emfileWait = options.emfileWait || 1000
-  options.enableGlob = options.enableGlob || true
+  options.disableGlob = options.disableGlob || false
 }
 
 function rimraf (p, options, cb) {
@@ -56,7 +56,7 @@ function rimraf (p, options, cb) {
   var errState = null
   var n = 0
 
-  if (!options.enableGlob || !glob.hasMagic(p))
+  if (options.disableGlob || !glob.hasMagic(p))
     return afterGlob(null, [p])
 
   fs.lstat(p, function (er, stat) {
