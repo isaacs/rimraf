@@ -7,7 +7,7 @@
   "license": "ISC",
   "repository": "git://github.com/isaacs/rimraf.git",
   "scripts": {
-    "test": "cd test && bash run.sh"
+    "test": "tap test/*.js"
   },
   "bin": "./bin.js",
   "dependencies": {
@@ -18,5 +18,9 @@
     "rimraf.js",
     "LICENSE",
     "README.md"
-  ]
+  ],
+  "devDependencies": {
+    "mkdirp": "^0.5.1",
+    "tap": "^1.2.0"
+  }
 }
