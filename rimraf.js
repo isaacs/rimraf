@@ -263,7 +263,7 @@ function rimrafSync (p, options) {
 
   var results
 
-  if (!glob.hasMagic(p)) {
+  if (options.disableGlob || !glob.hasMagic(p)) {
     results = [p]
   } else {
     try {

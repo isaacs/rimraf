@@ -38,14 +38,29 @@ t.test('async removal', function (t) {
 })
 
 t.test('glob', function (t) {
-  fill()
-  var glob = require('glob')
-  var pattern = __dirname + '/target/f-*'
-  var before = glob.sync(pattern)
-  t.notEqual(before.length, 0)
-  rimraf(pattern, function (er) {
-    if (er)
-      throw er
+  t.plan(2)
+  t.test('async', function (t) {
+    fill()
+    var glob = require('glob')
+    var pattern = __dirname + '/target/f-*'
+    var before = glob.sync(pattern)
+    t.notEqual(before.length, 0)
+    rimraf(pattern, function (er) {
+      if (er)
+        throw er
+      var after = glob.sync(pattern)
+      t.same(after, [])
+      rimraf.sync(__dirname + '/target')
+      t.end()
+    })
+  })
+  t.test('sync', function (t) {
+    fill()
+    var glob = require('glob')
+    var pattern = __dirname + '/target/f-*'
+    var before = glob.sync(pattern)
+    t.notEqual(before.length, 0)
+    rimraf.sync(pattern)
     var after = glob.sync(pattern)
     t.same(after, [])
     rimraf.sync(__dirname + '/target')
@@ -54,14 +69,29 @@ t.test('glob', function (t) {
 })
 
 t.test('no glob', function (t) {
-  fill()
-  var glob = require('glob')
-  var pattern = __dirname + '/target/f-*'
-  var before = glob.sync(pattern)
-  t.notEqual(before.length, 0)
-  rimraf(pattern, { disableGlob: true }, function (er) {
-    if (er)
-      throw er
+  t.plan(2)
+  t.test('async', function (t) {
+    fill()
+    var glob = require('glob')
+    var pattern = __dirname + '/target/f-*'
+    var before = glob.sync(pattern)
+    t.notEqual(before.length, 0)
+    rimraf(pattern, { disableGlob: true }, function (er) {
+      if (er)
+        throw er
+      var after = glob.sync(pattern)
+      t.same(after, before)
+      rimraf.sync(__dirname + '/target')
+      t.end()
+    })
+  })
+  t.test('sync', function (t) {
+    fill()
+    var glob = require('glob')
+    var pattern = __dirname + '/target/f-*'
+    var before = glob.sync(pattern)
+    t.notEqual(before.length, 0)
+    rimraf.sync(pattern, { disableGlob: true })
     var after = glob.sync(pattern)
     t.same(after, before)
     rimraf.sync(__dirname + '/target')
