@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/isaacs/rimraf.svg?branch=master)](https://travis-ci.org/isaacs/rimraf)
+
 The [UNIX command](http://en.wikipedia.org/wiki/Rm_(Unix)) `rm -rf` for node.  
 
 Install with `npm install rimraf`, or just drop rimraf.js somewhere.
