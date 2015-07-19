@@ -13,6 +13,9 @@ if (module === require.main) {
 function fill (depth, files, folders, target) {
   mkdirp.sync(target)
   var o = { flag: 'wx' }
+  if (process.version.match(/^v0\.8/))
+    o = 'utf8'
+
   for (var f = files; f > 0; f--) {
     fs.writeFileSync(target + '/f-' + depth + '-' + f, '', o)
   }
