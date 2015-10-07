@@ -7,14 +7,15 @@ module.exports = function () {
 
 if (module === require.main) {
   require('tap').pass('yes')
-  return
+  process.exit(0)
 }
 
 function fill (depth, files, folders, target) {
   mkdirp.sync(target)
   var o = { flag: 'wx' }
-  if (process.version.match(/^v0\.8/))
+  if (process.version.match(/^v0\.8/)) {
     o = 'utf8'
+  }
 
   for (var f = files; f > 0; f--) {
     fs.writeFileSync(target + '/f-' + depth + '-' + f, '', o)
@@ -29,13 +30,10 @@ function fill (depth, files, folders, target) {
   // file with a name that looks like a glob
   fs.writeFileSync(target + '/[a-z0-9].txt', '', o)
 
-  depth--
-  if (depth <= 0)
-    return
+  if (--depth <= 0) return
 
   for (f = folders; f > 0; f--) {
     mkdirp.sync(target + '/folder-' + depth + '-' + f)
     fill(depth, files, folders, target + '/d-' + depth + '-' + f)
   }
 }
-
