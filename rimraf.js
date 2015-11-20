@@ -3,7 +3,6 @@ rimraf.sync = rimrafSync
 
 var assert = require("assert")
 var path = require("path")
-var fs = require("fs")
 var glob = require("glob")
 
 var globOpts = {
@@ -19,6 +18,8 @@ var timeout = 0
 var isWindows = (process.platform === "win32")
 
 function defaults (options) {
+  options.fs = options.fs || require("fs")
+
   var methods = [
     'unlink',
     'chmod',
@@ -28,9 +29,9 @@ function defaults (options) {
     'readdir'
   ]
   methods.forEach(function(m) {
-    options[m] = options[m] || fs[m]
+    options[m] = options[m] || options.fs[m]
     m = m + 'Sync'
-    options[m] = options[m] || fs[m]
+    options[m] = options[m] || options.fs[m]
   })
 
   options.maxBusyTries = options.maxBusyTries || 3
@@ -49,6 +50,8 @@ function rimraf (p, options, cb) {
   assert(options, 'rimraf: missing options')
   assert.equal(typeof options, 'object', 'rimraf: options should be object')
   assert.equal(typeof cb, 'function', 'rimraf: callback function required')
+  
+  var fs = options.fs
 
   defaults(options)
 
@@ -255,6 +258,8 @@ function rmkids(p, options, cb) {
 function rimrafSync (p, options) {
   options = options || {}
   defaults(options)
+
+  var fs = options.fs
 
   assert(p, 'rimraf: missing path')
   assert.equal(typeof p, 'string', 'rimraf: path should be a string')
