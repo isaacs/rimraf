@@ -1,10 +1,10 @@
 module.exports = rimraf
 rimraf.sync = rimrafSync
 
-var assert = require("assert")
-var path = require("path")
-var fs = require("fs")
-var glob = require("glob")
+var assert = require('assert')
+var path = require('path')
+var fs = require('fs')
+var glob = require('glob')
 
 var globOpts = {
   nosort: true,
@@ -16,7 +16,7 @@ var globOpts = {
 // for EMFILE handling
 var timeout = 0
 
-var isWindows = (process.platform === "win32")
+var isWindows = (process.platform === 'win32')
 
 function defaults (options) {
   var methods = [
@@ -27,7 +27,7 @@ function defaults (options) {
     'rmdir',
     'readdir'
   ]
-  methods.forEach(function(m) {
+  methods.forEach(function (m) {
     options[m] = options[m] || fs[m]
     m = m + 'Sync'
     options[m] = options[m] || fs[m]
@@ -56,36 +56,33 @@ function rimraf (p, options, cb) {
   var errState = null
   var n = 0
 
-  if (options.disableGlob || !glob.hasMagic(p))
+  if (options.disableGlob || !glob.hasMagic(p)) {
     return afterGlob(null, [p])
+  }
 
-  fs.lstat(p, function (er, stat) {
-    if (!er)
-      return afterGlob(null, [p])
+  fs.lstat(p, function (err, stat) {
+    if (!err) return afterGlob(null, [p])
 
     glob(p, globOpts, afterGlob)
   })
 
-  function next (er) {
-    errState = errState || er
-    if (--n === 0)
-      cb(errState)
+  function next (err) {
+    errState = errState || err
+    if (--n === 0) cb(errState)
   }
 
-  function afterGlob (er, results) {
-    if (er)
-      return cb(er)
+  function afterGlob (err, results) {
+    if (err) return cb(err)
 
     n = results.length
-    if (n === 0)
-      return cb()
+    if (n === 0) return cb()
 
     results.forEach(function (p) {
-      rimraf_(p, options, function CB (er) {
-        if (er) {
-          if (isWindows && (er.code === "EBUSY" || er.code === "ENOTEMPTY" || er.code === "EPERM") &&
+      rimraf_(p, options, function CB (err) {
+        if (err) {
+          if (isWindows && (err.code === 'EBUSY' || err.code === 'ENOTEMPTY' || err.code === 'EPERM') &&
               busyTries < options.maxBusyTries) {
-            busyTries ++
+            busyTries++
             var time = busyTries * 100
             // try again, with the same exact callback as this one.
             return setTimeout(function () {
@@ -94,18 +91,18 @@ function rimraf (p, options, cb) {
           }
 
           // this one won't happen if graceful-fs is used.
-          if (er.code === "EMFILE" && timeout < options.emfileWait) {
+          if (err.code === 'EMFILE' && timeout < options.emfileWait) {
             return setTimeout(function () {
               rimraf_(p, options, CB)
-            }, timeout ++)
+            }, timeout++)
           }
 
           // already gone
-          if (er.code === "ENOENT") er = null
+          if (err.code === 'ENOENT') err = null
         }
 
         timeout = 0
-        next(er)
+        next(err)
       })
     })
   }
@@ -129,121 +126,134 @@ function rimraf_ (p, options, cb) {
 
   // sunos lets the root user unlink directories, which is... weird.
   // so we have to lstat here and make sure it's not a dir.
-  options.lstat(p, function (er, st) {
-    if (er && er.code === "ENOENT")
+  options.lstat(p, function (err, st) {
+    if (err && err.code === 'ENOENT') {
       return cb(null)
+    }
 
-    if (st && st.isDirectory())
-      return rmdir(p, options, er, cb)
+    if (st && st.isDirectory()) {
+      return rmdir(p, options, err, cb)
+    }
 
-    options.unlink(p, function (er) {
-      if (er) {
-        if (er.code === "ENOENT")
+    options.unlink(p, function (err) {
+      if (err) {
+        if (err.code === 'ENOENT') {
           return cb(null)
-        if (er.code === "EPERM")
+        }
+
+        if (err.code === 'EPERM') {
           return (isWindows)
-            ? fixWinEPERM(p, options, er, cb)
-            : rmdir(p, options, er, cb)
-        if (er.code === "EISDIR")
-          return rmdir(p, options, er, cb)
+            ? fixWinEPERM(p, options, err, cb)
+            : rmdir(p, options, err, cb)
+        }
+
+        if (err.code === 'EISDIR') {
+          return rmdir(p, options, err, cb)
+        }
       }
-      return cb(er)
+      return cb(err)
     })
   })
 }
 
-function fixWinEPERM (p, options, er, cb) {
+function fixWinEPERM (p, options, err, cb) {
   assert(p)
   assert(options)
   assert(typeof cb === 'function')
-  if (er)
-    assert(er instanceof Error)
+  if (err) {
+    assert(err instanceof Error)
+  }
 
   options.chmod(p, 666, function (er2) {
-    if (er2)
-      cb(er2.code === "ENOENT" ? null : er)
-    else
-      options.stat(p, function(er3, stats) {
-        if (er3)
-          cb(er3.code === "ENOENT" ? null : er)
-        else if (stats.isDirectory())
-          rmdir(p, options, er, cb)
-        else
+    if (er2) {
+      cb(er2.code === 'ENOENT' ? null : err)
+    } else {
+      options.stat(p, function (er3, stats) {
+        if (er3) {
+          cb(er3.code === 'ENOENT' ? null : err)
+        } else if (stats.isDirectory()) {
+          rmdir(p, options, err, cb)
+        } else {
           options.unlink(p, cb)
+        }
       })
+    }
   })
 }
 
-function fixWinEPERMSync (p, options, er) {
+function fixWinEPERMSync (p, options, err) {
   assert(p)
   assert(options)
-  if (er)
-    assert(er instanceof Error)
+  if (err) {
+    assert(err instanceof Error)
+  }
 
   try {
     options.chmodSync(p, 666)
   } catch (er2) {
-    if (er2.code === "ENOENT")
+    if (er2.code === 'ENOENT') {
       return
-    else
-      throw er
+    } else {
+      throw err
+    }
   }
 
   try {
     var stats = options.statSync(p)
   } catch (er3) {
-    if (er3.code === "ENOENT")
+    if (er3.code === 'ENOENT') {
       return
-    else
-      throw er
+    } else {
+      throw err
+    }
   }
 
-  if (stats.isDirectory())
-    rmdirSync(p, options, er)
-  else
+  if (stats.isDirectory()) {
+    rmdirSync(p, options, err)
+  } else {
     options.unlinkSync(p)
+  }
 }
 
 function rmdir (p, options, originalEr, cb) {
   assert(p)
   assert(options)
-  if (originalEr)
+  if (originalEr) {
     assert(originalEr instanceof Error)
+  }
   assert(typeof cb === 'function')
 
   // try to rmdir first, and only readdir on ENOTEMPTY or EEXIST (SunOS)
   // if we guessed wrong, and it's not a directory, then
   // raise the original error.
-  options.rmdir(p, function (er) {
-    if (er && (er.code === "ENOTEMPTY" || er.code === "EEXIST" || er.code === "EPERM"))
+  options.rmdir(p, function (err) {
+    if (err && (err.code === 'ENOTEMPTY' || err.code === 'EEXIST' || err.code === 'EPERM')) {
       rmkids(p, options, cb)
-    else if (er && er.code === "ENOTDIR")
+    } else if (err && err.code === 'ENOTDIR') {
       cb(originalEr)
-    else
-      cb(er)
+    } else {
+      cb(err)
+    }
   })
 }
 
-function rmkids(p, options, cb) {
+function rmkids (p, options, cb) {
   assert(p)
   assert(options)
   assert(typeof cb === 'function')
 
-  options.readdir(p, function (er, files) {
-    if (er)
-      return cb(er)
+  options.readdir(p, function (err, files) {
+    if (err) return cb(err)
+
     var n = files.length
-    if (n === 0)
-      return options.rmdir(p, cb)
+    if (n === 0) return options.rmdir(p, cb)
+
     var errState
     files.forEach(function (f) {
-      rimraf(path.join(p, f), options, function (er) {
-        if (errState)
-          return
-        if (er)
-          return cb(errState = er)
-        if (--n === 0)
-          options.rmdir(p, cb)
+      rimraf(path.join(p, f), options, function (err) {
+        if (errState) return
+        if (err) return cb(errState = err)
+        if (--n === 0) options.rmdir(p, cb)
       })
     })
   })
@@ -269,38 +279,40 @@ function rimrafSync (p, options) {
     try {
       fs.lstatSync(p)
       results = [p]
-    } catch (er) {
+    } catch (err) {
       results = glob.sync(p, globOpts)
     }
   }
 
-  if (!results.length)
-    return
+  if (!results.length) return
 
   for (var i = 0; i < results.length; i++) {
-    var p = results[i]
+    p = results[i]
 
     try {
       var st = options.lstatSync(p)
-    } catch (er) {
-      if (er.code === "ENOENT")
-        return
+    } catch (err) {
+      if (err.code === 'ENOENT') return
     }
 
     try {
       // sunos lets the root user unlink directories, which is... weird.
-      if (st && st.isDirectory())
+      if (st && st.isDirectory()) {
         rmdirSync(p, options, null)
-      else
+      } else {
         options.unlinkSync(p)
-    } catch (er) {
-      if (er.code === "ENOENT")
+      }
+    } catch (err) {
+      if (err.code === 'ENOENT') {
         return
-      if (er.code === "EPERM")
-        return isWindows ? fixWinEPERMSync(p, options, er) : rmdirSync(p, options, er)
-      if (er.code !== "EISDIR")
-        throw er
-      rmdirSync(p, options, er)
+      }
+      if (err.code === 'EPERM') {
+        return isWindows ? fixWinEPERMSync(p, options, err) : rmdirSync(p, options, err)
+      }
+      if (err.code !== 'EISDIR') {
+        throw err
+      }
+      rmdirSync(p, options, err)
     }
   }
 }
@@ -308,18 +320,22 @@ function rimrafSync (p, options) {
 function rmdirSync (p, options, originalEr) {
   assert(p)
   assert(options)
-  if (originalEr)
+  if (originalEr) {
     assert(originalEr instanceof Error)
+  }
 
   try {
     options.rmdirSync(p)
-  } catch (er) {
-    if (er.code === "ENOENT")
+  } catch (err) {
+    if (err.code === 'ENOENT') {
       return
-    if (er.code === "ENOTDIR")
+    }
+    if (err.code === 'ENOTDIR') {
       throw originalEr
-    if (er.code === "ENOTEMPTY" || er.code === "EEXIST" || er.code === "EPERM")
+    }
+    if (err.code === 'ENOTEMPTY' || err.code === 'EEXIST' || err.code === 'EPERM') {
       rmkidsSync(p, options)
+    }
   }
 }
 

@@ -4,16 +4,17 @@ var rimraf = require('./')
 
 var help = false
 var dashdash = false
-var args = process.argv.slice(2).filter(function(arg) {
-  if (dashdash)
+var args = process.argv.slice(2).filter(function (arg) {
+  if (dashdash) {
     return !!arg
-  else if (arg === '--')
+  } else if (arg === '--') {
     dashdash = true
-  else if (arg.match(/^(-+|\/)(h(elp)?|\?)$/))
+  } else if (arg.match(/^(-+|\/)(h(elp)?|\?)$/)) {
     help = true
-  else
+  } else {
     return !!arg
-});
+  }
+})
 
 if (help || args.length === 0) {
   // If they didn't ask for help, then this is not a "success"
@@ -26,15 +27,16 @@ if (help || args.length === 0) {
   log('')
   log('  -h, --help    Display this usage info')
   process.exit(help ? 0 : 1)
-} else
+} else {
   go(0)
+}
 
 function go (n) {
-  if (n >= args.length)
-    return
-  rimraf(args[n], function (er) {
-    if (er)
-      throw er
-    go(n+1)
+  if (n >= args.length) return
+
+  rimraf(args[n], function (err) {
+    if (err) throw err
+
+    go(n + 1)
   })
 }
