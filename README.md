@@ -12,8 +12,8 @@ The first parameter will be interpreted as a globbing pattern for files. If you
 want to disable globbing you can do so with `opts.disableGlob` (defaults to
 `false`). This might be handy, for instance, if you have filenames that contain
 globbing wildcard characters.
-You can optionally pass in an alternate fs implementation by passing in opts.fs. 
-Your implementation should have opts.fs.lstat(path, cb) and opts.fs.lstatSync(path).
+You can optionally pass in an alternate fs implementation by passing in `opts.fs`. 
+Your implementation should have `opts.fs.lstat(path, cb)` and `opts.fs.lstatSync(path)`.
 
 The callback will be called with an error if there is one.  Certain
 errors are handled for you:
