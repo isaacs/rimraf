@@ -3,7 +3,7 @@ rimraf.sync = rimrafSync
 
 var assert = require("assert")
 var path = require("path")
-var fs = require("fs")
+var fsx = require("fs")
 var glob = require("glob")
 
 var globOpts = {
@@ -15,7 +15,6 @@ var globOpts = {
 
 // for EMFILE handling
 var timeout = 0
-
 var isWindows = (process.platform === "win32")
 
 function defaults (options) {
@@ -27,6 +26,8 @@ function defaults (options) {
     'rmdir',
     'readdir'
   ]
+  var fs = options.fs || fsx;
+  
   methods.forEach(function(m) {
     options[m] = options[m] || fs[m]
     m = m + 'Sync'
@@ -55,7 +56,8 @@ function rimraf (p, options, cb) {
   var busyTries = 0
   var errState = null
   var n = 0
-
+  var fs = options.fs || fsx;
+  
   if (options.disableGlob || !glob.hasMagic(p))
     return afterGlob(null, [p])
 
@@ -262,7 +264,8 @@ function rimrafSync (p, options) {
   assert.equal(typeof options, 'object', 'rimraf: options should be object')
 
   var results
-
+  var fs = options.fs || fsx;
+  
   if (options.disableGlob || !glob.hasMagic(p)) {
     results = [p]
   } else {
