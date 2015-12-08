@@ -8,10 +8,16 @@ Install with `npm install rimraf`, or just drop rimraf.js somewhere.
 
 `rimraf(f, [opts], callback)`
 
-The first parameter will be interpreted as a globbing pattern for files. If you
-want to disable globbing you can do so with `opts.disableGlob` (defaults to
-`false`). This might be handy, for instance, if you have filenames that contain
-globbing wildcard characters.
+The first parameter will be interpreted as a globbing pattern for files. `opts`
+can include all [glob options](https://github.com/isaacs/node-glob#options) as
+well as:
+
+- `disableGlob`: Disables globbing. This might be handy if you have filenames
+  that contain globbing wildcard characters. Default: `false`.
+- `maxBusyTries`: How often to retry when encountering certain errors on the
+  Windows platform. Default: `3`.
+- `emfileWait`: The timeout in miliseconds between retries when encountering
+  a `EMFILE` error. Default: `1000`.
 
 The callback will be called with an error if there is one.  Certain
 errors are handled for you:
