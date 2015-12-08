@@ -5,6 +5,7 @@ var assert = require("assert")
 var path = require("path")
 var fs = require("fs")
 var glob = require("glob")
+var extend = require("util-extend")
 
 var globOpts = {
   nosort: true,
@@ -63,7 +64,7 @@ function rimraf (p, options, cb) {
     if (!er)
       return afterGlob(null, [p])
 
-    glob(p, globOpts, afterGlob)
+    glob(p, extend(globOpts, options), afterGlob)
   })
 
   function next (er) {
@@ -270,7 +271,7 @@ function rimrafSync (p, options) {
       fs.lstatSync(p)
       results = [p]
     } catch (er) {
-      results = glob.sync(p, globOpts)
+      results = glob.sync(p, extend(globOpts, options))
     }
   }
 

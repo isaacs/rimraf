@@ -11,7 +11,8 @@
   },
   "bin": "./bin.js",
   "dependencies": {
-    "glob": "^5.0.14"
+    "glob": "^5.0.14",
+    "util-extend": "^1.0.1"
   },
   "files": [
     "LICENSE",
