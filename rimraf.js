@@ -135,6 +135,10 @@ function rimraf_ (p, options, cb) {
     if (er && er.code === "ENOENT")
       return cb(null)
 
+    // Windows can EPERM on stat.  Life is suffering.
+    if (er && er.code === "EPERM" && isWindows)
+      fixWinEPERM(p, options, er, cb)
+
     if (st && st.isDirectory())
       return rmdir(p, options, er, cb)
 
@@ -287,6 +291,10 @@ function rimrafSync (p, options) {
     } catch (er) {
       if (er.code === "ENOENT")
         return
+
+      // Windows can EPERM on stat.  Life is suffering.
+      if (er.code === "EPERM" && isWindows)
+        fixWinEPERMSync(p, options, er)
     }
 
     try {
