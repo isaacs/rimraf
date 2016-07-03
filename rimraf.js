@@ -61,7 +61,7 @@ function rimraf (p, options, cb) {
   if (options.disableGlob || !glob.hasMagic(p))
     return afterGlob(null, [p])
 
-  fs.lstat(p, function (er, stat) {
+  options.lstat(p, function (er, stat) {
     if (!er)
       return afterGlob(null, [p])
 
@@ -273,7 +273,7 @@ function rimrafSync (p, options) {
     results = [p]
   } else {
     try {
-      fs.lstatSync(p)
+      options.lstatSync(p)
       results = [p]
     } catch (er) {
       results = glob.sync(p, options.glob)
