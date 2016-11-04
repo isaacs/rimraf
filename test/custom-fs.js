@@ -156,8 +156,35 @@ function create () {
   })
 }
 
+function winMods() {
+	var objectsToMod = [expectAsync, expectSync]
+	
+	objectsToMod.forEach(function(elem) {
+		Object.keys(elem).forEach(function(key) {
+			if (elem[key].constructor.name === 'Array') {
+				for (var i=0, l=elem[key].length; i<l; i++) {
+					if (elem[key][i].indexOf('/') > -1) {
+						elem[key][i] = elem[key][i].replace(/\//g, '\\')
+					}
+				}
+			} else if (elem[key].constructor.name === 'Object') {
+				Object.keys(elem[key]).forEach(function(innerkey) {
+					if (innerkey.includes('/')) {
+						var newinnerkey = innerkey.replace(/\//g, '\\')
+						elem[key][newinnerkey] = elem[key][innerkey]
+						delete elem[key][innerkey]
+					}
+				})
+			}
+		})
+	})
+}
+
 t.test('setup', function (t) {
   create()
+  if (process.platform.match(/^win/)) {
+	  winMods()
+  }
   t.end()
 })
 

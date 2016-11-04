@@ -4,6 +4,19 @@ var t = require('tap')
 var fs = require('fs')
 var fill = require('./fill.js')
 
+t.test('Windows check', function (t) {
+	if (process.platform.match(/^win/)) {
+		var exec = require('child_process').spawnSync
+		var spawnedProc = exec('NET', [ 'SESSION' ])
+		if (spawnedProc.status) {
+			t.plan(0, 'Skip on Windows when not running as administrator')
+			process.exit()
+			return
+		}
+	}
+	t.end()
+})
+
 t.test('initial clean', function (t) {
   rimraf.sync(__dirname + '/target')
   t.throws(function () {
