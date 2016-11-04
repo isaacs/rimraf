@@ -6,14 +6,15 @@ Install with `npm install rimraf`, or just drop rimraf.js somewhere.
 
 ## API
 
-`rimraf(f, [opts], callback)`
+`rimraf(f, [opts, callback]) => Promise`
 
 The first parameter will be interpreted as a globbing pattern for files. If you
 want to disable globbing you can do so with `opts.disableGlob` (defaults to
 `false`). This might be handy, for instance, if you have filenames that contain
 globbing wildcard characters.
 
-The callback will be called with an error if there is one.  Certain
+Promises and callbacks are supported; if you use the latter, it will be called
+with an error as the only argument if there is one.  Certain
 errors are handled for you:
 
 * Windows: `EBUSY` and `ENOTEMPTY` - rimraf will back off a maximum of

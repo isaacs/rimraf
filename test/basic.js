@@ -23,7 +23,7 @@ t.test('sync removal', function (t) {
   t.end()
 })
 
-t.test('async removal', function (t) {
+t.test('async removal (callback)', function (t) {
   fill()
   t.ok(fs.statSync(__dirname + '/target').isDirectory())
 
@@ -36,6 +36,19 @@ t.test('async removal', function (t) {
     t.end()
   })
 })
+
+t.test('async removal (promise)', function (t) {
+  fill()
+  t.ok(fs.statSync(__dirname + '/target').isDirectory())
+
+  rimraf(__dirname + '/target').then(function () {
+    t.throws(function () {
+      fs.statSync(__dirname + '/target')
+    })
+    t.end()
+  })
+})
+
 
 t.test('glob', function (t) {
   t.plan(2)
