@@ -38,7 +38,7 @@ t.test('async removal', function (t) {
 })
 
 t.test('glob', function (t) {
-  t.plan(2)
+  t.plan(3)
   t.test('async', function (t) {
     fill()
     var glob = require('glob')
@@ -62,6 +62,23 @@ t.test('glob', function (t) {
     t.notEqual(before.length, 0)
     rimraf.sync(pattern)
     var after = glob.sync(pattern)
+    t.same(after, [])
+    rimraf.sync(__dirname + '/target')
+    t.end()
+  })
+  t.test('modified cwd', function (t) {
+    fill()
+    var glob = require('glob')
+    var pattern = 'target/f-*'
+    var globOpts = {
+      cwd: __dirname
+    }
+    var before = glob.sync(pattern, globOpts)
+    t.notEqual(before.length, 0)
+    rimraf.sync(pattern, {
+      glob: globOpts
+    })
+    var after = glob.sync(pattern, globOpts)
     t.same(after, [])
     rimraf.sync(__dirname + '/target')
     t.end()
