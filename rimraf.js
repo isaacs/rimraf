@@ -38,6 +38,7 @@ function defaults (options) {
   }
   options.disableGlob = options.disableGlob || false
   options.glob = options.glob || defaultGlobOpts
+  options.glob.absolute = true
 }
 
 function rimraf (p, options, cb) {
