@@ -310,6 +310,7 @@ function rimrafSync (p, options) {
         return isWindows ? fixWinEPERMSync(p, options, er) : rmdirSync(p, options, er)
       if (er.code !== "EISDIR")
         throw er
+
       rmdirSync(p, options, er)
     }
   }
@@ -339,5 +340,21 @@ function rmkidsSync (p, options) {
   options.readdirSync(p).forEach(function (f) {
     rimrafSync(path.join(p, f), options)
   })
-  options.rmdirSync(p, options)
+
+  // We only end up here once we got ENOTEMPTY at least once, and
+  // at this point, we are guaranteed to have removed all the kids.
+  // So, we know that it won't be ENOENT or ENOTDIR or anything else.
+  // try really hard to delete stuff on windows, because it has a
+  // PROFOUNDLY annoying habit of not closing handles promptly when
+  // files are deleted, resulting in spurious ENOTEMPTY errors.
+  var retries = isWindows ? 100 : 1
+  var i = 0
+  do {
+    try {
+      return options.rmdirSync(p, options)
+    } finally {
+      if (++i < retries)
+        continue
+    }
+  } while (true)
 }
