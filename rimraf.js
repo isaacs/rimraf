@@ -355,7 +355,7 @@ function rmkidsSync (p, options) {
     } catch(e) {
       if (++i < retries)
         continue
-      throw e;
+      throw e
     }
   } while (true)
 }
