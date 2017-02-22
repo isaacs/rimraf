@@ -352,9 +352,10 @@ function rmkidsSync (p, options) {
   do {
     try {
       return options.rmdirSync(p, options)
-    } finally {
+    } catch(e) {
       if (++i < retries)
         continue
+      throw e;
     }
   } while (true)
 }
