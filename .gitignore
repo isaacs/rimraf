@@ -2,3 +2,5 @@ node_modules/
 npm-debug.log
 .nyc_output
 coverage
+bin-without-hashbang.js
+rimraf-standalone.js

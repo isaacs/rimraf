@@ -7,7 +7,12 @@
   "license": "ISC",
   "repository": "git://github.com/isaacs/rimraf.git",
   "scripts": {
-    "test": "tap test/*.js"
+    "test": "tap test/*.js",
+    "copy-bin": "cpy bin.js --rename=bin-without-hashbang.js .",
+    "patch-bin": "search-and-replace bin-without-hashbang.js . \"#!/usr/bin/env\" //removed",
+    "rollup": "rollup -c",
+    "build": "run-s copy-bin patch-bin rollup",
+    "clean-me": "node rimraf-standalone.js node_modules"
   },
   "bin": "./bin.js",
   "dependencies": {
@@ -17,10 +22,17 @@
     "LICENSE",
     "README.md",
     "bin.js",
-    "rimraf.js"
+    "rimraf.js",
+    "rimraf-standalone.js"
   ],
   "devDependencies": {
+    "cpy-cli": "^1.0.1",
     "mkdirp": "^0.5.1",
+    "npm-run-all": "^4.0.2",
+    "rollup": "^0.41.4",
+    "rollup-plugin-commonjs": "^7.0.0",
+    "rollup-plugin-node-resolve": "^2.0.0",
+    "search-and-replace": "^0.0.2",
     "tap": "^10.1.2"
   }
 }
