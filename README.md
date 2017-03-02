@@ -95,6 +95,38 @@ the async API.  It's better.
 If installed with `npm install rimraf -g` it can be used as a global
 command `rimraf <path> [<path> ...]` which is useful for cross platform support.
 
+## Standalone script for cleaning node_modules
+
+Many developers would like to use rimraf as part of a "clean" task which deletes
+all non-source control files in the project, including the node_modules
+directory. Unfortunately, this has two major downsides:
+
+* Must `npm install` to have rimraf available for cleaning.
+* On some platforms (possibland possibly other platforms) this fails,
+  because the execution of rimraf keeps files open/locked in the
+  node_modules directory.
+
+One workaround is to perform a global install is described above, but that
+violates the principle of a package including any needed development libraries
+in devDependencies, and breaks if rimraf is installed **both** globally and in
+the project.
+
+For a more comprehensive workaround, rimraf includes an extra file
+`rimraf-standalone.js` which you can copy to the root of your project, commit in
+your project, and set up a package script:
+
+```
+  "scripts": {
+    "clean": "node rimraf-standalone.js node_modules"
+  },
+```
+
+To clean:
+
+```
+npm run clean
+```
+
 ## mkdirp
 
 If you need to create a directory recursively, check out
