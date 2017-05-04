@@ -11,7 +11,7 @@
   },
   "bin": "./bin.js",
   "dependencies": {
-    "glob": "^7.0.5"
+    "glob": "^7.1.0"
   },
   "files": [
     "LICENSE",
