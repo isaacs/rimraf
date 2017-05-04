@@ -137,7 +137,7 @@ function rimraf_ (p, options, cb) {
 
     // Windows can EPERM on stat.  Life is suffering.
     if (er && er.code === "EPERM" && isWindows)
-      fixWinEPERM(p, options, er, cb)
+      return fixWinEPERM(p, options, er, cb)
 
     if (st && st.isDirectory())
       return rmdir(p, options, er, cb)
