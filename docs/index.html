@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Home</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Home</h1>
+
+    
+
+
+
+    
+
+
+    <h3> </h3>
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    <section>
+        <article><p><a href="https://travis-ci.org/isaacs/rimraf"><img src="https://travis-ci.org/isaacs/rimraf.svg?branch=master" alt="Build Status"></a> <a href="https://david-dm.org/isaacs/rimraf"><img src="https://david-dm.org/isaacs/rimraf.svg" alt="Dependency Status"></a> <a href="https://david-dm.org/isaacs/rimraf#info=devDependencies"><img src="https://david-dm.org/isaacs/rimraf/dev-status.svg" alt="devDependency Status"></a></p>
+<p>The <a href="http://en.wikipedia.org/wiki/Rm_(Unix">UNIX command</a>) <code>rm -rf</code> for node.</p>
+<p>Install with <code>npm install rimraf</code>, or just drop rimraf.js somewhere.</p>
+<h2>API</h2><p><code>rimraf(f, [opts], callback)</code></p>
+<p>The first parameter will be interpreted as a globbing pattern for files. If you
+want to disable globbing you can do so with <code>opts.disableGlob</code> (defaults to
+<code>false</code>). This might be handy, for instance, if you have filenames that contain
+globbing wildcard characters.</p>
+<p>The callback will be called with an error if there is one.  Certain
+errors are handled for you:</p>
+<ul>
+<li>Windows: <code>EBUSY</code> and <code>ENOTEMPTY</code> - rimraf will back off a maximum of
+<code>opts.maxBusyTries</code> times before giving up, adding 100ms of wait
+between each attempt.  The default <code>maxBusyTries</code> is 3.</li>
+<li><code>ENOENT</code> - If the file doesn't exist, rimraf will return
+successfully, since your desired outcome is already the case.</li>
+<li><code>EMFILE</code> - Since <code>readdir</code> requires opening a file descriptor, it's
+possible to hit <code>EMFILE</code> if too many file descriptors are in use.
+In the sync case, there's nothing to be done for this.  But in the
+async case, rimraf will gradually back off with timeouts up to
+<code>opts.emfileWait</code> ms, which defaults to 1000.</li>
+</ul>
+<h2>options</h2><ul>
+<li><p>unlink, chmod, stat, lstat, rmdir, readdir,
+unlinkSync, chmodSync, statSync, lstatSync, rmdirSync, readdirSync</p>
+<p>  In order to use a custom file system library, you can override
+  specific fs functions on the options object.</p>
+<p>  If any of these functions are present on the options object, then
+  the supplied function will be used instead of the default fs
+  method.</p>
+<p>  Sync methods are only relevant for <code>rimraf.sync()</code>, of course.</p>
+<p>  For example:</p>
+<pre class="prettyprint source lang-javascript"><code>  var myCustomFS = require('some-custom-fs')
+
+  rimraf('some-thing', myCustomFS, callback)</code></pre></li>
+<li><p>maxBusyTries</p>
+<p>  If an <code>EBUSY</code>, <code>ENOTEMPTY</code>, or <code>EPERM</code> error code is encountered
+  on Windows systems, then rimraf will retry with a linear backoff
+  wait of 100ms longer on each try.  The default maxBusyTries is 3.</p>
+<p>  Only relevant for async usage.</p>
+</li>
+<li><p>emfileWait</p>
+<p>  If an <code>EMFILE</code> error is encountered, then rimraf will retry
+  repeatedly with a linear backoff of 1ms longer on each try, until
+  the timeout counter hits this max.  The default limit is 1000.</p>
+<p>  If you repeatedly encounter <code>EMFILE</code> errors, then consider using
+  <a href="http://npm.im/graceful-fs">graceful-fs</a> in your program.</p>
+<p>  Only relevant for async usage.</p>
+</li>
+<li><p>glob</p>
+<p>  Set to <code>false</code> to disable <a href="http://npm.im/glob">glob</a> pattern
+  matching.</p>
+<p>  Set to an object to pass options to the glob module.  The default
+  glob options are <code>{ nosort: true, silent: true }</code>.</p>
+<p>  Glob version 6 is used in this module.</p>
+<p>  Relevant for both sync and async usage.</p>
+</li>
+<li><p>disableGlob</p>
+<p>  Set to any non-falsey value to disable globbing entirely.
+  (Equivalent to setting <code>glob: false</code>.)</p>
+</li>
+</ul>
+<h2>rimraf.sync</h2><p>It can remove stuff synchronously, too.  But that's not so good.  Use
+the async API.  It's better.</p>
+<h2>CLI</h2><p>If installed with <code>npm install rimraf -g</code> it can be used as a global
+command <code>rimraf &lt;path&gt; [&lt;path&gt; ...]</code> which is useful for cross platform support.</p>
+<h2>mkdirp</h2><p>If you need to create a directory recursively, check out
+<a href="https://github.com/substack/node-mkdirp">mkdirp</a>.</p></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#rimraf">rimraf</a></li><li><a href="global.html#rimrafSync">rimrafSync</a></li><li><a href="global.html#sync">sync</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue May 23 2017 00:32:23 GMT+0200 (CEST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
