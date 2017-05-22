@@ -7,6 +7,7 @@
   "license": "ISC",
   "repository": "git://github.com/isaacs/rimraf.git",
   "scripts": {
+    "docs": "jsdoc rimraf.js -c .jsdoc.json",
     "test": "tap test/*.js"
   },
   "bin": "./bin.js",
