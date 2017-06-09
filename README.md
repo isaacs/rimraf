@@ -87,8 +87,8 @@ errors are handled for you:
 
 ## rimraf.sync
 
-It can remove stuff synchronously, too.  But that's not so good.  Use
-the async API.  It's better.
+It can remove stuff synchronously, too.  That's not as good for performance, so it's recommended to use
+the async API, but if you need sync, go for it!
 
 ## CLI
 
