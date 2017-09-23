@@ -1,4 +1,4 @@
-module.exports = rimraf
+module.exports = rimraf.default = rimraf
 rimraf.sync = rimrafSync
 
 var assert = require("assert")
