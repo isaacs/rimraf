@@ -76,7 +76,7 @@ errors are handled for you:
     Set to an object to pass options to the glob module.  The default
     glob options are `{ nosort: true, silent: true }`.
 
-    Glob version 6 is used in this module.
+    Glob version 7 is used in this module.
 
     Relevant for both sync and async usage.
 
