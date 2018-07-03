@@ -16,7 +16,27 @@ function intercept (method, path) {
   intercepted._removed = intercepted._removed.sort()
 }
 
-var expectAsync = {
+function makePaths(expected) {
+  if (process.platform !== 'win32')
+    return expected
+  function makePath(path) {
+    return path.replace(/\//g, '\\');
+  }
+  var rval = {
+    _keepDirs: {}
+  }
+  for (var key in expected) {
+    if (key === '_keepDirs')
+      continue
+    rval[key] = expected[key].map(makePath)
+  }
+  for (var key in expected._keepDirs) {
+    rval._keepDirs[makePath(key)] = expected._keepDirs[key]
+  }
+  return rval
+}
+
+var expectAsync = makePaths({
   _removed: [
     'a',
     'a/x',
@@ -54,9 +74,9 @@ var expectAsync = {
     'a/z/keep.txt',
     'a/z/some-file.txt'
   ]
-}
+})
 
-var expectSync = {
+var expectSync = makePaths({
   _removed: [
     'a',
     'a/x',
@@ -94,7 +114,7 @@ var expectSync = {
     'a/z/keep.txt',
     'a/z/some-file.txt'
   ]
-}
+})
 
 function shouldRemove (file) {
   if (file.match(/keep.txt$/) || keepDirs[file]) {
