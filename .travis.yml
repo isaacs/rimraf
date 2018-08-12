@@ -9,6 +9,7 @@ node_js:
   - '7'
   - '8'
   - '9'
+  - '10'
 matrix:
    fast_finish: true
    allow_failures:
