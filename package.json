@@ -9,7 +9,9 @@
   "scripts": {
     "test": "tap test/*.js"
   },
-  "bin": "./bin.js",
+  "bin": {
+    "rimraf": "./bin.js"
+  },
   "dependencies": {
     "glob": "^7.0.5"
   },
