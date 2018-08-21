@@ -16,28 +16,31 @@ function intercept (method, path) {
   intercepted._removed = intercepted._removed.sort()
 }
 
+function makePath(path) {
+  return path.replace(/\//g, '\\');
+}
+
 function makePaths(expected) {
   if (process.platform !== 'win32')
     return expected
-  function makePath(path) {
-    return path.replace(/\//g, '\\');
+  if (typeof expected === 'string') {
+    return makePath(expected);
   }
-  var rval = {
-    _keepDirs: {}
+  if (expected instanceof Array) {
+    return expected.map(makePath);
   }
-  for (var key in expected) {
-    if (key === '_keepDirs')
-      continue
-    rval[key] = expected[key].map(makePath)
+  if (typeof expected === 'object') {
+    let returned = {};
+    for (let key in expected) {
+      returned[makePath(key)] = expected[key];
+    }
+    return returned;
   }
-  for (var key in expected._keepDirs) {
-    rval._keepDirs[makePath(key)] = expected._keepDirs[key]
-  }
-  return rval
+  return expected;
 }
 
-var expectAsync = makePaths({
-  _removed: [
+var expectAsync = {
+  _removed: makePaths([
     'a',
     'a/x',
     'a/x/some-file.txt',
@@ -45,8 +48,8 @@ var expectAsync = makePaths({
     'a/y/some-file.txt',
     'a/z',
     'a/z/some-file.txt'
-  ],
-  _saved: [
+  ]),
+  _saved: makePaths([
     'a',
     'a/x',
     'a/x/keep.txt',
@@ -54,9 +57,9 @@ var expectAsync = makePaths({
     'a/y/keep.txt',
     'a/z',
     'a/z/keep.txt'
-  ],
-  _keepDirs: { 'a/x': true, 'a/y': true, 'a/z': true, a: true, '.': true },
-  rmdir: [
+  ]),
+  _keepDirs: makePaths({ 'a/x': true, 'a/y': true, 'a/z': true, a: true, '.': true }),
+  rmdir: makePaths([
     'a',
     'a',
     'a/x',
@@ -65,19 +68,19 @@ var expectAsync = makePaths({
     'a/y',
     'a/z',
     'a/z'
-  ],
-  unlink: [
+  ]),
+  unlink: makePaths([
     'a/x/keep.txt',
     'a/x/some-file.txt',
     'a/y/keep.txt',
     'a/y/some-file.txt',
     'a/z/keep.txt',
     'a/z/some-file.txt'
-  ]
-})
+  ])
+}
 
-var expectSync = makePaths({
-  _removed: [
+var expectSync = {
+  _removed: makePaths([
     'a',
     'a/x',
     'a/x/some-file.txt',
@@ -85,8 +88,8 @@ var expectSync = makePaths({
     'a/y/some-file.txt',
     'a/z',
     'a/z/some-file.txt'
-  ],
-  _saved: [
+  ]),
+  _saved: makePaths([
     'a',
     'a/x',
     'a/x/keep.txt',
@@ -94,9 +97,9 @@ var expectSync = makePaths({
     'a/y/keep.txt',
     'a/z',
     'a/z/keep.txt'
-  ],
-  _keepDirs: { 'a/x': true, a: true, 'a/y': true, 'a/z': true, '.': true },
-  rmdirSync: [
+  ]),
+  _keepDirs: makePaths({ 'a/x': true, a: true, 'a/y': true, 'a/z': true, '.': true }),
+  rmdirSync: makePaths([
     'a',
     'a',
     'a/x',
@@ -105,16 +108,16 @@ var expectSync = makePaths({
     'a/y',
     'a/z',
     'a/z'
-  ],
-  unlinkSync: [
+  ]),
+  unlinkSync: makePaths([
     'a/x/keep.txt',
     'a/x/some-file.txt',
     'a/y/keep.txt',
     'a/y/some-file.txt',
     'a/z/keep.txt',
     'a/z/some-file.txt'
-  ]
-})
+  ])
+}
 
 function shouldRemove (file) {
   if (file.match(/keep.txt$/) || keepDirs[file]) {
