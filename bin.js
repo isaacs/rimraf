@@ -5,6 +5,8 @@ var rimraf = require('./')
 var help = false
 var dashdash = false
 var noglob = false
+var verbose = false
+
 var args = process.argv.slice(2).filter(function(arg) {
   if (dashdash)
     return !!arg
@@ -14,6 +16,8 @@ var args = process.argv.slice(2).filter(function(arg) {
     noglob = true
   else if (arg === '--glob' || arg === '-g')
     noglob = false
+  else if (arg === '--verbose' || arg === '-V')
+    verbose = true
   else if (arg.match(/^(-+|\/)(h(elp)?|\?)$/))
     help = true
   else
@@ -32,6 +36,7 @@ if (help || args.length === 0) {
   log('  -h, --help     Display this usage info')
   log('  -G, --no-glob  Do not expand glob patterns in arguments')
   log('  -g, --glob     Expand glob patterns in arguments (default)')
+  log('  -V, --verbose  Prints paths being deleted')
   process.exit(help ? 0 : 1)
 } else
   go(0)
@@ -39,9 +44,15 @@ if (help || args.length === 0) {
 function go (n) {
   if (n >= args.length)
     return
+
   var options = {}
+
   if (noglob)
-    options = { glob: false }
+    options.glob = false
+  
+  if (verbose)
+    options.verbose = verbose
+
   rimraf(args[n], options, function (er) {
     if (er)
       throw er
