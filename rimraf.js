@@ -47,6 +47,16 @@ function rimraf (p, options, cb) {
     options = {}
   }
 
+  if (typeof cb !== 'function') {
+    if (!options) options = {}
+    return new Promise(function (resolve, reject) {
+      rimraf(p, options, function (err, data) {
+        if (err) return reject(err)
+        return resolve(data)
+      })
+    })
+  }
+
   assert(p, 'rimraf: missing path')
   assert.equal(typeof p, 'string', 'rimraf: path should be a string')
   assert.equal(typeof cb, 'function', 'rimraf: callback function required')
