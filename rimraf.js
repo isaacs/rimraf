@@ -222,7 +222,9 @@ function rmdir (p, options, originalEr, cb) {
   // if we guessed wrong, and it's not a directory, then
   // raise the original error.
   options.rmdir(p, function (er) {
-    if (er && (er.code === "ENOTEMPTY" || er.code === "EEXIST" || er.code === "EPERM"))
+    if (er && (er.code === "EPERM") && isWindows)
+      fixWinEPERM(p, options, er, cb)
+    else if (er && (er.code === "ENOTEMPTY" || er.code === "EEXIST" || er.code === "EPERM"))
       rmkids(p, options, cb)
     else if (er && er.code === "ENOTDIR")
       cb(originalEr)
@@ -330,7 +332,9 @@ function rmdirSync (p, options, originalEr) {
       return
     if (er.code === "ENOTDIR")
       throw originalEr
-    if (er.code === "ENOTEMPTY" || er.code === "EEXIST" || er.code === "EPERM")
+    if ((er.code === "EPERM") && isWindows)
+      fixWinEPERMSync(p, options, er)
+    else if (er.code === "ENOTEMPTY" || er.code === "EEXIST" || er.code === "EPERM")
       rmkidsSync(p, options)
   }
 }
