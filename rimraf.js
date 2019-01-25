@@ -39,6 +39,7 @@ function defaults (options) {
   }
   options.disableGlob = options.disableGlob || false
   options.glob = options.glob || defaultGlobOpts
+  options.verbose = options.verbose || false
 }
 
 function rimraf (p, options, cb) {
@@ -106,6 +107,9 @@ function rimraf (p, options, cb) {
           // already gone
           if (er.code === "ENOENT") er = null
         }
+
+        if (options.verbose)
+          console.log('deleting', p)
 
         timeout = 0
         next(er)
