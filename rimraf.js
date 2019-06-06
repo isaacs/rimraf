@@ -42,6 +42,7 @@ function defaults (options) {
 }
 
 function rimraf (p, options, cb) {
+
   if (typeof options === 'function') {
     cb = options
     options = {}
@@ -82,6 +83,24 @@ function rimraf (p, options, cb) {
     n = results.length
     if (n === 0)
       return cb()
+
+    results = results.map(function(result) {
+      return path.resolve(result)
+    })
+
+    // Need to change de node working directory to the top level in case where the sub directory is deleted
+    if(!options.topLevelDirectory) {
+      options.topLevelDirectory = results.map(function(result) {
+        var basename = path.basename(result)
+        var splittedPath = result.split(basename)
+        return splittedPath.slice(0, splittedPath.length - 1).join(basename)
+      }).sort(function(a,b) {
+        return a.length < b.length
+      })[0]
+      if(options.topLevelDirectory && fs.existsSync(options.topLevelDirectory)) {
+        process.chdir(options.topLevelDirectory)
+      }
+    }
 
     results.forEach(function (p) {
       rimraf_(p, options, function CB (er) {
@@ -260,6 +279,7 @@ function rmkids(p, options, cb) {
 // tie up the JavaScript thread and fail on excessively
 // deep directory trees.
 function rimrafSync (p, options) {
+
   options = options || {}
   defaults(options)
 
@@ -284,6 +304,24 @@ function rimrafSync (p, options) {
   if (!results.length)
     return
 
+  results = results.map(function(result) {
+    return path.resolve(result)
+  })
+
+  // Need to change de node working directory to the top level in case where the sub directory is deleted
+  if(!options.topLevelDirectory) {
+    options.topLevelDirectory = results.map(function(result) {
+      var basename = path.basename(result)
+      var splittedPath = result.split(basename)
+      return splittedPath.slice(0, splittedPath.length - 1).join(basename)
+    }).sort(function(a,b) {
+      return a.length < b.length
+    })[0]
+    if(options.topLevelDirectory && fs.existsSync(options.topLevelDirectory)) {
+      process.chdir(options.topLevelDirectory)
+    }  
+  }
+
   for (var i = 0; i < results.length; i++) {
     var p = results[i]
 
@@ -300,13 +338,14 @@ function rimrafSync (p, options) {
 
     try {
       // sunos lets the root user unlink directories, which is... weird.
-      if (st && st.isDirectory())
-        rmdirSync(p, options, null)
+      if (st && st.isDirectory()){
+        rmdirSync(p, options, null)}
       else
         options.unlinkSync(p)
     } catch (er) {
-      if (er.code === "ENOENT")
-        return
+      if (er.code === "ENOENT") {
+        console.log(er)
+        return}
       if (er.code === "EPERM")
         return isWindows ? fixWinEPERMSync(p, options, er) : rmdirSync(p, options, er)
       if (er.code !== "EISDIR")
@@ -326,12 +365,13 @@ function rmdirSync (p, options, originalEr) {
   try {
     options.rmdirSync(p)
   } catch (er) {
-    if (er.code === "ENOENT")
+    if (er.code === "ENOENT") 
       return
     if (er.code === "ENOTDIR")
       throw originalEr
-    if (er.code === "ENOTEMPTY" || er.code === "EEXIST" || er.code === "EPERM")
+    if (er.code === "ENOTEMPTY" || er.code === "EEXIST" || er.code === "EPERM") {
       rmkidsSync(p, options)
+    }
   }
 }
 
@@ -357,7 +397,7 @@ function rmkidsSync (p, options) {
       threw = false
       return ret
     } finally {
-      if (++i < retries && threw)
+      if (++i < retries && threw) 
         continue
     }
   } while (true)

@@ -23,11 +23,43 @@ t.test('sync removal', function (t) {
   t.end()
 })
 
+t.test('sync removal sub directory', function (t) {
+  fill()
+  t.ok(fs.statSync(__dirname + '/target').isDirectory())
+  
+  process.chdir(__dirname + '/target/d-3-2/')
+
+  rimraf.sync('./../')
+
+  process.chdir('./../../')
+  t.throws(function () {
+    fs.statSync(__dirname + '/target')
+  })
+  t.end()
+})
+
 t.test('async removal', function (t) {
   fill()
   t.ok(fs.statSync(__dirname + '/target').isDirectory())
 
   rimraf(__dirname + '/target', function (er) {
+    if (er)
+      throw er
+    t.throws(function () {
+      fs.statSync(__dirname + '/target')
+    })
+    t.end()
+  })
+})
+
+t.test('async removal sub directory', function (t) {
+  fill()
+  t.ok(fs.statSync(__dirname + '/target').isDirectory())
+
+  process.chdir(__dirname + '/target/d-3-1/')
+
+  rimraf('./../', function (er) {
+    process.chdir('./../../' )
     if (er)
       throw er
     t.throws(function () {

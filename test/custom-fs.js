@@ -18,83 +18,95 @@ function intercept (method, path) {
 
 var expectAsync = {
   _removed: [
-    'a',
-    'a/x',
-    'a/x/some-file.txt',
-    'a/y',
-    'a/y/some-file.txt',
-    'a/z',
-    'a/z/some-file.txt'
+    __dirname + "/a",
+    __dirname + "/a/x",
+    __dirname + "/a/x/some-file.txt",
+    __dirname + "/a/y",
+    __dirname + "/a/y/some-file.txt",
+    __dirname + "/a/z",
+    __dirname + "/a/z/some-file.txt"
   ],
   _saved: [
-    'a',
-    'a/x',
-    'a/x/keep.txt',
-    'a/y',
-    'a/y/keep.txt',
-    'a/z',
-    'a/z/keep.txt'
+    __dirname + "/a",
+    __dirname + "/a/x",
+    __dirname + "/a/x/keep.txt",
+    __dirname + "/a/y",
+    __dirname + "/a/y/keep.txt",
+    __dirname + "/a/z",
+    __dirname + "/a/z/keep.txt"
   ],
-  _keepDirs: { 'a/x': true, 'a/y': true, 'a/z': true, a: true, '.': true },
+  _keepDirs: {
+    [__dirname + "/a/x"]: true,
+    [__dirname + "/a"]: true,
+    [__dirname + "/a/y"]: true,
+    [__dirname + "/a/z"]: true,
+    [__dirname + ""]: true
+  },
   rmdir: [
-    'a',
-    'a',
-    'a/x',
-    'a/x',
-    'a/y',
-    'a/y',
-    'a/z',
-    'a/z'
+    __dirname + "/a",
+    __dirname + "/a",
+    __dirname + "/a/x",
+    __dirname + "/a/x",
+    __dirname + "/a/y",
+    __dirname + "/a/y",
+    __dirname + "/a/z",
+    __dirname + "/a/z"
   ],
   unlink: [
-    'a/x/keep.txt',
-    'a/x/some-file.txt',
-    'a/y/keep.txt',
-    'a/y/some-file.txt',
-    'a/z/keep.txt',
-    'a/z/some-file.txt'
+    __dirname + "/a/x/keep.txt",
+    __dirname + "/a/x/some-file.txt",
+    __dirname + "/a/y/keep.txt",
+    __dirname + "/a/y/some-file.txt",
+    __dirname + "/a/z/keep.txt",
+    __dirname + "/a/z/some-file.txt"
   ]
-}
+};
 
 var expectSync = {
   _removed: [
-    'a',
-    'a/x',
-    'a/x/some-file.txt',
-    'a/y',
-    'a/y/some-file.txt',
-    'a/z',
-    'a/z/some-file.txt'
+    __dirname + "/a",
+    __dirname + "/a/x",
+    __dirname + "/a/x/some-file.txt",
+    __dirname + "/a/y",
+    __dirname + "/a/y/some-file.txt",
+    __dirname + "/a/z",
+    __dirname + "/a/z/some-file.txt"
   ],
   _saved: [
-    'a',
-    'a/x',
-    'a/x/keep.txt',
-    'a/y',
-    'a/y/keep.txt',
-    'a/z',
-    'a/z/keep.txt'
+    __dirname + "/a",
+    __dirname + "/a/x",
+    __dirname + "/a/x/keep.txt",
+    __dirname + "/a/y",
+    __dirname + "/a/y/keep.txt",
+    __dirname + "/a/z",
+    __dirname + "/a/z/keep.txt"
   ],
-  _keepDirs: { 'a/x': true, a: true, 'a/y': true, 'a/z': true, '.': true },
+  _keepDirs: {
+    [__dirname + "/a/x"]: true,
+    [__dirname + "/a"]: true,
+    [__dirname + "/a/y"]: true,
+    [__dirname + "/a/z"]: true,
+    [__dirname + ""]: true
+  },
   rmdirSync: [
-    'a',
-    'a',
-    'a/x',
-    'a/x',
-    'a/y',
-    'a/y',
-    'a/z',
-    'a/z'
+    __dirname + "/a",
+    __dirname + "/a",
+    __dirname + "/a/x",
+    __dirname + "/a/x",
+    __dirname + "/a/y",
+    __dirname + "/a/y",
+    __dirname + "/a/z",
+    __dirname + "/a/z"
   ],
   unlinkSync: [
-    'a/x/keep.txt',
-    'a/x/some-file.txt',
-    'a/y/keep.txt',
-    'a/y/some-file.txt',
-    'a/z/keep.txt',
-    'a/z/some-file.txt'
+    __dirname + "/a/x/keep.txt",
+    __dirname + "/a/x/some-file.txt",
+    __dirname + "/a/y/keep.txt",
+    __dirname + "/a/y/some-file.txt",
+    __dirname + "/a/z/keep.txt",
+    __dirname + "/a/z/some-file.txt"
   ]
-}
+};
 
 function shouldRemove (file) {
   if (file.match(/keep.txt$/) || keepDirs[file]) {
