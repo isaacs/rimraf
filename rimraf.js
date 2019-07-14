@@ -41,8 +41,9 @@ function defaults (options) {
   options.emfileWait = options.emfileWait || 1000
   if (options.glob === false) {
     options.disableGlob = true
-  } else if (glob === undefined) {
-    console.error('glob dependency not found, set `options.glob = false` if intentional')
+  }
+  if (options.disableGlob !== true && glob === undefined) {
+    console.error('glob dependency not found, set `options.disableGlob = true` if intentional')
     process.exit(1)
   }
   options.disableGlob = options.disableGlob || false
