@@ -43,8 +43,7 @@ function defaults (options) {
     options.disableGlob = true
   }
   if (options.disableGlob !== true && glob === undefined) {
-    console.error('glob dependency not found, set `options.disableGlob = true` if intentional')
-    process.exit(1)
+    throw Error('glob dependency not found, set `options.disableGlob = true` if intentional')
   }
   options.disableGlob = options.disableGlob || false
   options.glob = options.glob || defaultGlobOpts
