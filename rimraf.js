@@ -1,29 +1,28 @@
 module.exports = rimraf
 rimraf.sync = rimrafSync
 
-var assert = require("assert")
-var path = require("path")
-var fs = require("fs")
-var glob = undefined
+const assert = require("assert")
+const path = require("path")
+const fs = require("fs")
+let glob = undefined
 try {
   glob = require("glob")
 } catch (_err) {
   // treat glob as optional.
 }
-var _0666 = parseInt('666', 8)
 
-var defaultGlobOpts = {
+const defaultGlobOpts = {
   nosort: true,
   silent: true
 }
 
 // for EMFILE handling
-var timeout = 0
+let timeout = 0
 
-var isWindows = (process.platform === "win32")
+const isWindows = (process.platform === "win32")
 
 function defaults (options) {
-  var methods = [
+  const methods = [
     'unlink',
     'chmod',
     'stat',
@@ -63,9 +62,9 @@ function rimraf (p, options, cb) {
 
   defaults(options)
 
-  var busyTries = 0
-  var errState = null
-  var n = 0
+  let busyTries = 0
+  let errState = null
+  let n = 0
 
   if (options.disableGlob || !glob.hasMagic(p))
     return afterGlob(null, [p])
@@ -97,11 +96,10 @@ function rimraf (p, options, cb) {
           if ((er.code === "EBUSY" || er.code === "ENOTEMPTY" || er.code === "EPERM") &&
               busyTries < options.maxBusyTries) {
             busyTries ++
-            var time = busyTries * 100
             // try again, with the same exact callback as this one.
             return setTimeout(function () {
               rimraf_(p, options, CB)
-            }, time)
+            }, busyTries * 100)
           }
 
           // this one won't happen if graceful-fs is used.
@@ -174,7 +172,7 @@ function fixWinEPERM (p, options, er, cb) {
   if (er)
     assert(er instanceof Error)
 
-  options.chmod(p, _0666, function (er2) {
+  options.chmod(p, 0o666, function (er2) {
     if (er2)
       cb(er2.code === "ENOENT" ? null : er)
     else
@@ -196,7 +194,7 @@ function fixWinEPERMSync (p, options, er) {
     assert(er instanceof Error)
 
   try {
-    options.chmodSync(p, _0666)
+    options.chmodSync(p, 0o666)
   } catch (er2) {
     if (er2.code === "ENOENT")
       return
@@ -204,8 +202,9 @@ function fixWinEPERMSync (p, options, er) {
       throw er
   }
 
+  let stats
   try {
-    var stats = options.statSync(p)
+    stats = options.statSync(p)
   } catch (er3) {
     if (er3.code === "ENOENT")
       return
@@ -247,10 +246,10 @@ function rmkids(p, options, cb) {
   options.readdir(p, function (er, files) {
     if (er)
       return cb(er)
-    var n = files.length
+    let n = files.length
     if (n === 0)
       return options.rmdir(p, cb)
-    var errState
+    let errState
     files.forEach(function (f) {
       rimraf(path.join(p, f), options, function (er) {
         if (errState)
@@ -276,7 +275,7 @@ function rimrafSync (p, options) {
   assert(options, 'rimraf: missing options')
   assert.equal(typeof options, 'object', 'rimraf: options should be object')
 
-  var results
+  let results
 
   if (options.disableGlob || !glob.hasMagic(p)) {
     results = [p]
@@ -292,11 +291,12 @@ function rimrafSync (p, options) {
   if (!results.length)
     return
 
-  for (var i = 0; i < results.length; i++) {
-    var p = results[i]
+  for (let i = 0; i < results.length; i++) {
+    const p = results[i]
 
+    let st
     try {
-      var st = options.lstatSync(p)
+      st = options.lstatSync(p)
     } catch (er) {
       if (er.code === "ENOENT")
         return
@@ -356,12 +356,12 @@ function rmkidsSync (p, options) {
   // try really hard to delete stuff on windows, because it has a
   // PROFOUNDLY annoying habit of not closing handles promptly when
   // files are deleted, resulting in spurious ENOTEMPTY errors.
-  var retries = isWindows ? 100 : 1
-  var i = 0
+  const retries = isWindows ? 100 : 1
+  let i = 0
   do {
-    var threw = true
+    let threw = true
     try {
-      var ret = options.rmdirSync(p, options)
+      const ret = options.rmdirSync(p, options)
       threw = false
       return ret
     } finally {
