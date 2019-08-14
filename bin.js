@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-var rimraf = require('./')
+const rimraf = require('./')
 
-var help = false
-var dashdash = false
-var noglob = false
-var args = process.argv.slice(2).filter(function(arg) {
+let help = false
+let dashdash = false
+let noglob = false
+const args = process.argv.slice(2).filter(arg => {
   if (dashdash)
     return !!arg
   else if (arg === '--')
@@ -20,9 +20,20 @@ var args = process.argv.slice(2).filter(function(arg) {
     return !!arg
 })
 
+const go = n => {
+  if (n >= args.length)
+    return
+  const options = noglob ? { glob: false } : {}
+  rimraf(args[n], options, er => {
+    if (er)
+      throw er
+    go(n+1)
+  })
+}
+
 if (help || args.length === 0) {
   // If they didn't ask for help, then this is not a "success"
-  var log = help ? console.log : console.error
+  const log = help ? console.log : console.error
   log('Usage: rimraf <path> [<path> ...]')
   log('')
   log('  Deletes all files and folders at "path" recursively.')
@@ -35,16 +46,3 @@ if (help || args.length === 0) {
   process.exit(help ? 0 : 1)
 } else
   go(0)
-
-function go (n) {
-  if (n >= args.length)
-    return
-  var options = {}
-  if (noglob)
-    options = { glob: false }
-  rimraf(args[n], options, function (er) {
-    if (er)
-      throw er
-    go(n+1)
-  })
-}
