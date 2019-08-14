@@ -4,7 +4,7 @@ rimraf.sync = rimrafSync
 var assert = require("assert")
 var path = require("path")
 var fs = require("fs")
-let glob = undefined
+var glob = undefined
 try {
   glob = require("glob")
 } catch (_err) {
