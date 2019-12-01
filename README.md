@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/isaacs/rimraf.svg?branch=master)](https://travis-ci.org/isaacs/rimraf) [![Dependency Status](https://david-dm.org/isaacs/rimraf.svg)](https://david-dm.org/isaacs/rimraf) [![devDependency Status](https://david-dm.org/isaacs/rimraf/dev-status.svg)](https://david-dm.org/isaacs/rimraf#info=devDependencies)
 
-The [UNIX command](http://en.wikipedia.org/wiki/Rm_(Unix)) `rm -rf` for node.
+The [UNIX command](https://en.wikipedia.org/wiki/Rm_(Unix)) `rm -rf` for node.
 
 Install with `npm install rimraf`, or just drop rimraf.js somewhere.
 
@@ -64,19 +64,19 @@ errors are handled for you:
     the timeout counter hits this max.  The default limit is 1000.
 
     If you repeatedly encounter `EMFILE` errors, then consider using
-    [graceful-fs](http://npm.im/graceful-fs) in your program.
+    [graceful-fs](https://npm.im/graceful-fs) in your program.
 
     Only relevant for async usage.
 
 * glob
 
-    Set to `false` to disable [glob](http://npm.im/glob) pattern
+    Set to `false` to disable [glob](https://npm.im/glob) pattern
     matching.
 
     Set to an object to pass options to the glob module.  The default
     glob options are `{ nosort: true, silent: true }`.
 
-    Glob version 6 is used in this module.
+    Glob version 7 is used in this module.
 
     Relevant for both sync and async usage.
 
@@ -98,4 +98,4 @@ command `rimraf <path> [<path> ...]` which is useful for cross platform support.
 ## mkdirp
 
 If you need to create a directory recursively, check out
-[mkdirp](https://github.com/substack/node-mkdirp).
+[mkdirp](https://npm.im/mkdirp).
