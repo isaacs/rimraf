@@ -165,7 +165,7 @@ const fixWinEPERM = (p, options, er, cb) => {
   assert(options)
   assert(typeof cb === 'function')
   if (er)
-    assert(er instanceof Error)
+    assert(er.stack)
 
   options.chmod(p, 0o666, er2 => {
     if (er2)
@@ -186,7 +186,7 @@ const fixWinEPERMSync = (p, options, er) => {
   assert(p)
   assert(options)
   if (er)
-    assert(er instanceof Error)
+    assert(er.stack)
 
   try {
     options.chmodSync(p, 0o666)
@@ -217,7 +217,7 @@ const rmdir = (p, options, originalEr, cb) => {
   assert(p)
   assert(options)
   if (originalEr)
-    assert(originalEr instanceof Error)
+    assert(originalEr.stack)
   assert(typeof cb === 'function')
 
   // try to rmdir first, and only readdir on ENOTEMPTY or EEXIST (SunOS)
@@ -324,7 +324,7 @@ const rmdirSync = (p, options, originalEr) => {
   assert(p)
   assert(options)
   if (originalEr)
-    assert(originalEr instanceof Error)
+    assert(originalEr.stack)
 
   try {
     options.rmdirSync(p)
