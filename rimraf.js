@@ -43,6 +43,7 @@ const defaults = options => {
   }
   options.disableGlob = options.disableGlob || false
   options.glob = options.glob || defaultGlobOpts
+  options.glob.absolute = true
 }
 
 const rimraf = (p, options, cb) => {
