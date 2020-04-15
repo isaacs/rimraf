@@ -29,7 +29,7 @@ const defaults = options => {
   ]
   methods.forEach(m => {
     options[m] = options[m] || fs[m]
-    m = m + 'Sync'
+    m += 'Sync'
     options[m] = options[m] || fs[m]
   })
 
