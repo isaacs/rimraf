@@ -26,6 +26,9 @@
     "mkdirp": "^0.5.1",
     "tap": "^12.1.1"
   },
+  "engines": {
+    "node": ">=6"
+  },
   "funding": {
     "url": "https://github.com/sponsors/isaacs"
   }
