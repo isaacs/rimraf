@@ -50,6 +50,9 @@ const rimraf = (p, options, cb) => {
     cb = options
     options = {}
   }
+  if(!glob) {
+    options.disableGlob = true;
+  } 
 
   assert(p, 'rimraf: missing path')
   assert.equal(typeof p, 'string', 'rimraf: path should be a string')
