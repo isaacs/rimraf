@@ -1,101 +1,84 @@
-[![Build Status](https://travis-ci.org/isaacs/rimraf.svg?branch=master)](https://travis-ci.org/isaacs/rimraf) [![Dependency Status](https://david-dm.org/isaacs/rimraf.svg)](https://david-dm.org/isaacs/rimraf) [![devDependency Status](https://david-dm.org/isaacs/rimraf/dev-status.svg)](https://david-dm.org/isaacs/rimraf#info=devDependencies)
-
 The [UNIX command](http://en.wikipedia.org/wiki/Rm_(Unix)) `rm -rf` for node.
 
 Install with `npm install rimraf`, or just drop rimraf.js somewhere.
 
+## Major Changes from v3 to v4
+
+* The function returns a `Promise` instead of taking a callback.
+* Built-in glob support removed.
+* Native implementation used by default when available.
+* New implementation on Windows, making the exponential backoff for
+  `EBUSY` and `ENOTEMPTY` errors no longer necessary.
+* Simplified implementation on Posix, since the Windows affordances are not
+  necessary there.
+
 ## API
 
-`rimraf(f, [opts], callback)`
+### `rimraf(f, [opts]) -> Promise`
 
-The first parameter will be interpreted as a globbing pattern for files. If you
-want to disable globbing you can do so with `opts.disableGlob` (defaults to
-`false`). This might be handy, for instance, if you have filenames that contain
-globbing wildcard characters.
+This first parameter is a path.  The second argument is an options object.
 
-The callback will be called with an error if there is one.  Certain
-errors are handled for you:
+Options:
 
-* Windows: `EBUSY` and `ENOTEMPTY` - rimraf will back off a maximum of
-  `opts.maxBusyTries` times before giving up, adding 100ms of wait
-  between each attempt.  The default `maxBusyTries` is 3.
-* `ENOENT` - If the file doesn't exist, rimraf will return
-  successfully, since your desired outcome is already the case.
-* `EMFILE` - Since `readdir` requires opening a file descriptor, it's
-  possible to hit `EMFILE` if too many file descriptors are in use.
-  In the sync case, there's nothing to be done for this.  But in the
-  async case, rimraf will gradually back off with timeouts up to
-  `opts.emfileWait` ms, which defaults to 1000.
+* `tmp`: Temp folder to use to place files and folders for the Windows
+  implementation.  Must be on the same physical device as the path being
+  deleted.  Defaults to `dirname(f)`.
 
-## options
+Any other options are provided to the native Node.js `fs.rm` implementation
+when that is used.
 
-* unlink, chmod, stat, lstat, rmdir, readdir,
-  unlinkSync, chmodSync, statSync, lstatSync, rmdirSync, readdirSync
+This will attempt to choose the best implementation, based on Node.js
+version and `process.platform`.  To force a specific implementation, use
+one of the other functions provided.
 
-    In order to use a custom file system library, you can override
-    specific fs functions on the options object.
+### `rimraf.sync(f, [opts])` `rimraf.rimrafSync(f, [opts])`
 
-    If any of these functions are present on the options object, then
-    the supplied function will be used instead of the default fs
-    method.
+Synchronous form of `rimraf()`
 
-    Sync methods are only relevant for `rimraf.sync()`, of course.
+Note that, unlike many file system operations, the synchronous form will
+typically be significantly _slower_ than the async form, because recursive
+deletion is extremely parallelizable.
 
-    For example:
+### `rimraf.native(f, [opts])`
 
-    ```javascript
-    var myCustomFS = require('some-custom-fs')
+Uses the built-in `fs.rm` implementation that Node.js provides.  This is
+used by default on Node.js versions greater than or equal to `14.14.0`.
 
-    rimraf('some-thing', myCustomFS, callback)
-    ```
+### `rimraf.nativeSync(f, [opts])` `rimraf.native.sync(f, [opts])`
 
-* maxBusyTries
+Synchronous form of `rimraf.native`
 
-    If an `EBUSY`, `ENOTEMPTY`, or `EPERM` error code is encountered
-    on Windows systems, then rimraf will retry with a linear backoff
-    wait of 100ms longer on each try.  The default maxBusyTries is 3.
+### `rimraf.manual(f, [opts])`
 
-    Only relevant for async usage.
+Use the JavaScript implementation appropriate for your operating system.
 
-* emfileWait
+### `rimraf.manualSync(f, [opts])` `rimraf.manualSync(f, opts)`
 
-    If an `EMFILE` error is encountered, then rimraf will retry
-    repeatedly with a linear backoff of 1ms longer on each try, until
-    the timeout counter hits this max.  The default limit is 1000.
+Synchronous form of `rimraf.manual()`
 
-    If you repeatedly encounter `EMFILE` errors, then consider using
-    [graceful-fs](http://npm.im/graceful-fs) in your program.
+### `rimraf.windows(f, [opts])`
 
-    Only relevant for async usage.
+JavaScript implementation of file removal appropriate for Windows
+platforms, where `unlink` and `rmdir` are not atomic operations.
 
-* glob
+Moves all files and folders to the parent directory of `f` with a temporary
+filename prior to attempting to remove them.
 
-    Set to `false` to disable [glob](http://npm.im/glob) pattern
-    matching.
+Note that, in cases where the operation fails, this _may_ leave files lying
+around in the parent directory with names like
+`.file-basename.txt.0.123412341`.  Until the Windows kernel provides a way
+to perform atomic `unlink` and `rmdir` operations, this is unfortunately
+unavoidable.
 
-    Set to an object to pass options to the glob module.  The default
-    glob options are `{ nosort: true, silent: true }`.
+To move files to a different temporary directory other than the parent,
+provide `opts.tmp`.  Note that this _must_ be on the same physical device
+as the folder being deleted, or else the operation will fail.
 
-    Glob version 6 is used in this module.
+### `rimraf.windows.sync(path, [opts])` `rimraf.windowsSync(path, [opts])`
 
-    Relevant for both sync and async usage.
-
-* disableGlob
-
-    Set to any non-falsey value to disable globbing entirely.
-    (Equivalent to setting `glob: false`.)
-
-## rimraf.sync
-
-It can remove stuff synchronously, too.  But that's not so good.  Use
-the async API.  It's better.
-
-## CLI
-
-If installed with `npm install rimraf -g` it can be used as a global
-command `rimraf <path> [<path> ...]` which is useful for cross platform support.
+Synchronous form of `rimraf.windows()`
 
 ## mkdirp
 
-If you need to create a directory recursively, check out
+If you need to _create_ a directory recursively, check out
 [mkdirp](https://github.com/isaacs/node-mkdirp).
