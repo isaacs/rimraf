@@ -13,7 +13,7 @@
     "test": "tap",
     "snap": "tap",
     "npmclilint": "npmcli-lint",
-    "lint": "npm run npmclilint -- map.js lib/**/*.*js test/**/*.*js",
+    "lint": "npm run npmclilint -- libtap-settings.js map.js lib/**/*.*js test/**/*.*js",
     "lintfix": "npm run lint -- --fix",
     "posttest": "npm run lint --",
     "postsnap": "npm run lintfix --"
@@ -27,7 +27,8 @@
     "tap": "^15.1.6"
   },
   "tap": {
-    "coverage-map": "map.js"
+    "coverage-map": "map.js",
+    "libtap-settings": "libtap-settings.js"
   },
   "funding": {
     "url": "https://github.com/sponsors/isaacs"

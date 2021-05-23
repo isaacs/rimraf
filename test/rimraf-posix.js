@@ -1,9 +1,13 @@
-const t = require('tap')
+// have to do this *before* loading tap, or else the fact that we
+// load rimraf-posix.js for tap's fixture cleanup will cause it to
+// have some coverage, but not 100%, failing the coverage check.
 if (process.platform === 'win32') {
-  t.plan(0, 'this test does not work reliably on windows')
+  console.log('TAP version 13')
+  console.log('1..0 # this test does not work reliably on windows')
   process.exit(0)
 }
 
+const t = require('tap')
 const {
   rimrafPosix,
   rimrafPosixSync,
