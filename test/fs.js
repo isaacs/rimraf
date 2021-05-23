@@ -15,12 +15,16 @@ const mockFSMethodFail = method => (...args) => {
   process.nextTick(() => cb(new Error('oops'), method, 1, 2, 3))
 }
 
+const { useNative } = require('../lib/use-native.js')
 t.type(fs.promises, Object)
 const mockFSPass = {}
 const mockFSFail = {}
 for (const method of Object.keys(fs.promises)) {
-  t.type(realFS[method], Function, `real fs.${method} is a function`)
-  t.equal(fs[`${method}Sync`], realFS[`${method}Sync`], `has ${method}Sync`)
+  // of course fs.rm is missing when we shouldn't use native :)
+  if (method !== 'rm' || useNative()) {
+    t.type(realFS[method], Function, `real fs.${method} is a function`)
+    t.equal(fs[`${method}Sync`], realFS[`${method}Sync`], `has ${method}Sync`)
+  }
 
   // set up our pass/fails for the next tests
   mockFSPass[method] = mockFSMethodPass(method)
