@@ -2,6 +2,11 @@
 // we can delete a lot of files on CI in multiple platforms and node versions.
 const t = require('tap')
 
+if (/^v10\./.test(process.version)) {
+  t.plan(0, 'skip this on node 10, it runs out of memory')
+  process.exit(0)
+}
+
 // run with RIMRAF_TEST_START_CHAR/_END_CHAR/_DEPTH environs to
 // make this more or less aggressive.
 const START = (process.env.RIMRAF_TEST_START_CHAR || 'a').charCodeAt(0)
