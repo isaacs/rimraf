@@ -3,7 +3,7 @@ t.formatSnapshot = calls => calls.map(args => args.map(arg =>
   String(arg)
     .split(process.cwd())
     .join('{CWD}')
-    .replace(/\\/g, '/').replace(/\/(\.[a-z]\.)[^/]*$/, '/{tmpfile}')))
+    .replace(/\\/g, '/').replace(/.*\/(\.[a-z]\.)[^/]*$/, '{tmpfile}')))
 
 const fixture = {
   a: 'a',
@@ -262,11 +262,11 @@ t.test('refuse to delete the root dir', async t => {
   })
 
   // not brave enough to pass the actual c:\\ here...
-  t.throws(() => rimrafWindowsSync('some-path', {}), {
-    message: 'cannot delete root directory',
+  t.throws(() => rimrafWindowsSync('some-path', { tmp: 'some-path' }), {
+    message: 'cannot delete temp directory used for deletion',
   })
-  t.rejects(() => rimrafWindows('some-path', {}), {
-    message: 'cannot delete root directory',
+  t.rejects(() => rimrafWindows('some-path', { tmp: 'some-path' }), {
+    message: 'cannot delete temp directory used for deletion',
   })
 })
 

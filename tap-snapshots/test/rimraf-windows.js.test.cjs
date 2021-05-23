@@ -9,7 +9,7 @@ exports[`test/rimraf-windows.js TAP handle EPERMs on unlink by trying to chmod 0
 Array [
   Array [
     "chmod",
-    "{CWD}/test/tap-testdir-rimraf-windows-handle-EPERMs-on-unlink-by-trying-to-chmod-0o666-async/{tmpfile}",
+    "{tmpfile}",
     "438",
   ],
 ]
@@ -19,7 +19,7 @@ exports[`test/rimraf-windows.js TAP handle EPERMs on unlink by trying to chmod 0
 Array [
   Array [
     "chmodSync",
-    "{CWD}/test/tap-testdir-rimraf-windows-handle-EPERMs-on-unlink-by-trying-to-chmod-0o666-sync/{tmpfile}",
+    "{tmpfile}",
     "438",
   ],
 ]
@@ -33,7 +33,7 @@ exports[`test/rimraf-windows.js TAP handle EPERMs, chmod raises something other 
 Array [
   Array [
     "chmodSync",
-    "{CWD}/test/tap-testdir-rimraf-windows-handle-EPERMs-chmod-raises-something-other-than-ENOENT-sync/{tmpfile}",
+    "{tmpfile}",
     "438",
   ],
 ]
@@ -43,7 +43,7 @@ exports[`test/rimraf-windows.js TAP handle EPERMs, chmod returns ENOENT async > 
 Array [
   Array [
     "chmod",
-    "{CWD}/test/tap-testdir-rimraf-windows-handle-EPERMs-chmod-returns-ENOENT-async/{tmpfile}",
+    "{tmpfile}",
     "438",
   ],
 ]
@@ -53,7 +53,7 @@ exports[`test/rimraf-windows.js TAP handle EPERMs, chmod returns ENOENT sync > m
 Array [
   Array [
     "chmodSync",
-    "{CWD}/test/tap-testdir-rimraf-windows-handle-EPERMs-chmod-returns-ENOENT-sync/{tmpfile}",
+    "{tmpfile}",
     "438",
   ],
 ]
