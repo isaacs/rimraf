@@ -125,7 +125,7 @@ t.test('actually delete some stuff', t => {
     },
   }
   const rimraf = require('../')
-  const { statSync } = require('fs')
+  const { statSync } = require('../lib/fs.js')
   t.test('sync', t => {
     const path = t.testdir(fixture)
     rimraf.sync(path)

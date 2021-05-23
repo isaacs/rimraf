@@ -9,7 +9,7 @@ const {
   rimrafPosixSync,
 } = require('../lib/rimraf-posix.js')
 
-const fs = require('fs')
+const fs = require('../lib/fs.js')
 
 const fixture = {
   a: 'a',
@@ -57,7 +57,7 @@ t.test('throw unlink errors', async t => {
     rimrafPosix,
     rimrafPosixSync,
   } = t.mock('../lib/rimraf-posix.js', {
-    fs: {
+    '../lib/fs.js': {
       ...fs,
       unlinkSync: path => {
         throw Object.assign(new Error('cannot unlink'), { code: 'FOO' })
@@ -80,7 +80,7 @@ t.test('throw rmdir errors', async t => {
     rimrafPosix,
     rimrafPosixSync,
   } = t.mock('../lib/rimraf-posix.js', {
-    fs: {
+    '../lib/fs.js': {
       ...fs,
       rmdirSync: path => {
         throw Object.assign(new Error('cannot rmdir'), { code: 'FOO' })
@@ -103,7 +103,7 @@ t.test('throw unexpected readdir errors', async t => {
     rimrafPosix,
     rimrafPosixSync,
   } = t.mock('../lib/rimraf-posix.js', {
-    fs: {
+    '../lib/fs.js': {
       ...fs,
       readdirSync: path => {
         throw Object.assign(new Error('cannot readdir'), { code: 'FOO' })

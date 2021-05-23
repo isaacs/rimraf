@@ -28,7 +28,7 @@ const fixture = {
 }
 
 t.only('actually delete some stuff', async t => {
-  const fs = require('fs')
+  const fs = require('../lib/fs.js')
   const fsMock = { ...fs, promises: { ...fs.promises }}
 
   // simulate annoying windows semantics, where an unlink or rmdir
@@ -57,12 +57,12 @@ t.only('actually delete some stuff', async t => {
   const {
     rimrafPosix,
     rimrafPosixSync,
-  } = t.mock('../lib/rimraf-posix.js', { fs: fsMock })
+  } = t.mock('../lib/rimraf-posix.js', { '../lib/fs.js': fsMock })
 
   const {
     rimrafWindows,
     rimrafWindowsSync,
-  } = t.mock('../lib/rimraf-windows.js', { fs: fsMock })
+  } = t.mock('../lib/rimraf-windows.js', { '../lib/fs.js': fsMock })
 
   t.test('posix does not work here', t => {
     t.test('sync', t => {
@@ -97,7 +97,7 @@ t.only('actually delete some stuff', async t => {
 })
 
 t.only('throw unlink errors', async t => {
-  const fs = require('fs')
+  const fs = require('../lib/fs.js')
   // only throw once here, or else it messes with tap's fixture cleanup
   // that's probably a bug in t.mock?
   let threwAsync = false
@@ -106,7 +106,7 @@ t.only('throw unlink errors', async t => {
     rimrafWindows,
     rimrafWindowsSync,
   } = t.mock('../lib/rimraf-windows.js', {
-    fs: {
+    '../lib/fs.js': {
       ...fs,
       unlinkSync: path => {
         if (threwSync)
@@ -140,7 +140,7 @@ t.only('throw unlink errors', async t => {
 })
 
 t.only('ignore ENOENT unlink errors', async t => {
-  const fs = require('fs')
+  const fs = require('../lib/fs.js')
   // only throw once here, or else it messes with tap's fixture cleanup
   // that's probably a bug in t.mock?
   const threwAsync = false
@@ -149,7 +149,7 @@ t.only('ignore ENOENT unlink errors', async t => {
     rimrafWindows,
     rimrafWindowsSync,
   } = t.mock('../lib/rimraf-windows.js', {
-    fs: {
+    '../lib/fs.js': {
       ...fs,
       unlinkSync: path => {
         fs.unlinkSync(path)
@@ -185,12 +185,12 @@ t.only('ignore ENOENT unlink errors', async t => {
 })
 
 t.test('throw rmdir errors', async t => {
-  const fs = require('fs')
+  const fs = require('../lib/fs.js')
   const {
     rimrafWindows,
     rimrafWindowsSync,
   } = t.mock('../lib/rimraf-windows.js', {
-    fs: {
+    '../lib/fs.js': {
       ...fs,
       rmdirSync: path => {
         throw Object.assign(new Error('cannot rmdir'), { code: 'FOO' })
@@ -219,12 +219,12 @@ t.test('throw rmdir errors', async t => {
 })
 
 t.test('throw unexpected readdir errors', async t => {
-  const fs = require('fs')
+  const fs = require('../lib/fs.js')
   const {
     rimrafWindows,
     rimrafWindowsSync,
   } = t.mock('../lib/rimraf-windows.js', {
-    fs: {
+    '../lib/fs.js': {
       ...fs,
       readdirSync: path => {
         throw Object.assign(new Error('cannot readdir'), { code: 'FOO' })
@@ -273,7 +273,7 @@ t.test('refuse to delete the root dir', async t => {
 })
 
 t.test('handle EPERMs on unlink by trying to chmod 0o666', async t => {
-  const fs = require('fs')
+  const fs = require('../lib/fs.js')
   const CHMODS = []
   let threwAsync = false
   let threwSync = false
@@ -281,7 +281,7 @@ t.test('handle EPERMs on unlink by trying to chmod 0o666', async t => {
     rimrafWindows,
     rimrafWindowsSync,
   } = t.mock('../lib/rimraf-windows.js', {
-    fs: {
+    '../lib/fs.js': {
       ...fs,
       chmodSync: (...args) => {
         CHMODS.push(['chmodSync', ...args])
@@ -329,7 +329,7 @@ t.test('handle EPERMs on unlink by trying to chmod 0o666', async t => {
 })
 
 t.test('handle EPERMs, chmod returns ENOENT', async t => {
-  const fs = require('fs')
+  const fs = require('../lib/fs.js')
   const CHMODS = []
   let threwAsync = false
   let threwSync = false
@@ -337,7 +337,7 @@ t.test('handle EPERMs, chmod returns ENOENT', async t => {
     rimrafWindows,
     rimrafWindowsSync,
   } = t.mock('../lib/rimraf-windows.js', {
-    fs: {
+    '../lib/fs.js': {
       ...fs,
       chmodSync: (...args) => {
         CHMODS.push(['chmodSync', ...args])
@@ -391,7 +391,7 @@ t.test('handle EPERMs, chmod returns ENOENT', async t => {
 })
 
 t.test('handle EPERMs, chmod raises something other than ENOENT', async t => {
-  const fs = require('fs')
+  const fs = require('../lib/fs.js')
   const CHMODS = []
   let threwAsync = false
   let threwSync = false
@@ -399,7 +399,7 @@ t.test('handle EPERMs, chmod raises something other than ENOENT', async t => {
     rimrafWindows,
     rimrafWindowsSync,
   } = t.mock('../lib/rimraf-windows.js', {
-    fs: {
+    '../lib/fs.js': {
       ...fs,
       chmodSync: (...args) => {
         CHMODS.push(['chmodSync', ...args])

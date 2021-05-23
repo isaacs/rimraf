@@ -8,7 +8,7 @@ const START = (process.env.RIMRAF_TEST_START_CHAR || 'a').charCodeAt(0)
 const END = (process.env.RIMRAF_TEST_END_CHAR || 'f').charCodeAt(0)
 const DEPTH = +process.env.RIMRAF_TEST_DEPTH || 4
 
-const { statSync, writeFileSync, mkdirSync, readdirSync } = require('fs')
+const { statSync, writeFileSync, mkdirSync, readdirSync } = require('../lib/fs.js')
 const { resolve, dirname } = require('path')
 
 const create = (path, depth = 0) => {
