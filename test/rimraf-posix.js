@@ -124,3 +124,49 @@ t.test('throw unexpected readdir errors', async t => {
   t.throws(() => rimrafPosixSync(path, {}), { code: 'FOO' })
   t.rejects(rimrafPosix(path, {}), { code: 'FOO' })
 })
+
+t.test('ignore ENOENTs from unlink/rmdir', async t => {
+  const {
+    rimrafPosix,
+    rimrafPosixSync,
+  } = t.mock('../lib/rimraf-posix.js', {
+    '../lib/fs.js': {
+      ...fs,
+      // simulate a case where two rimrafs are happening in parallel,
+      // so the deletion happens AFTER the readdir, but before ours.
+      rmdirSync: path => {
+        fs.rmdirSync(path)
+        fs.rmdirSync(path)
+      },
+      unlinkSync: path => {
+        fs.unlinkSync(path)
+        fs.unlinkSync(path)
+      },
+      promises: {
+        ...fs.promises,
+        rmdir: async path => {
+          fs.rmdirSync(path)
+          return fs.promises.rmdir(path)
+        },
+        unlink: async path => {
+          fs.unlinkSync(path)
+          return fs.promises.unlink(path)
+        },
+      },
+    },
+  })
+  const { statSync } = fs
+  t.test('sync', t => {
+    const path = t.testdir(fixture)
+    rimrafPosixSync(path, {})
+    t.throws(() => statSync(path), { code: 'ENOENT' }, 'deleted')
+    t.end()
+  })
+  t.test('async', async t => {
+    const path = t.testdir(fixture)
+    await rimrafPosix(path, {})
+    t.throws(() => statSync(path), { code: 'ENOENT' }, 'deleted')
+  })
+
+  t.end()
+})
