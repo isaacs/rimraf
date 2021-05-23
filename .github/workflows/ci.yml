@@ -32,6 +32,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      # uses peerDeps for linting
+      - name: Use latest npm
+        run: npm install -g npm@latest
+
       - name: Install dependencies
         run: npm install
 
