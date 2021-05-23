@@ -141,8 +141,6 @@ t.only('throw unlink errors', async t => {
 
 t.only('ignore ENOENT unlink errors', async t => {
   const fs = require('../lib/fs.js')
-  // only throw once here, or else it messes with tap's fixture cleanup
-  // that's probably a bug in t.mock?
   const threwAsync = false
   let threwSync = false
   const {
