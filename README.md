@@ -6,6 +6,7 @@ Install with `npm install rimraf`, or just drop rimraf.js somewhere.
 
 * The function returns a `Promise` instead of taking a callback.
 * Built-in glob support removed.
+* Functions take arrays of paths, as well as a single path.
 * Native implementation used by default when available.
 * New implementation on Windows, making the exponential backoff for
   `EBUSY` and `ENOTEMPTY` errors no longer necessary.

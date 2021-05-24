@@ -8,14 +8,14 @@
 exports[`test/index.js TAP mocky unit tests to select the correct function main function, useNative=false > must match snapshot 1`] = `
 Array [
   Array [
-    "pathArg",
-    "path",
-  ],
-  Array [
     "optsArg",
     Object {
       "a": 1,
     },
+  ],
+  Array [
+    "pathArg",
+    "path",
   ],
   Array [
     "useNative",
@@ -31,14 +31,14 @@ Array [
     },
   ],
   Array [
-    "pathArg",
-    "path",
-  ],
-  Array [
     "optsArg",
     Object {
       "a": 2,
     },
+  ],
+  Array [
+    "pathArg",
+    "path",
   ],
   Array [
     "useNativeSync",
@@ -59,14 +59,14 @@ Array [
 exports[`test/index.js TAP mocky unit tests to select the correct function main function, useNative=true > must match snapshot 1`] = `
 Array [
   Array [
-    "pathArg",
-    "path",
-  ],
-  Array [
     "optsArg",
     Object {
       "a": 1,
     },
+  ],
+  Array [
+    "pathArg",
+    "path",
   ],
   Array [
     "useNative",
@@ -82,14 +82,14 @@ Array [
     },
   ],
   Array [
-    "pathArg",
-    "path",
-  ],
-  Array [
     "optsArg",
     Object {
       "a": 2,
     },
+  ],
+  Array [
+    "pathArg",
+    "path",
   ],
   Array [
     "useNativeSync",
@@ -110,14 +110,14 @@ Array [
 exports[`test/index.js TAP mocky unit tests to select the correct function manual > must match snapshot 1`] = `
 Array [
   Array [
-    "pathArg",
-    "path",
-  ],
-  Array [
     "optsArg",
     Object {
       "a": 3,
     },
+  ],
+  Array [
+    "pathArg",
+    "path",
   ],
   Array [
     "rimrafPosix",
@@ -127,14 +127,14 @@ Array [
     },
   ],
   Array [
-    "pathArg",
-    "path",
-  ],
-  Array [
     "optsArg",
     Object {
       "a": 4,
     },
+  ],
+  Array [
+    "pathArg",
+    "path",
   ],
   Array [
     "rimrafPosixSync",
@@ -149,14 +149,14 @@ Array [
 exports[`test/index.js TAP mocky unit tests to select the correct function native > must match snapshot 1`] = `
 Array [
   Array [
-    "pathArg",
-    "path",
-  ],
-  Array [
     "optsArg",
     Object {
       "a": 5,
     },
+  ],
+  Array [
+    "pathArg",
+    "path",
   ],
   Array [
     "rimrafNative",
@@ -166,14 +166,14 @@ Array [
     },
   ],
   Array [
-    "pathArg",
-    "path",
-  ],
-  Array [
     "optsArg",
     Object {
       "a": 6,
     },
+  ],
+  Array [
+    "pathArg",
+    "path",
   ],
   Array [
     "rimrafNativeSync",
@@ -188,14 +188,14 @@ Array [
 exports[`test/index.js TAP mocky unit tests to select the correct function posix > must match snapshot 1`] = `
 Array [
   Array [
-    "pathArg",
-    "path",
-  ],
-  Array [
     "optsArg",
     Object {
       "a": 7,
     },
+  ],
+  Array [
+    "pathArg",
+    "path",
   ],
   Array [
     "rimrafPosix",
@@ -205,14 +205,14 @@ Array [
     },
   ],
   Array [
-    "pathArg",
-    "path",
-  ],
-  Array [
     "optsArg",
     Object {
       "a": 8,
     },
+  ],
+  Array [
+    "pathArg",
+    "path",
   ],
   Array [
     "rimrafPosixSync",
@@ -227,14 +227,14 @@ Array [
 exports[`test/index.js TAP mocky unit tests to select the correct function windows > must match snapshot 1`] = `
 Array [
   Array [
-    "pathArg",
-    "path",
-  ],
-  Array [
     "optsArg",
     Object {
       "a": 9,
     },
+  ],
+  Array [
+    "pathArg",
+    "path",
   ],
   Array [
     "rimrafWindows",
@@ -244,14 +244,14 @@ Array [
     },
   ],
   Array [
-    "pathArg",
-    "path",
-  ],
-  Array [
     "optsArg",
     Object {
       "a": 10,
     },
+  ],
+  Array [
+    "pathArg",
+    "path",
   ],
   Array [
     "rimrafWindowsSync",

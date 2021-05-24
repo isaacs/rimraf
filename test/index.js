@@ -139,3 +139,40 @@ t.test('actually delete some stuff', t => {
   })
   t.end()
 })
+
+t.test('accept array of paths as first arg', async t => {
+  const { resolve } = require('path')
+  const ASYNC_CALLS = []
+  const SYNC_CALLS = []
+  const {rimraf, rimrafSync} = t.mock('../', {
+    '../lib/use-native.js': {
+      useNative: () => true,
+      useNativeSync: () => true,
+    },
+    '../lib/rimraf-native.js': {
+      rimrafNative: async (path, opts) => ASYNC_CALLS.push([path, opts]),
+      rimrafNativeSync: (path, opts) => SYNC_CALLS.push([path, opts]),
+    },
+  })
+  t.equal(await rimraf(['a', 'b', 'c']), undefined)
+  t.equal(await rimraf(['i', 'j', 'k'], { x: 'ya' }), undefined)
+  t.same(ASYNC_CALLS, [
+    [resolve('a'), {}],
+    [resolve('b'), {}],
+    [resolve('c'), {}],
+    [resolve('i'), {x: 'ya'}],
+    [resolve('j'), {x: 'ya'}],
+    [resolve('k'), {x: 'ya'}],
+  ])
+
+  t.equal(rimrafSync(['x', 'y', 'z']), undefined)
+  t.equal(rimrafSync(['m', 'n', 'o'], { cat: 'chai' }), undefined)
+  t.same(SYNC_CALLS, [
+    [resolve('x'), {}],
+    [resolve('y'), {}],
+    [resolve('z'), {}],
+    [resolve('m'), {cat: 'chai'}],
+    [resolve('n'), {cat: 'chai'}],
+    [resolve('o'), {cat: 'chai'}],
+  ])
+})

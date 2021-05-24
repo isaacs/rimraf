@@ -42,3 +42,33 @@ t.throws(() => pathArg('/'), { code: 'ERR_PRESERVE_ROOT' })
 t.throws(() => pathArg('/', { preserveRoot: null }),
   { code: 'ERR_PRESERVE_ROOT' })
 t.equal(pathArg('/', { preserveRoot: false }), resolve('/'))
+
+t.throws(() => pathArg({}), {
+  code: 'ERR_INVALID_ARG_TYPE',
+  path: {},
+  message: 'The "path" argument must be of type string. ' +
+    'Received an instance of Object',
+  name: 'TypeError',
+})
+t.throws(() => pathArg([]), {
+  code: 'ERR_INVALID_ARG_TYPE',
+  path: [],
+  message: 'The "path" argument must be of type string. ' +
+    'Received an instance of Array',
+  name: 'TypeError',
+})
+const { inspect } = require('util')
+t.throws(() => pathArg(Object.create(null)), {
+  code: 'ERR_INVALID_ARG_TYPE',
+  path: Object.create(null),
+  message: 'The "path" argument must be of type string. ' +
+    `Received ${inspect(Object.create(null))}`,
+  name: 'TypeError',
+})
+t.throws(() => pathArg(true), {
+  code: 'ERR_INVALID_ARG_TYPE',
+  path: true,
+  message: 'The "path" argument must be of type string. ' +
+    `Received type boolean true`,
+  name: 'TypeError',
+})
