@@ -81,6 +81,31 @@ as the folder being deleted, or else the operation will fail.
 
 Synchronous form of `rimraf.windows()`
 
+### Command Line Interface
+
+```
+Usage: rimraf <path> [<path> ...]
+Deletes all files and folders at "path", recursively.
+
+Options:
+  --                  Treat all subsequent arguments as paths
+  -h --help           Display this usage info
+  --preserve-root     Do not remove '/' (default)
+  --no-preserve-root  Do not treat '/' specially
+
+  --impl=<type>       Specify the implementationt to use.
+                      rimraf: choose the best option
+                      native: the C++ implementation in Node.js
+                      manual: the platform-specific JS implementation
+                      posix: the Posix JS implementation
+                      windows: the Windows JS implementation
+
+Implementation-specific options:
+  --tmp=<path>        Folder to hold temp files for 'windows' implementation
+  --max-retries=<n>   maxRetries for the 'native' implementation
+  --retry-delay=<n>   retryDelay for the 'native' implementation
+```
+
 ## mkdirp
 
 If you need to _create_ a directory recursively, check out
