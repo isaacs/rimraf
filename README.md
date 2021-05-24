@@ -23,7 +23,9 @@ Options:
 
 * `tmp`: Temp folder to use to place files and folders for the Windows
   implementation.  Must be on the same physical device as the path being
-  deleted.  Defaults to `dirname(f)`.
+  deleted.  Defaults to `os.tmpdir()` when that is on the same drive letter
+  as the path being deleted, or `${drive}:\temp` if present, or `${drive}:\`
+  if not.
 * `preserveRoot`: If set to boolean `false`, then allow the recursive
   removal of the root directory.  Otherwise, this is not allowed.
 
