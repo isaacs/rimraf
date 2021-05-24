@@ -37,3 +37,8 @@ if (platform === 'win32') {
     t.throws(() => pathArg(path), er)
   }
 }
+
+t.throws(() => pathArg('/'), { code: 'ERR_PRESERVE_ROOT' })
+t.throws(() => pathArg('/', { preserveRoot: null }),
+  { code: 'ERR_PRESERVE_ROOT' })
+t.equal(pathArg('/', { preserveRoot: false }), resolve('/'))
