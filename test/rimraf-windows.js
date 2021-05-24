@@ -449,3 +449,36 @@ t.test('handle EPERMs, chmod raises something other than ENOENT', async t => {
   })
   t.end()
 })
+
+t.test('rimraffing root, do not actually rmdir root', async t => {
+  const fs = require('../lib/fs.js')
+  let ROOT = null
+  const { parse } = require('path')
+  const {
+    rimrafWindows,
+    rimrafWindowsSync,
+  } = t.mock('../lib/rimraf-windows.js', {
+    path: {
+      ...require('path'),
+      parse: (path) => {
+        const p = parse(path)
+        if (path === ROOT)
+          p.root = path
+        return p
+      },
+    },
+  })
+  t.test('async', async t => {
+    ROOT = t.testdir(fixture)
+    await rimrafWindows(ROOT, { preserveRoot: false })
+    t.equal(fs.statSync(ROOT).isDirectory(), true, 'root still present')
+    t.same(fs.readdirSync(ROOT), [], 'entries all gone')
+  })
+  t.test('sync', async t => {
+    ROOT = t.testdir(fixture)
+    rimrafWindowsSync(ROOT, { preserveRoot: false })
+    t.equal(fs.statSync(ROOT).isDirectory(), true, 'root still present')
+    t.same(fs.readdirSync(ROOT), [], 'entries all gone')
+  })
+  t.end()
+})

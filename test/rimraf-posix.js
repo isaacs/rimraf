@@ -170,3 +170,32 @@ t.test('ignore ENOENTs from unlink/rmdir', async t => {
 
   t.end()
 })
+
+t.test('rimraffing root, do not actually rmdir root', async t => {
+  let ROOT = null
+  const { parse } = require('path')
+  const { rimrafPosix, rimrafPosixSync } = t.mock('../lib/rimraf-posix.js', {
+    path: {
+      ...require('path'),
+      parse: (path) => {
+        const p = parse(path)
+        if (path === ROOT)
+          p.root = path
+        return p
+      },
+    },
+  })
+  t.test('async', async t => {
+    ROOT = t.testdir(fixture)
+    await rimrafPosix(ROOT, { preserveRoot: false })
+    t.equal(fs.statSync(ROOT).isDirectory(), true, 'root still present')
+    t.same(fs.readdirSync(ROOT), [], 'entries all gone')
+  })
+  t.test('sync', async t => {
+    ROOT = t.testdir(fixture)
+    rimrafPosixSync(ROOT, { preserveRoot: false })
+    t.equal(fs.statSync(ROOT).isDirectory(), true, 'root still present')
+    t.same(fs.readdirSync(ROOT), [], 'entries all gone')
+  })
+  t.end()
+})
