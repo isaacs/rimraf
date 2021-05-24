@@ -8,7 +8,7 @@
 exports[`test/index.js TAP mocky unit tests to select the correct function main function, useNative=false > must match snapshot 1`] = `
 Array [
   Array [
-    "optsArg",
+    "optArg",
     Object {
       "a": 1,
     },
@@ -31,7 +31,7 @@ Array [
     },
   ],
   Array [
-    "optsArg",
+    "optArg",
     Object {
       "a": 2,
     },
@@ -59,7 +59,7 @@ Array [
 exports[`test/index.js TAP mocky unit tests to select the correct function main function, useNative=true > must match snapshot 1`] = `
 Array [
   Array [
-    "optsArg",
+    "optArg",
     Object {
       "a": 1,
     },
@@ -82,7 +82,7 @@ Array [
     },
   ],
   Array [
-    "optsArg",
+    "optArg",
     Object {
       "a": 2,
     },
@@ -110,7 +110,7 @@ Array [
 exports[`test/index.js TAP mocky unit tests to select the correct function manual > must match snapshot 1`] = `
 Array [
   Array [
-    "optsArg",
+    "optArg",
     Object {
       "a": 3,
     },
@@ -127,7 +127,7 @@ Array [
     },
   ],
   Array [
-    "optsArg",
+    "optArg",
     Object {
       "a": 4,
     },
@@ -149,7 +149,7 @@ Array [
 exports[`test/index.js TAP mocky unit tests to select the correct function native > must match snapshot 1`] = `
 Array [
   Array [
-    "optsArg",
+    "optArg",
     Object {
       "a": 5,
     },
@@ -166,7 +166,7 @@ Array [
     },
   ],
   Array [
-    "optsArg",
+    "optArg",
     Object {
       "a": 6,
     },
@@ -188,7 +188,7 @@ Array [
 exports[`test/index.js TAP mocky unit tests to select the correct function posix > must match snapshot 1`] = `
 Array [
   Array [
-    "optsArg",
+    "optArg",
     Object {
       "a": 7,
     },
@@ -205,7 +205,7 @@ Array [
     },
   ],
   Array [
-    "optsArg",
+    "optArg",
     Object {
       "a": 8,
     },
@@ -227,7 +227,7 @@ Array [
 exports[`test/index.js TAP mocky unit tests to select the correct function windows > must match snapshot 1`] = `
 Array [
   Array [
-    "optsArg",
+    "optArg",
     Object {
       "a": 9,
     },
@@ -244,7 +244,7 @@ Array [
     },
   ],
   Array [
-    "optsArg",
+    "optArg",
     Object {
       "a": 10,
     },

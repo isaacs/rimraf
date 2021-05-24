@@ -9,12 +9,12 @@ t.test('mocky unit tests to select the correct function', t => {
   let USE_NATIVE = true
   const mocks = {
     '../lib/use-native.js': {
-      useNative: opts => {
-        CALLS.push(['useNative', opts])
+      useNative: opt => {
+        CALLS.push(['useNative', opt])
         return USE_NATIVE
       },
-      useNativeSync: opts => {
-        CALLS.push(['useNativeSync', opts])
+      useNativeSync: opt => {
+        CALLS.push(['useNativeSync', opt])
         return USE_NATIVE
       },
     },
@@ -22,32 +22,32 @@ t.test('mocky unit tests to select the correct function', t => {
       CALLS.push(['pathArg', path])
       return path
     },
-    '../lib/opts-arg.js': opts => {
-      CALLS.push(['optsArg', opts])
-      return opts
+    '../lib/opt-arg.js': opt => {
+      CALLS.push(['optArg', opt])
+      return opt
     },
     '../lib/rimraf-posix.js': {
-      rimrafPosix: async (path, opts) => {
-        CALLS.push(['rimrafPosix', path, opts])
+      rimrafPosix: async (path, opt) => {
+        CALLS.push(['rimrafPosix', path, opt])
       },
-      rimrafPosixSync: async (path, opts) => {
-        CALLS.push(['rimrafPosixSync', path, opts])
+      rimrafPosixSync: async (path, opt) => {
+        CALLS.push(['rimrafPosixSync', path, opt])
       },
     },
     '../lib/rimraf-windows.js': {
-      rimrafWindows: async (path, opts) => {
-        CALLS.push(['rimrafWindows', path, opts])
+      rimrafWindows: async (path, opt) => {
+        CALLS.push(['rimrafWindows', path, opt])
       },
-      rimrafWindowsSync: async (path, opts) => {
-        CALLS.push(['rimrafWindowsSync', path, opts])
+      rimrafWindowsSync: async (path, opt) => {
+        CALLS.push(['rimrafWindowsSync', path, opt])
       },
     },
     '../lib/rimraf-native.js': {
-      rimrafNative: async (path, opts) => {
-        CALLS.push(['rimrafNative', path, opts])
+      rimrafNative: async (path, opt) => {
+        CALLS.push(['rimrafNative', path, opt])
       },
-      rimrafNativeSync: async (path, opts) => {
-        CALLS.push(['rimrafNativeSync', path, opts])
+      rimrafNativeSync: async (path, opt) => {
+        CALLS.push(['rimrafNativeSync', path, opt])
       },
     },
   }
@@ -150,8 +150,8 @@ t.test('accept array of paths as first arg', async t => {
       useNativeSync: () => true,
     },
     '../lib/rimraf-native.js': {
-      rimrafNative: async (path, opts) => ASYNC_CALLS.push([path, opts]),
-      rimrafNativeSync: (path, opts) => SYNC_CALLS.push([path, opts]),
+      rimrafNative: async (path, opt) => ASYNC_CALLS.push([path, opt]),
+      rimrafNativeSync: (path, opt) => SYNC_CALLS.push([path, opt]),
     },
   })
   t.equal(await rimraf(['a', 'b', 'c']), undefined)
