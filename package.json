@@ -17,7 +17,8 @@
     "lint": "npm run npmclilint -- libtap-settings.js map.js lib/**/*.*js test/**/*.*js",
     "lintfix": "npm run lint -- --fix",
     "posttest": "npm run lint --",
-    "postsnap": "npm run lintfix --"
+    "postsnap": "npm run lintfix --",
+    "benchmark": "node benchmark/index.js"
   },
   "files": [
     "lib"
