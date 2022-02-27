@@ -44,7 +44,7 @@ t.test('glob', function (t) {
     var glob = require('glob')
     var pattern = __dirname + '/target/f-*'
     var before = glob.sync(pattern)
-    t.notEqual(before.length, 0)
+    t.not(before.length, 0)
     rimraf(pattern, function (er) {
       if (er)
         throw er
@@ -59,7 +59,7 @@ t.test('glob', function (t) {
     var glob = require('glob')
     var pattern = __dirname + '/target/f-*'
     var before = glob.sync(pattern)
-    t.notEqual(before.length, 0)
+    t.not(before.length, 0)
     rimraf.sync(pattern)
     var after = glob.sync(pattern)
     t.same(after, [])
@@ -75,7 +75,7 @@ t.test('no glob', function (t) {
     var glob = require('glob')
     var pattern = __dirname + '/target/f-*'
     var before = glob.sync(pattern)
-    t.notEqual(before.length, 0)
+    t.not(before.length, 0)
     rimraf(pattern, { disableGlob: true }, function (er) {
       if (er)
         throw er
@@ -90,7 +90,7 @@ t.test('no glob', function (t) {
     var glob = require('glob')
     var pattern = __dirname + '/target/f-*'
     var before = glob.sync(pattern)
-    t.notEqual(before.length, 0)
+    t.not(before.length, 0)
     rimraf.sync(pattern, { disableGlob: true })
     var after = glob.sync(pattern)
     t.same(after, before)

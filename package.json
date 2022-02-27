@@ -24,7 +24,7 @@
   ],
   "devDependencies": {
     "mkdirp": "^0.5.1",
-    "tap": "^12.1.1"
+    "tap": "^15.1.6"
   },
   "funding": {
     "url": "https://github.com/sponsors/isaacs"
