@@ -98,4 +98,4 @@ command `rimraf <path> [<path> ...]` which is useful for cross platform support.
 ## mkdirp
 
 If you need to create a directory recursively, check out
-[mkdirp](https://github.com/substack/node-mkdirp).
+[mkdirp](https://github.com/isaacs/node-mkdirp).
