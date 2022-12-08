@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write #  for commit-if-modified.sh to push
+
 jobs:
   makework:
     runs-on: ubuntu-latest
