@@ -179,8 +179,9 @@ t.test('rimraffing root, do not actually rmdir root', async t => {
       ...require('path'),
       parse: (path) => {
         const p = parse(path)
-        if (path === ROOT)
+        if (path === ROOT) {
           p.root = path
+        }
         return p
       },
     },

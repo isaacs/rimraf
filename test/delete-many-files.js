@@ -20,10 +20,11 @@ const create = (path, depth = 0) => {
   mkdirSync(path)
   for (let i = START; i <= END; i++) {
     const c = String.fromCharCode(i)
-    if (depth < DEPTH && (i - START >= depth))
+    if (depth < DEPTH && (i - START >= depth)) {
       create(resolve(path, c), depth + 1)
-    else
+    } else {
       writeFileSync(resolve(path, c), c)
+    }
   }
   return path
 }

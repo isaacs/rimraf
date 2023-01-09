@@ -44,7 +44,7 @@ t.only('actually delete some stuff', async t => {
   const danglers = []
   const unlinkLater = path => {
     const p = new Promise((res) => {
-      setTimeout(() => unlink(path).then(res, res), 50)
+      setTimeout(() => unlink(path).then(res, res))
     })
     danglers.push(p)
   }
@@ -60,9 +60,9 @@ t.only('actually delete some stuff', async t => {
   } = t.mock('../lib/rimraf-posix.js', { '../lib/fs.js': fsMock })
 
   const {
-    rimrafWindows,
-    rimrafWindowsSync,
-  } = t.mock('../lib/rimraf-windows.js', { '../lib/fs.js': fsMock })
+    rimrafMoveRemove,
+    rimrafMoveRemoveSync,
+  } = t.mock('../lib/rimraf-move-remove.js', { '../lib/fs.js': fsMock })
 
   t.test('posix does not work here', t => {
     t.test('sync', t => {
@@ -80,18 +80,18 @@ t.only('actually delete some stuff', async t => {
 
   t.test('sync', t => {
     const path = t.testdir(fixture)
-    rimrafWindowsSync(path, {})
+    rimrafMoveRemoveSync(path, {})
     t.throws(() => statSync(path), { code: 'ENOENT' }, 'deleted')
-    t.doesNotThrow(() => rimrafWindowsSync(path, {}),
+    t.doesNotThrow(() => rimrafMoveRemoveSync(path, {}),
       'deleting a second time is OK')
     t.end()
   })
 
   t.test('async', async t => {
     const path = t.testdir(fixture)
-    await rimrafWindows(path, {})
+    await rimrafMoveRemove(path, {})
     t.throws(() => statSync(path), { code: 'ENOENT' }, 'deleted')
-    t.resolves(rimrafWindows(path, {}), 'deleting a second time is OK')
+    t.resolves(rimrafMoveRemove(path, {}), 'deleting a second time is OK')
   })
   t.end()
 })
@@ -103,9 +103,9 @@ t.only('throw unlink errors', async t => {
   let threwAsync = false
   let threwSync = false
   const {
-    rimrafWindows,
-    rimrafWindowsSync,
-  } = t.mock('../lib/rimraf-windows.js', {
+    rimrafMoveRemove,
+    rimrafMoveRemoveSync,
+  } = t.mock('../lib/rimraf-move-remove.js', {
     '../lib/fs.js': {
       ...fs,
       unlinkSync: path => {
@@ -130,12 +130,12 @@ t.only('throw unlink errors', async t => {
   // nest to clean up the mess
   t.test('sync', t => {
     const path = t.testdir({ test: fixture }) + '/test'
-    t.throws(() => rimrafWindowsSync(path, {}), { code: 'FOO' })
+    t.throws(() => rimrafMoveRemoveSync(path, {}), { code: 'FOO' })
     t.end()
   })
   t.test('async', t => {
     const path = t.testdir({ test: fixture }) + '/test'
-    t.rejects(rimrafWindows(path, {}), { code: 'FOO' })
+    t.rejects(rimrafMoveRemove(path, {}), { code: 'FOO' })
     t.end()
   })
   t.end()
@@ -146,9 +146,9 @@ t.only('ignore ENOENT unlink errors', async t => {
   const threwAsync = false
   let threwSync = false
   const {
-    rimrafWindows,
-    rimrafWindowsSync,
-  } = t.mock('../lib/rimraf-windows.js', {
+    rimrafMoveRemove,
+    rimrafMoveRemoveSync,
+  } = t.mock('../lib/rimraf-move-remove.js', {
     '../lib/fs.js': {
       ...fs,
       unlinkSync: path => {
@@ -175,12 +175,12 @@ t.only('ignore ENOENT unlink errors', async t => {
   // nest to clean up the mess
   t.test('sync', t => {
     const path = t.testdir({ test: fixture }) + '/test'
-    t.doesNotThrow(() => rimrafWindowsSync(path, {}), 'enoent no problems')
+    t.doesNotThrow(() => rimrafMoveRemoveSync(path, {}), 'enoent no problems')
     t.end()
   })
   t.test('async', t => {
     const path = t.testdir({ test: fixture }) + '/test'
-    t.resolves(() => rimrafWindows(path, {}), 'enoent no problems')
+    t.resolves(() => rimrafMoveRemove(path, {}), 'enoent no problems')
     t.end()
   })
   t.end()
@@ -189,9 +189,9 @@ t.only('ignore ENOENT unlink errors', async t => {
 t.test('throw rmdir errors', async t => {
   const fs = require('../lib/fs.js')
   const {
-    rimrafWindows,
-    rimrafWindowsSync,
-  } = t.mock('../lib/rimraf-windows.js', {
+    rimrafMoveRemove,
+    rimrafMoveRemoveSync,
+  } = t.mock('../lib/rimraf-move-remove.js', {
     '../lib/fs.js': {
       ...fs,
       rmdirSync: path => {
@@ -208,13 +208,13 @@ t.test('throw rmdir errors', async t => {
   t.test('sync', t => {
     // nest it so that we clean up the mess
     const path = t.testdir({ test: fixture }) + '/test'
-    t.throws(() => rimrafWindowsSync(path, {}), { code: 'FOO' })
+    t.throws(() => rimrafMoveRemoveSync(path, {}), { code: 'FOO' })
     t.end()
   })
   t.test('async', t => {
     // nest it so that we clean up the mess
     const path = t.testdir({ test: fixture }) + '/test'
-    t.rejects(rimrafWindows(path, {}), { code: 'FOO' })
+    t.rejects(rimrafMoveRemove(path, {}), { code: 'FOO' })
     t.end()
   })
   t.end()
@@ -223,9 +223,9 @@ t.test('throw rmdir errors', async t => {
 t.test('throw unexpected readdir errors', async t => {
   const fs = require('../lib/fs.js')
   const {
-    rimrafWindows,
-    rimrafWindowsSync,
-  } = t.mock('../lib/rimraf-windows.js', {
+    rimrafMoveRemove,
+    rimrafMoveRemoveSync,
+  } = t.mock('../lib/rimraf-move-remove.js', {
     '../lib/fs.js': {
       ...fs,
       readdirSync: path => {
@@ -242,16 +242,36 @@ t.test('throw unexpected readdir errors', async t => {
   t.test('sync', t => {
     // nest to clean up the mess
     const path = t.testdir({ test: fixture }) + '/test'
-    t.throws(() => rimrafWindowsSync(path, {}), { code: 'FOO' })
+    t.throws(() => rimrafMoveRemoveSync(path, {}), { code: 'FOO' })
     t.end()
   })
   t.test('async', t => {
     // nest to clean up the mess
     const path = t.testdir({ test: fixture }) + '/test'
-    t.rejects(rimrafWindows(path, {}), { code: 'FOO' })
+    t.rejects(rimrafMoveRemove(path, {}), { code: 'FOO' })
     t.end()
   })
   t.end()
+})
+
+t.test('refuse to delete the root dir', async t => {
+  const {
+    rimrafMoveRemove,
+    rimrafMoveRemoveSync,
+  } = t.mock('../lib/rimraf-move-remove.js', {
+    path: {
+      ...require('path'),
+      dirname: path => path,
+    },
+  })
+
+  // not brave enough to pass the actual c:\\ here...
+  t.throws(() => rimrafMoveRemoveSync('some-path', { tmp: 'some-path' }), {
+    message: 'cannot delete temp directory used for deletion',
+  })
+  t.rejects(() => rimrafMoveRemove('some-path', { tmp: 'some-path' }), {
+    message: 'cannot delete temp directory used for deletion',
+  })
 })
 
 t.test('handle EPERMs on unlink by trying to chmod 0o666', async t => {
@@ -260,9 +280,9 @@ t.test('handle EPERMs on unlink by trying to chmod 0o666', async t => {
   let threwAsync = false
   let threwSync = false
   const {
-    rimrafWindows,
-    rimrafWindowsSync,
-  } = t.mock('../lib/rimraf-windows.js', {
+    rimrafMoveRemove,
+    rimrafMoveRemoveSync,
+  } = t.mock('../lib/rimraf-move-remove.js', {
     '../lib/fs.js': {
       ...fs,
       chmodSync: (...args) => {
@@ -298,14 +318,14 @@ t.test('handle EPERMs on unlink by trying to chmod 0o666', async t => {
   t.test('sync', t => {
     // nest it so that we clean up the mess
     const path = t.testdir({ test: fixture }) + '/test'
-    rimrafWindowsSync(path, {})
+    rimrafMoveRemoveSync(path, {})
     t.matchSnapshot(CHMODS)
     t.end()
   })
   t.test('async', async t => {
     // nest it so that we clean up the mess
     const path = t.testdir({ test: fixture }) + '/test'
-    await rimrafWindows(path, {})
+    await rimrafMoveRemove(path, {})
     t.matchSnapshot(CHMODS)
     t.end()
   })
@@ -318,9 +338,9 @@ t.test('handle EPERMs, chmod returns ENOENT', async t => {
   let threwAsync = false
   let threwSync = false
   const {
-    rimrafWindows,
-    rimrafWindowsSync,
-  } = t.mock('../lib/rimraf-windows.js', {
+    rimrafMoveRemove,
+    rimrafMoveRemoveSync,
+  } = t.mock('../lib/rimraf-move-remove.js', {
     '../lib/fs.js': {
       ...fs,
       chmodSync: (...args) => {
@@ -362,14 +382,14 @@ t.test('handle EPERMs, chmod returns ENOENT', async t => {
   t.test('sync', t => {
     // nest it so that we clean up the mess
     const path = t.testdir({ test: fixture }) + '/test'
-    rimrafWindowsSync(path, {})
+    rimrafMoveRemoveSync(path, {})
     t.matchSnapshot(CHMODS)
     t.end()
   })
   t.test('async', async t => {
     // nest it so that we clean up the mess
     const path = t.testdir({ test: fixture }) + '/test'
-    await rimrafWindows(path, {})
+    await rimrafMoveRemove(path, {})
     t.matchSnapshot(CHMODS)
     t.end()
   })
@@ -382,9 +402,9 @@ t.test('handle EPERMs, chmod raises something other than ENOENT', async t => {
   let threwAsync = false
   let threwSync = false
   const {
-    rimrafWindows,
-    rimrafWindowsSync,
-  } = t.mock('../lib/rimraf-windows.js', {
+    rimrafMoveRemove,
+    rimrafMoveRemoveSync,
+  } = t.mock('../lib/rimraf-move-remove.js', {
     '../lib/fs.js': {
       ...fs,
       chmodSync: (...args) => {
@@ -426,14 +446,14 @@ t.test('handle EPERMs, chmod raises something other than ENOENT', async t => {
   t.test('sync', t => {
     // nest it so that we clean up the mess
     const path = t.testdir({ test: fixture }) + '/test'
-    t.throws(() => rimrafWindowsSync(path, {}), { code: 'EPERM' })
+    t.throws(() => rimrafMoveRemoveSync(path, {}), { code: 'EPERM' })
     t.matchSnapshot(CHMODS)
     t.end()
   })
   t.test('async', async t => {
     // nest it so that we clean up the mess
     const path = t.testdir({ test: fixture }) + '/test'
-    t.rejects(rimrafWindows(path, {}), { code: 'EPERM' })
+    t.rejects(rimrafMoveRemove(path, {}), { code: 'EPERM' })
     t.matchSnapshot(CHMODS)
     t.end()
   })
@@ -445,9 +465,9 @@ t.test('rimraffing root, do not actually rmdir root', async t => {
   let ROOT = null
   const { parse } = require('path')
   const {
-    rimrafWindows,
-    rimrafWindowsSync,
-  } = t.mock('../lib/rimraf-windows.js', {
+    rimrafMoveRemove,
+    rimrafMoveRemoveSync,
+  } = t.mock('../lib/rimraf-move-remove.js', {
     path: {
       ...require('path'),
       parse: (path) => {
@@ -461,25 +481,15 @@ t.test('rimraffing root, do not actually rmdir root', async t => {
   })
   t.test('async', async t => {
     ROOT = t.testdir(fixture)
-    await rimrafWindows(ROOT, { preserveRoot: false })
+    await rimrafMoveRemove(ROOT, { preserveRoot: false })
     t.equal(fs.statSync(ROOT).isDirectory(), true, 'root still present')
     t.same(fs.readdirSync(ROOT), [], 'entries all gone')
   })
   t.test('sync', async t => {
     ROOT = t.testdir(fixture)
-    rimrafWindowsSync(ROOT, { preserveRoot: false })
+    rimrafMoveRemoveSync(ROOT, { preserveRoot: false })
     t.equal(fs.statSync(ROOT).isDirectory(), true, 'root still present')
     t.same(fs.readdirSync(ROOT), [], 'entries all gone')
   })
   t.end()
-})
-
-t.test('do not allow third arg', async t => {
-  const ROOT = t.testdir(fixture)
-  const {
-    rimrafWindows,
-    rimrafWindowsSync,
-  } = require('../lib/rimraf-windows.js')
-  t.rejects(rimrafWindows(ROOT, {}, true))
-  t.throws(() => rimrafWindowsSync(ROOT, {}, true))
 })

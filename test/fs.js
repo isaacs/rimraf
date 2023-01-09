@@ -33,20 +33,23 @@ for (const method of Object.keys(fs.promises)) {
 
 // doesn't have any sync versions that aren't promisified
 for (const method of Object.keys(fs)) {
-  if (method === 'promises')
+  if (method === 'promises') {
     continue
+  }
   const m = method.replace(/Sync$/, '')
   t.type(fs.promises[m], Function, `fs.promises.${m} is a function`)
 }
 
 t.test('passing resolves promise', async t => {
   const fs = t.mock('../lib/fs.js', { fs: mockFSPass })
-  for (const [m, fn] of Object.entries(fs.promises))
+  for (const [m, fn] of Object.entries(fs.promises)) {
     t.same(await fn(), m, `got expected value for ${m}`)
+  }
 })
 
 t.test('failing rejects promise', async t => {
   const fs = t.mock('../lib/fs.js', { fs: mockFSFail })
-  for (const [m, fn] of Object.entries(fs.promises))
+  for (const [m, fn] of Object.entries(fs.promises)) {
     t.rejects(fn(), { message: 'oops' }, `got expected value for ${m}`)
+  }
 })
