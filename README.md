@@ -1,51 +1,51 @@
-The [UNIX command](http://en.wikipedia.org/wiki/Rm_(Unix)) `rm -rf` for node.
+The [UNIX command](<http://en.wikipedia.org/wiki/Rm_(Unix)>) `rm -rf` for node.
 
 Install with `npm install rimraf`, or just drop rimraf.js somewhere.
 
 ## Major Changes from v3 to v4
 
-* The function returns a `Promise` instead of taking a callback.
-* Built-in glob support removed.
-* Functions take arrays of paths, as well as a single path.
-* Native implementation used by default when available.
-* New implementation on Windows, falling back to "move then
+- The function returns a `Promise` instead of taking a callback.
+- Built-in glob support removed.
+- Functions take arrays of paths, as well as a single path.
+- Native implementation used by default when available.
+- New implementation on Windows, falling back to "move then
   remove" strategy when exponential backoff for `EBUSY` fails to
   resolve the situation.
-* Simplified implementation on Posix, since the Windows affordances are not
+- Simplified implementation on Posix, since the Windows affordances are not
   necessary there.
 
 ## API
 
 ### `rimraf(f, [opts]) -> Promise`
 
-This first parameter is a path.  The second argument is an options object.
+This first parameter is a path. The second argument is an options object.
 
 Options:
 
-* `preserveRoot`: If set to boolean `false`, then allow the
-  recursive removal of the root directory.  Otherwise, this is
+- `preserveRoot`: If set to boolean `false`, then allow the
+  recursive removal of the root directory. Otherwise, this is
   not allowed.
-* `tmp`: Windows only.  Temp folder to use to place files and
-  folders for the "move then remove" fallback.  Must be on the
-  same physical device as the path being deleted.  Defaults to
+- `tmp`: Windows only. Temp folder to use to place files and
+  folders for the "move then remove" fallback. Must be on the
+  same physical device as the path being deleted. Defaults to
   `os.tmpdir()` when that is on the same drive letter as the path
   being deleted, or `${drive}:\temp` if present, or `${drive}:\`
   if not.
-* `retries`: Windows only.  Maximum number of synchronous retry
+- `retries`: Windows only. Maximum number of synchronous retry
   attempts in case of `EBUSY`, `EMFILE`, and `ENFILE` errors.
   Default `10`
-* `backoff`: Windows only.  Rate of exponential backoff for async
+- `backoff`: Windows only. Rate of exponential backoff for async
   removal in case of `EBUSY`, `EMFILE`, and `ENFILE` errors.
-  Should be a number greater than 1.  Default `1.2`
-* `maxBackoff`: Windows only.  Maximum backoff time in ms to
+  Should be a number greater than 1. Default `1.2`
+- `maxBackoff`: Windows only. Maximum backoff time in ms to
   attempt asynchronous retries in case of `EBUSY`, `EMFILE`, and
-  `ENFILE` errors.  Default `100`
+  `ENFILE` errors. Default `100`
 
 Any other options are provided to the native Node.js `fs.rm` implementation
 when that is used.
 
 This will attempt to choose the best implementation, based on Node.js
-version and `process.platform`.  To force a specific implementation, use
+version and `process.platform`. To force a specific implementation, use
 one of the other functions provided.
 
 ### `rimraf.sync(f, [opts])` `rimraf.rimrafSync(f, [opts])`
@@ -58,7 +58,7 @@ deletion is extremely parallelizable.
 
 ### `rimraf.native(f, [opts])`
 
-Uses the built-in `fs.rm` implementation that Node.js provides.  This is
+Uses the built-in `fs.rm` implementation that Node.js provides. This is
 used by default on Node.js versions greater than or equal to `14.14.0`.
 
 ### `rimraf.nativeSync(f, [opts])` `rimraf.native.sync(f, [opts])`
@@ -76,13 +76,13 @@ Synchronous form of `rimraf.manual()`
 ### `rimraf.windows(f, [opts])`
 
 JavaScript implementation of file removal appropriate for Windows
-platforms.  Works around `unlink` and `rmdir` not being atomic
+platforms. Works around `unlink` and `rmdir` not being atomic
 operations, and `EPERM` when deleting files with certain
 permission modes.
 
 First deletes all non-directory files within the tree, and then
 removes all directories, which should ideally be empty by that
-time.  When an `ENOTEMPTY` is raised in the second pass, falls
+time. When an `ENOTEMPTY` is raised in the second pass, falls
 back to the `rimraf.moveRemove` strategy as needed.
 
 ### `rimraf.windows.sync(path, [opts])` `rimraf.windowsSync(path, [opts])`
@@ -96,17 +96,17 @@ with a temporary filename prior to attempting to remove them.
 
 Note that, in cases where the operation fails, this _may_ leave
 files lying around in the parent directory with names like
-`.file-basename.txt.0.123412341`.  Until the Windows kernel
+`.file-basename.txt.0.123412341`. Until the Windows kernel
 provides a way to perform atomic `unlink` and `rmdir` operations,
 this is unfortunately unavoidable.
 
 To move files to a different temporary directory other than the
-parent, provide `opts.tmp`.  Note that this _must_ be on the same
+parent, provide `opts.tmp`. Note that this _must_ be on the same
 physical device as the folder being deleted, or else the
 operation will fail.
 
 This is the slowest strategy, but most reliable on Windows
-platforms.  Used as a last-ditch fallback by `rimraf.windows()`.
+platforms. Used as a last-ditch fallback by `rimraf.windows()`.
 
 ### `rimraf.moveRemove.sync(path, [opts])` `rimraf.moveRemoveSync(path, [opts])`
 

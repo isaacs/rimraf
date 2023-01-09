@@ -3,7 +3,7 @@
 const rimraf = require('./')
 module.exports = {
   rmdirRecursiveSync: path => rimraf.sync(path),
-  rmdirRecursive (path, cb) {
+  rmdirRecursive(path, cb) {
     rimraf(path).then(cb, cb)
   },
 }

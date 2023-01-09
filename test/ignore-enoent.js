@@ -12,8 +12,14 @@ const throwEperm = () => {
 }
 
 t.resolves(ignoreENOENT(Promise.reject(enoent)), 'enoent is fine')
-t.rejects(ignoreENOENT(Promise.reject(eperm)), { code: 'EPERM' },
-  'eperm is not')
+t.rejects(
+  ignoreENOENT(Promise.reject(eperm)),
+  { code: 'EPERM' },
+  'eperm is not'
+)
 t.doesNotThrow(() => ignoreENOENTSync(throwEnoent), 'enoent is fine sync')
-t.throws(() => ignoreENOENTSync(throwEperm), { code: 'EPERM' },
-  'eperm is not fine sync')
+t.throws(
+  () => ignoreENOENTSync(throwEperm),
+  { code: 'EPERM' },
+  'eperm is not fine sync'
+)

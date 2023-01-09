@@ -6,7 +6,7 @@ if (/^v([0-8]\.|1[0-3]\.|14\.[0-9]\.|14\.1[1-3]\.)/.test(process.version)) {
 }
 
 const t = require('tap')
-const {useNative, useNativeSync} = require('../lib/use-native.js')
+const { useNative, useNativeSync } = require('../lib/use-native.js')
 
 if (!process.env.__TESTING_RIMRAF_NODE_VERSION__) {
   t.spawn(process.execPath, [__filename], {

@@ -12,18 +12,13 @@ t.test('basic arg parsing stuff', t => {
   console.error = (...msg) => ERRS.push(msg)
 
   const CALLS = []
-  const rimraf = async (path, opt) =>
-    CALLS.push(['rimraf', path, opt])
+  const rimraf = async (path, opt) => CALLS.push(['rimraf', path, opt])
   const bin = t.mock('../lib/bin.js', {
     '../lib/index.js': Object.assign(rimraf, {
-      native: async (path, opt) =>
-        CALLS.push(['native', path, opt]),
-      manual: async (path, opt) =>
-        CALLS.push(['manual', path, opt]),
-      posix: async (path, opt) =>
-        CALLS.push(['posix', path, opt]),
-      windows: async (path, opt) =>
-        CALLS.push(['windows', path, opt]),
+      native: async (path, opt) => CALLS.push(['native', path, opt]),
+      manual: async (path, opt) => CALLS.push(['manual', path, opt]),
+      posix: async (path, opt) => CALLS.push(['posix', path, opt]),
+      windows: async (path, opt) => CALLS.push(['windows', path, opt]),
     }),
   })
 
@@ -34,11 +29,7 @@ t.test('basic arg parsing stuff', t => {
   })
 
   t.test('helpful output', t => {
-    const cases = [
-      ['-h'],
-      ['--help'],
-      ['a', 'b', '--help', 'c'],
-    ]
+    const cases = [['-h'], ['--help'], ['a', 'b', '--help', 'c']]
     for (const c of cases) {
       t.test(c.join(' '), async t => {
         t.equal(await bin(...c), 0)
@@ -141,9 +132,7 @@ t.test('basic arg parsing stuff', t => {
       t.equal(await bin('foo', `--impl=${impl}`), 0)
       t.same(LOGS, [])
       t.same(ERRS, [])
-      t.same(CALLS, [
-        [impl, ['foo'], {}],
-      ])
+      t.same(CALLS, [[impl, ['foo'], {}]])
     })
   }
 

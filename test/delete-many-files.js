@@ -13,14 +13,19 @@ const START = (process.env.RIMRAF_TEST_START_CHAR || 'a').charCodeAt(0)
 const END = (process.env.RIMRAF_TEST_END_CHAR || 'f').charCodeAt(0)
 const DEPTH = +process.env.RIMRAF_TEST_DEPTH || 4
 
-const { statSync, writeFileSync, mkdirSync, readdirSync } = require('../lib/fs.js')
+const {
+  statSync,
+  writeFileSync,
+  mkdirSync,
+  readdirSync,
+} = require('../lib/fs.js')
 const { resolve, dirname } = require('path')
 
 const create = (path, depth = 0) => {
   mkdirSync(path)
   for (let i = START; i <= END; i++) {
     const c = String.fromCharCode(i)
-    if (depth < DEPTH && (i - START >= depth)) {
+    if (depth < DEPTH && i - START >= depth) {
       create(resolve(path, c), depth + 1)
     } else {
       writeFileSync(resolve(path, c), c)
@@ -33,10 +38,12 @@ const cases = {
   manual: require('../').manual,
 }
 
-const base = t.testdir(Object.keys(cases).reduce((o, c) => {
-  o[c] = { sync: {}, async: {} }
-  return o
-}, {}))
+const base = t.testdir(
+  Object.keys(cases).reduce((o, c) => {
+    o[c] = { sync: {}, async: {} }
+    return o
+  }, {})
+)
 
 const createAllFixtures = t => {
   for (const name of Object.keys(cases)) {

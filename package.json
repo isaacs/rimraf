@@ -2,7 +2,13 @@
   "name": "rimraf",
   "version": "4.0.0-0",
   "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js"
+  },
   "bin": "lib/bin.js",
+  "files": [
+    "lib"
+  ],
   "description": "A deep deletion module for node (like `rm -rf`)",
   "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
   "license": "ISC",
@@ -13,19 +19,24 @@
     "prepublishOnly": "git push origin --follow-tags",
     "test": "tap",
     "snap": "tap",
-    "npmclilint": "npmcli-lint",
-    "lint": "npm run npmclilint -- libtap-settings.js map.js lib/**/*.*js test/**/*.*js",
-    "lintfix": "npm run lint -- --fix",
-    "posttest": "npm run lint --",
-    "postsnap": "npm run lintfix --",
+    "format": "prettier --write . --loglevel warn",
     "benchmark": "node benchmark/index.js"
   },
-  "files": [
-    "lib"
-  ],
+  "prettier": {
+    "semi": false,
+    "printWidth": 80,
+    "tabWidth": 2,
+    "useTabs": false,
+    "singleQuote": true,
+    "jsxSingleQuote": false,
+    "bracketSameLine": true,
+    "arrowParens": "avoid",
+    "endOfLine": "lf"
+  },
   "devDependencies": {
-    "@npmcli/lint": "^1.0.0",
+    "eslint-config-prettier": "^8.6.0",
     "mkdirp": "1",
+    "prettier": "^2.8.2",
     "tap": "^16.3.3"
   },
   "tap": {
@@ -34,8 +45,5 @@
   },
   "funding": {
     "url": "https://github.com/sponsors/isaacs"
-  },
-  "exports": {
-    ".": "./lib/index.js"
   }
 }

@@ -8,10 +8,7 @@
 // }
 
 const t = require('tap')
-const {
-  rimrafPosix,
-  rimrafPosixSync,
-} = require('../lib/rimraf-posix.js')
+const { rimrafPosix, rimrafPosixSync } = require('../lib/rimraf-posix.js')
 
 const fs = require('../lib/fs.js')
 
@@ -43,8 +40,10 @@ t.test('actually delete some stuff', t => {
     const path = t.testdir(fixture)
     rimrafPosixSync(path, {})
     t.throws(() => statSync(path), { code: 'ENOENT' }, 'deleted')
-    t.doesNotThrow(() => rimrafPosixSync(path, {}),
-      'deleting a second time is OK')
+    t.doesNotThrow(
+      () => rimrafPosixSync(path, {}),
+      'deleting a second time is OK'
+    )
     t.end()
   })
   t.test('async', async t => {
@@ -57,10 +56,7 @@ t.test('actually delete some stuff', t => {
 })
 
 t.test('throw unlink errors', async t => {
-  const {
-    rimrafPosix,
-    rimrafPosixSync,
-  } = t.mock('../lib/rimraf-posix.js', {
+  const { rimrafPosix, rimrafPosixSync } = t.mock('../lib/rimraf-posix.js', {
     '../lib/fs.js': {
       ...fs,
       unlinkSync: path => {
@@ -80,10 +76,7 @@ t.test('throw unlink errors', async t => {
 })
 
 t.test('throw rmdir errors', async t => {
-  const {
-    rimrafPosix,
-    rimrafPosixSync,
-  } = t.mock('../lib/rimraf-posix.js', {
+  const { rimrafPosix, rimrafPosixSync } = t.mock('../lib/rimraf-posix.js', {
     '../lib/fs.js': {
       ...fs,
       rmdirSync: path => {
@@ -103,10 +96,7 @@ t.test('throw rmdir errors', async t => {
 })
 
 t.test('throw unexpected readdir errors', async t => {
-  const {
-    rimrafPosix,
-    rimrafPosixSync,
-  } = t.mock('../lib/rimraf-posix.js', {
+  const { rimrafPosix, rimrafPosixSync } = t.mock('../lib/rimraf-posix.js', {
     '../lib/fs.js': {
       ...fs,
       readdirSync: path => {
@@ -126,10 +116,7 @@ t.test('throw unexpected readdir errors', async t => {
 })
 
 t.test('ignore ENOENTs from unlink/rmdir', async t => {
-  const {
-    rimrafPosix,
-    rimrafPosixSync,
-  } = t.mock('../lib/rimraf-posix.js', {
+  const { rimrafPosix, rimrafPosixSync } = t.mock('../lib/rimraf-posix.js', {
     '../lib/fs.js': {
       ...fs,
       // simulate a case where two rimrafs are happening in parallel,
@@ -177,7 +164,7 @@ t.test('rimraffing root, do not actually rmdir root', async t => {
   const { rimrafPosix, rimrafPosixSync } = t.mock('../lib/rimraf-posix.js', {
     path: {
       ...require('path'),
-      parse: (path) => {
+      parse: path => {
         const p = parse(path)
         if (path === ROOT) {
           p.root = path

@@ -1,7 +1,10 @@
 const t = require('tap')
 
-t.same(require('../package.json').exports, { '.': './lib/index.js' },
-  'nothing else exported except main')
+t.same(
+  require('../package.json').exports,
+  { '.': './lib/index.js' },
+  'nothing else exported except main'
+)
 
 t.test('mocky unit tests to select the correct function', t => {
   // don't mock rimrafManual, so we can test the platform switch
@@ -54,12 +57,12 @@ t.test('mocky unit tests to select the correct function', t => {
   process.env.__TESTING_RIMRAF_PLATFORM__ = 'posix'
   const rimraf = t.mock('../', mocks)
 
-  t.afterEach(() => CALLS.length = 0)
+  t.afterEach(() => (CALLS.length = 0))
   for (const useNative of [true, false]) {
     t.test(`main function, useNative=${useNative}`, t => {
       USE_NATIVE = useNative
-      rimraf('path', {a: 1})
-      rimraf.sync('path', {a: 2})
+      rimraf('path', { a: 1 })
+      rimraf.sync('path', { a: 2 })
       t.equal(rimraf.rimraf, rimraf)
       t.equal(rimraf.rimrafSync, rimraf.sync)
       t.matchSnapshot(CALLS)
@@ -68,32 +71,32 @@ t.test('mocky unit tests to select the correct function', t => {
   }
 
   t.test('manual', t => {
-    rimraf.manual('path', {a: 3})
-    rimraf.manual.sync('path', {a: 4})
+    rimraf.manual('path', { a: 3 })
+    rimraf.manual.sync('path', { a: 4 })
     t.equal(rimraf.manualSync, rimraf.manual.sync)
     t.matchSnapshot(CALLS)
     t.end()
   })
 
   t.test('native', t => {
-    rimraf.native('path', {a: 5})
-    rimraf.native.sync('path', {a: 6})
+    rimraf.native('path', { a: 5 })
+    rimraf.native.sync('path', { a: 6 })
     t.equal(rimraf.nativeSync, rimraf.native.sync)
     t.matchSnapshot(CALLS)
     t.end()
   })
 
   t.test('posix', t => {
-    rimraf.posix('path', {a: 7})
-    rimraf.posix.sync('path', {a: 8})
+    rimraf.posix('path', { a: 7 })
+    rimraf.posix.sync('path', { a: 8 })
     t.equal(rimraf.posixSync, rimraf.posix.sync)
     t.matchSnapshot(CALLS)
     t.end()
   })
 
   t.test('windows', t => {
-    rimraf.windows('path', {a: 9})
-    rimraf.windows.sync('path', {a: 10})
+    rimraf.windows('path', { a: 9 })
+    rimraf.windows.sync('path', { a: 10 })
     t.equal(rimraf.windowsSync, rimraf.windows.sync)
     t.matchSnapshot(CALLS)
     t.end()
@@ -144,7 +147,7 @@ t.test('accept array of paths as first arg', async t => {
   const { resolve } = require('path')
   const ASYNC_CALLS = []
   const SYNC_CALLS = []
-  const {rimraf, rimrafSync} = t.mock('../', {
+  const { rimraf, rimrafSync } = t.mock('../', {
     '../lib/use-native.js': {
       useNative: () => true,
       useNativeSync: () => true,
@@ -160,9 +163,9 @@ t.test('accept array of paths as first arg', async t => {
     [resolve('a'), {}],
     [resolve('b'), {}],
     [resolve('c'), {}],
-    [resolve('i'), {x: 'ya'}],
-    [resolve('j'), {x: 'ya'}],
-    [resolve('k'), {x: 'ya'}],
+    [resolve('i'), { x: 'ya' }],
+    [resolve('j'), { x: 'ya' }],
+    [resolve('k'), { x: 'ya' }],
   ])
 
   t.equal(rimrafSync(['x', 'y', 'z']), undefined)
@@ -171,8 +174,8 @@ t.test('accept array of paths as first arg', async t => {
     [resolve('x'), {}],
     [resolve('y'), {}],
     [resolve('z'), {}],
-    [resolve('m'), {cat: 'chai'}],
-    [resolve('n'), {cat: 'chai'}],
-    [resolve('o'), {cat: 'chai'}],
+    [resolve('m'), { cat: 'chai' }],
+    [resolve('n'), { cat: 'chai' }],
+    [resolve('o'), { cat: 'chai' }],
   ])
 })

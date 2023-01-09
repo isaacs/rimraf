@@ -6,14 +6,18 @@ const t = require('tap')
 // and when the cb returns data, the promisified version resolves to it.
 const fs = require('../lib/fs.js')
 const realFS = require('fs')
-const mockFSMethodPass = method => (...args) => {
-  const cb = args.pop()
-  process.nextTick(() => cb(null, method, 1, 2, 3))
-}
-const mockFSMethodFail = method => (...args) => {
-  const cb = args.pop()
-  process.nextTick(() => cb(new Error('oops'), method, 1, 2, 3))
-}
+const mockFSMethodPass =
+  method =>
+  (...args) => {
+    const cb = args.pop()
+    process.nextTick(() => cb(null, method, 1, 2, 3))
+  }
+const mockFSMethodFail =
+  method =>
+  (...args) => {
+    const cb = args.pop()
+    process.nextTick(() => cb(new Error('oops'), method, 1, 2, 3))
+  }
 
 const { useNative } = require('../lib/use-native.js')
 t.type(fs.promises, Object)
