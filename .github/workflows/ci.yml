@@ -6,7 +6,7 @@ jobs:
   build:
     strategy:
       matrix:
-        node-version: [10.0.x, 10.x, 12.0.x, 12.x, 14.0.x, 14.x, 16.x]
+        node-version: [14.0.x, 14.x, 16.0.x, 16.x, 18.0.x, 18.x, 19.x]
         platform:
         - os: ubuntu-latest
           shell: bash
@@ -31,9 +31,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-
-      - name: Use latest npm
-        run: npm install -g npm@latest
 
       - name: Install dependencies
         run: npm install
