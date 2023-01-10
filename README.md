@@ -37,9 +37,11 @@ Options:
 - `backoff`: Windows only. Rate of exponential backoff for async
   removal in case of `EBUSY`, `EMFILE`, and `ENFILE` errors.
   Should be a number greater than 1. Default `1.2`
-- `maxBackoff`: Windows only. Maximum backoff time in ms to
+- `maxBackoff`: Windows only. Maximum total backoff time in ms to
   attempt asynchronous retries in case of `EBUSY`, `EMFILE`, and
-  `ENFILE` errors. Default `100`
+  `ENFILE` errors. Default `200`. With the default `1.2` backoff
+  rate, this results in 14 retries, with the final retry being
+  delayed 33ms.
 
 Any other options are provided to the native Node.js `fs.rm` implementation
 when that is used.
