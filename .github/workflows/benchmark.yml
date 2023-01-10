@@ -1,0 +1,39 @@
+name: 'benchmarks'
+
+on: workflow_dispatch
+
+jobs:
+  benchmark:
+    strategy:
+      matrix:
+        node-version: [14.0.x, 14.x, 16.0.x, 16.x, 18.0.x, 18.x, 19.x]
+        platform:
+          - os: ubuntu-latest
+          - os: macos-latest
+          - os: windows-latest
+
+    runs-on: ${{ matrix.platform.os }}
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v1.1.0
+
+      - name: Use Nodejs ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: benchmark
+        run: node benchmark/index.js
+        env:
+          - RIMRAF_TEST_START_CHAR: a
+          - RIMRAF_TEST_END_CHAR: j
+          - RIMRAF_TEST_DEPTH: 7
+          - RIMRAF_TEST_ITERATIONS: 7
