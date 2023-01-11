@@ -45,5 +45,8 @@
   },
   "funding": {
     "url": "https://github.com/sponsors/isaacs"
+  },
+  "engines": {
+    "node": ">=14"
   }
 }
