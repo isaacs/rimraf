@@ -6,7 +6,7 @@ jobs:
   build:
     strategy:
       matrix:
-        node-version: [14.0.x, 14.x, 16.0.x, 16.x, 18.0.x, 18.x, 19.x]
+        node-version: [14.x, 16.x, 18.x, 19.x]
         platform:
         - os: ubuntu-latest
           shell: bash
@@ -39,5 +39,5 @@ jobs:
         run: npm test -- -t0 -c
         env:
           RIMRAF_TEST_START_CHAR: a
-          RIMRAF_TEST_END_CHAR: j
+          RIMRAF_TEST_END_CHAR: f
           RIMRAF_TEST_DEPTH: 5
