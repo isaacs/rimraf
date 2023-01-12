@@ -16,9 +16,24 @@ Install with `npm install rimraf`, or just drop rimraf.js somewhere.
 
 ## API
 
+Hybrid module, load either with `import` or `require()`.
+
+```js
+// default export is the main rimraf function
+import rimraf from 'rimraf'
+// or
+const rimraf = require('rimraf').default
+
+// other strategies exported as well
+import { rimraf, rimrafSync, native, nativeSync } from 'rimraf'
+// or
+const { rimraf, rimrafSync, native, nativeSync } = require('rimraf')
+```
+
 ### `rimraf(f, [opts]) -> Promise`
 
-This first parameter is a path. The second argument is an options object.
+This first parameter is a path or array of paths. The second
+argument is an options object.
 
 Options:
 
@@ -31,9 +46,10 @@ Options:
   `os.tmpdir()` when that is on the same drive letter as the path
   being deleted, or `${drive}:\temp` if present, or `${drive}:\`
   if not.
-- `retries`: Windows only. Maximum number of synchronous retry
-  attempts in case of `EBUSY`, `EMFILE`, and `ENFILE` errors.
-  Default `10`
+- `maxRetries`: Windows and Native only. Maximum number of
+  retry attempts in case of `EBUSY`, `EMFILE`, and `ENFILE`
+  errors. Default `10` for Windows implementation, `0` for Native
+  implementation.
 - `backoff`: Windows only. Rate of exponential backoff for async
   removal in case of `EBUSY`, `EMFILE`, and `ENFILE` errors.
   Should be a number greater than 1. Default `1.2`
@@ -42,6 +58,8 @@ Options:
   `ENFILE` errors. Default `200`. With the default `1.2` backoff
   rate, this results in 14 retries, with the final retry being
   delayed 33ms.
+- `retryDelay`: Native only. Time to wait between retries, using
+  linear backoff. Default `100`.
 
 Any other options are provided to the native Node.js `fs.rm` implementation
 when that is used.
@@ -123,7 +141,7 @@ Deletes all files and folders at "path", recursively.
 Options:
   --                  Treat all subsequent arguments as paths
   -h --help           Display this usage info
-  --preserve-root     Do not remove '/' (default)
+  --preserve-root     Do not remove '/' recursively (default)
   --no-preserve-root  Do not treat '/' specially
 
   --impl=<type>       Specify the implementationt to use.
@@ -132,11 +150,13 @@ Options:
                       manual: the platform-specific JS implementation
                       posix: the Posix JS implementation
                       windows: the Windows JS implementation
+                      move-remove: a slower Windows JS fallback implementation
 
 Implementation-specific options:
-  --tmp=<path>        Folder to hold temp files for 'windows' implementation
-  --max-retries=<n>   maxRetries for the 'native' implementation
-  --retry-delay=<n>   retryDelay for the 'native' implementation
+  --tmp=<path>        Folder to hold temp files for 'move-remove' implementation
+  --max-retries=<n>   maxRetries for the 'native' and 'windows' implementations
+  --retry-delay=<n>   retryDelay for the 'native' implementation, default 100
+  --backoff=<n>       Exponential backoff factor for retries (default: 1.2)
 ```
 
 ## mkdirp

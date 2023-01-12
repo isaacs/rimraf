@@ -8,15 +8,13 @@
 // or resolve(path, '\\temp') if it exists, or the root of the drive if not.
 // On Posix (not that you'd be likely to use the windows algorithm there),
 // it uses os.tmpdir() always.
-const platform = require('./platform.js')
-const {
-  statSync,
-  promises: { stat },
-} = require('./fs.js')
-const { tmpdir } = require('os')
-const { parse, resolve } = require('path')
+import { tmpdir } from 'os'
+import { parse, resolve } from 'path'
+import { promises, statSync } from './fs'
+import platform from './platform'
+const { stat } = promises
 
-const isDirSync = path => {
+const isDirSync = (path: string) => {
   try {
     return statSync(path).isDirectory()
   } catch (er) {
@@ -24,13 +22,13 @@ const isDirSync = path => {
   }
 }
 
-const isDir = path =>
+const isDir = (path: string) =>
   stat(path).then(
     st => st.isDirectory(),
     () => false
   )
 
-const win32DefaultTmp = async path => {
+const win32DefaultTmp = async (path: string) => {
   const { root } = parse(path)
   const tmp = tmpdir()
   const { root: tmpRoot } = parse(tmp)
@@ -46,7 +44,7 @@ const win32DefaultTmp = async path => {
   return root
 }
 
-const win32DefaultTmpSync = path => {
+const win32DefaultTmpSync = (path: string) => {
   const { root } = parse(path)
   const tmp = tmpdir()
   const { root: tmpRoot } = parse(tmp)
@@ -65,13 +63,7 @@ const win32DefaultTmpSync = path => {
 const posixDefaultTmp = async () => tmpdir()
 const posixDefaultTmpSync = () => tmpdir()
 
-module.exports =
-  platform === 'win32'
-    ? {
-        defaultTmp: win32DefaultTmp,
-        defaultTmpSync: win32DefaultTmpSync,
-      }
-    : {
-        defaultTmp: posixDefaultTmp,
-        defaultTmpSync: posixDefaultTmpSync,
-      }
+export const defaultTmp =
+  platform === 'win32' ? win32DefaultTmp : posixDefaultTmp
+export const defaultTmpSync =
+  platform === 'win32' ? win32DefaultTmpSync : posixDefaultTmpSync

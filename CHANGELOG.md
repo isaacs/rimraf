@@ -1,3 +1,14 @@
+# v4.0
+
+- Remove `glob` dependency entirely. This library now only
+  accepts actual file and folder names to delete.
+- Accept array of paths or single path.
+- Windows performance and reliability improved.
+- All strategies separated into explicitly exported methods.
+- Drop support for Node.js below version 14
+- rewrite in TypeScript
+- ship CJS/ESM hybrid module
+
 # v3.0
 
 - Add `--preserve-root` option to executable (default true)

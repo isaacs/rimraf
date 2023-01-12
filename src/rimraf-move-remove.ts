@@ -11,26 +11,29 @@
 //
 // However, it is HELLA SLOW, like 2-10x slower than a naive recursive rm.
 
-const { resolve, basename, parse } = require('path')
-const { defaultTmp, defaultTmpSync } = require('./default-tmp.js')
+import { basename, parse, resolve } from 'path'
+import { defaultTmp, defaultTmpSync } from './default-tmp'
 
-const { ignoreENOENT, ignoreENOENTSync } = require('./ignore-enoent.js')
+import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent'
 
-const {
-  renameSync,
-  unlinkSync,
-  rmdirSync,
+import {
   chmodSync,
-  promises: { rename, unlink, rmdir, chmod },
-} = require('./fs.js')
+  FsError,
+  promises as fsPromises,
+  renameSync,
+  rmdirSync,
+  unlinkSync,
+} from './fs'
+const { rename, unlink, rmdir, chmod } = fsPromises
 
-const { readdirOrError, readdirOrErrorSync } = require('./readdir-or-error.js')
+import { RimrafOptions } from '.'
+import { readdirOrError, readdirOrErrorSync } from './readdir-or-error'
 
 // crypto.randomBytes is much slower, and Math.random() is enough here
-const uniqueFilename = path => `.${basename(path)}.${Math.random()}`
+const uniqueFilename = (path: string) => `.${basename(path)}.${Math.random()}`
 
-const unlinkFixEPERM = async path =>
-  unlink(path).catch(er => {
+const unlinkFixEPERM = async (path: string) =>
+  unlink(path).catch((er: Error & { code?: string }) => {
     if (er.code === 'EPERM') {
       return chmod(path, 0o666).then(
         () => unlink(path),
@@ -47,27 +50,30 @@ const unlinkFixEPERM = async path =>
     throw er
   })
 
-const unlinkFixEPERMSync = path => {
+const unlinkFixEPERMSync = (path: string) => {
   try {
     unlinkSync(path)
   } catch (er) {
-    if (er.code === 'EPERM') {
+    if ((er as FsError)?.code === 'EPERM') {
       try {
         return chmodSync(path, 0o666)
       } catch (er2) {
-        if (er2.code === 'ENOENT') {
+        if ((er2 as FsError)?.code === 'ENOENT') {
           return
         }
         throw er
       }
-    } else if (er.code === 'ENOENT') {
+    } else if ((er as FsError)?.code === 'ENOENT') {
       return
     }
     throw er
   }
 }
 
-const rimrafMoveRemove = async (path, opt) => {
+export const rimrafMoveRemove = async (
+  path: string,
+  opt: RimrafOptions
+): Promise<void> => {
   if (!opt.tmp) {
     return rimrafMoveRemove(path, { ...opt, tmp: await defaultTmp(path) })
   }
@@ -103,16 +109,24 @@ const rimrafMoveRemove = async (path, opt) => {
   return await ignoreENOENT(tmpUnlink(path, opt.tmp, rmdir))
 }
 
-const tmpUnlink = async (path, tmp, rm) => {
+const tmpUnlink = async (
+  path: string,
+  tmp: string,
+  rm: (p: string) => Promise<any>
+) => {
   const tmpFile = resolve(tmp, uniqueFilename(path))
   await rename(path, tmpFile)
   return await rm(tmpFile)
 }
 
-const rimrafMoveRemoveSync = (path, opt) => {
+export const rimrafMoveRemoveSync = (
+  path: string,
+  opt: RimrafOptions
+): void => {
   if (!opt.tmp) {
     return rimrafMoveRemoveSync(path, { ...opt, tmp: defaultTmpSync(path) })
   }
+  const tmp: string = opt.tmp
 
   if (path === opt.tmp && parse(path).root !== path) {
     throw new Error('cannot delete temp directory used for deletion')
@@ -128,9 +142,7 @@ const rimrafMoveRemoveSync = (path, opt) => {
       throw entries
     }
 
-    return ignoreENOENTSync(() =>
-      tmpUnlinkSync(path, opt.tmp, unlinkFixEPERMSync)
-    )
+    return ignoreENOENTSync(() => tmpUnlinkSync(path, tmp, unlinkFixEPERMSync))
   }
 
   for (const entry of entries) {
@@ -141,16 +153,15 @@ const rimrafMoveRemoveSync = (path, opt) => {
     return
   }
 
-  return ignoreENOENTSync(() => tmpUnlinkSync(path, opt.tmp, rmdirSync))
+  return ignoreENOENTSync(() => tmpUnlinkSync(path, tmp, rmdirSync))
 }
 
-const tmpUnlinkSync = (path, tmp, rmSync) => {
+const tmpUnlinkSync = (
+  path: string,
+  tmp: string,
+  rmSync: (p: string) => void
+) => {
   const tmpFile = resolve(tmp, uniqueFilename(path))
   renameSync(path, tmpFile)
   return rmSync(tmpFile)
-}
-
-module.exports = {
-  rimrafMoveRemove,
-  rimrafMoveRemoveSync,
 }

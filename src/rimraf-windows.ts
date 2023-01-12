@@ -8,48 +8,43 @@
 //
 // Note: "move then remove" is 2-10 times slower, and just as unreliable.
 
-const { resolve, parse } = require('path')
-
-const { ignoreENOENT, ignoreENOENTSync } = require('./ignore-enoent.js')
-
-const {
-  unlinkSync,
-  rmdirSync,
-  promises: { unlink, rmdir },
-} = require('./fs.js')
-
-const { fixEPERM, fixEPERMSync } = require('./fix-eperm.js')
-
-const { readdirOrError, readdirOrErrorSync } = require('./readdir-or-error.js')
-
-const { retryBusy, retryBusySync } = require('./retry-busy.js')
-
-const {
-  rimrafMoveRemove,
-  rimrafMoveRemoveSync,
-} = require('./rimraf-move-remove.js')
+import { parse, resolve } from 'path'
+import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent'
+import { fixEPERM, fixEPERMSync } from './fix-eperm'
+import { readdirOrError, readdirOrErrorSync } from './readdir-or-error'
+import { retryBusy, retryBusySync } from './retry-busy'
+import { rimrafMoveRemove, rimrafMoveRemoveSync } from './rimraf-move-remove'
+import { FsError, promises, rmdirSync, unlinkSync } from './fs'
+import { RimrafOptions } from '.'
+const { unlink, rmdir } = promises
 
 const rimrafWindowsFile = retryBusy(fixEPERM(unlink))
 const rimrafWindowsFileSync = retryBusySync(fixEPERMSync(unlinkSync))
 const rimrafWindowsDir = retryBusy(fixEPERM(rmdir))
 const rimrafWindowsDirSync = retryBusySync(fixEPERMSync(rmdirSync))
 
-const rimrafWindowsDirMoveRemoveFallback = async (path, opt) => {
+const rimrafWindowsDirMoveRemoveFallback = async (
+  path: string,
+  opt: RimrafOptions
+) => {
   try {
     await rimrafWindowsDir(path, opt)
   } catch (er) {
-    if (er.code === 'ENOTEMPTY') {
+    if ((er as FsError)?.code === 'ENOTEMPTY') {
       return await rimrafMoveRemove(path, opt)
     }
     throw er
   }
 }
 
-const rimrafWindowsDirMoveRemoveFallbackSync = (path, opt) => {
+const rimrafWindowsDirMoveRemoveFallbackSync = (
+  path: string,
+  opt: RimrafOptions
+) => {
   try {
     rimrafWindowsDirSync(path, opt)
   } catch (er) {
-    if (er.code === 'ENOTEMPTY') {
+    if ((er as FsError)?.code === 'ENOTEMPTY') {
       return rimrafMoveRemoveSync(path, opt)
     }
     throw er
@@ -61,7 +56,11 @@ const CHILD = Symbol('child')
 const FINISH = Symbol('finish')
 const states = new Set([START, CHILD, FINISH])
 
-const rimrafWindows = async (path, opt, state = START) => {
+export const rimrafWindows = async (
+  path: string,
+  opt: RimrafOptions,
+  state = START
+): Promise<void> => {
   if (!states.has(state)) {
     throw new TypeError('invalid third argument passed to rimraf')
   }
@@ -94,7 +93,11 @@ const rimrafWindows = async (path, opt, state = START) => {
   }
 }
 
-const rimrafWindowsSync = (path, opt, state = START) => {
+export const rimrafWindowsSync = (
+  path: string,
+  opt: RimrafOptions,
+  state = START
+): void => {
   if (!states.has(state)) {
     throw new TypeError('invalid third argument passed to rimraf')
   }
@@ -126,9 +129,4 @@ const rimrafWindowsSync = (path, opt, state = START) => {
       rimrafWindowsDirMoveRemoveFallbackSync(path, opt)
     })
   }
-}
-
-module.exports = {
-  rimrafWindows,
-  rimrafWindowsSync,
 }

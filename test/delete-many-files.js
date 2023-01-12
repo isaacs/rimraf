@@ -15,10 +15,10 @@ const DEPTH = +process.env.RIMRAF_TEST_DEPTH || 4
 
 const {
   statSync,
-  writeFileSync,
   mkdirSync,
   readdirSync,
-} = require('../lib/fs.js')
+} = require('../dist/cjs/src/fs.js')
+const { writeFileSync } = require('fs')
 const { resolve, dirname } = require('path')
 
 const create = (path, depth = 0) => {

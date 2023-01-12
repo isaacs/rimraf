@@ -1,13 +1,11 @@
 #!/usr/bin/env node
-
-const rimraf = require('./index.js')
-
-const { version } = require('../package.json')
+import { version } from '../package.json'
+import rimraf, { RimrafOptions } from './'
 
 const runHelpForUsage = () =>
   console.error('run `rimraf --help` for usage information')
 
-const help = `rimraf version ${version}
+export const help = `rimraf version ${version}
 
 Usage: rimraf <path> [<path> ...]
 Deletes all files and folders at "path", recursively.
@@ -15,7 +13,7 @@ Deletes all files and folders at "path", recursively.
 Options:
   --                  Treat all subsequent arguments as paths
   -h --help           Display this usage info
-  --preserve-root     Do not remove '/' (default)
+  --preserve-root     Do not remove '/' recursively (default)
   --no-preserve-root  Do not treat '/' specially
 
   --impl=<type>       Specify the implementationt to use.
@@ -24,24 +22,27 @@ Options:
                       manual: the platform-specific JS implementation
                       posix: the Posix JS implementation
                       windows: the Windows JS implementation
+                      move-remove: a slower Windows JS fallback implementation
 
 Implementation-specific options:
-  --tmp=<path>        Folder to hold temp files for 'windows' implementation
-  --max-retries=<n>   maxRetries for the 'native' implementation
-  --retry-delay=<n>   retryDelay for the 'native' implementation
+  --tmp=<path>        Folder to hold temp files for 'move-remove' implementation
+  --max-retries=<n>   maxRetries for the 'native' and 'windows' implementations
+  --retry-delay=<n>   retryDelay for the 'native' implementation, default 100
+  --backoff=<n>       Exponential backoff factor for retries (default: 1.2)
 `
 
-const { resolve, parse } = require('path')
+import { parse, resolve } from 'path'
 
-const main = async (...args) => {
+const main = async (...args: string[]) => {
   if (process.env.__RIMRAF_TESTING_BIN_FAIL__ === '1') {
     throw new Error('simulated rimraf failure')
   }
 
-  const opt = {}
-  const paths = []
+  const opt: RimrafOptions = {}
+  const paths: string[] = []
   let dashdash = false
-  let impl = rimraf
+  let impl: (path: string | string[], opt?: RimrafOptions) => Promise<void> =
+    rimraf
 
   for (const arg of args) {
     if (dashdash) {
@@ -61,19 +62,23 @@ const main = async (...args) => {
       opt.preserveRoot = false
       continue
     } else if (/^--tmp=/.test(arg)) {
-      const val = arg.substr('--tmp='.length)
+      const val = arg.substring('--tmp='.length)
       opt.tmp = val
       continue
     } else if (/^--max-retries=/.test(arg)) {
-      const val = +arg.substr('--max-retries='.length)
+      const val = +arg.substring('--max-retries='.length)
       opt.maxRetries = val
       continue
     } else if (/^--retry-delay=/.test(arg)) {
-      const val = +arg.substr('--retry-delay='.length)
+      const val = +arg.substring('--retry-delay='.length)
       opt.retryDelay = val
       continue
+    } else if (/^--backoff=/.test(arg)) {
+      const val = +arg.substring('--backoff='.length)
+      opt.backoff = val
+      continue
     } else if (/^--impl=/.test(arg)) {
-      const val = arg.substr('--impl='.length)
+      const val = arg.substring('--impl='.length)
       switch (val) {
         case 'rimraf':
           impl = rimraf
@@ -83,6 +88,9 @@ const main = async (...args) => {
         case 'posix':
         case 'windows':
           impl = rimraf[val]
+          continue
+        case 'move-remove':
+          impl = rimraf.moveRemove
           continue
         default:
           console.error(`unknown implementation: ${val}`)
@@ -117,9 +125,15 @@ const main = async (...args) => {
   await impl(paths, opt)
   return 0
 }
+main.help = help
 
-module.exports = Object.assign(main, { help })
-if (module === require.main) {
+export default main
+
+if (
+  typeof require === 'function' &&
+  typeof module === 'object' &&
+  require.main === module
+) {
   const args = process.argv.slice(2)
   main(...args).then(
     code => process.exit(code),

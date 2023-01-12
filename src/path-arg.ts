@@ -1,7 +1,9 @@
-const platform = require('./platform.js')
-const { resolve, parse } = require('path')
-const { inspect } = require('util')
-const pathArg = (path, opt = {}) => {
+import platform from './platform'
+import { resolve, parse } from 'path'
+import { inspect } from 'util'
+import { RimrafOptions } from './index'
+
+const pathArg = (path: string, opt: RimrafOptions = {}) => {
   const type = typeof path
   if (type !== 'string') {
     const ctor = path && type === 'object' && path.constructor
@@ -42,7 +44,7 @@ const pathArg = (path, opt = {}) => {
   if (platform === 'win32') {
     const badWinChars = /[*|"<>?:]/
     const { root } = parse(path)
-    if (badWinChars.test(path.substr(root.length))) {
+    if (badWinChars.test(path.substring(root.length))) {
       throw Object.assign(new Error('Illegal characters in path.'), {
         path,
         code: 'EINVAL',
@@ -52,4 +54,5 @@ const pathArg = (path, opt = {}) => {
 
   return path
 }
-module.exports = pathArg
+
+export default pathArg

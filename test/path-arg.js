@@ -12,9 +12,9 @@ if (!process.env.__TESTING_RIMRAF_PLATFORM__) {
 
 const platform = process.env.__TESTING_RIMRAF_PLATFORM__ || process.platform
 const path = require('path')[platform] || require('path')
-const pathArg = t.mock('../lib/path-arg.js', {
+const pathArg = t.mock('../dist/cjs/src/path-arg.js', {
   path,
-})
+}).default
 const { resolve } = path
 
 t.equal(pathArg('a/b/c'), resolve('a/b/c'))

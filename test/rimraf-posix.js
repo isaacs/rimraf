@@ -8,9 +8,9 @@
 // }
 
 const t = require('tap')
-const { rimrafPosix, rimrafPosixSync } = require('../lib/rimraf-posix.js')
+const { rimrafPosix, rimrafPosixSync } = require('../dist/cjs/src/rimraf-posix.js')
 
-const fs = require('../lib/fs.js')
+const fs = require('../dist/cjs/src/fs.js')
 
 const fixture = {
   a: 'a',
@@ -56,8 +56,8 @@ t.test('actually delete some stuff', t => {
 })
 
 t.test('throw unlink errors', async t => {
-  const { rimrafPosix, rimrafPosixSync } = t.mock('../lib/rimraf-posix.js', {
-    '../lib/fs.js': {
+  const { rimrafPosix, rimrafPosixSync } = t.mock('../dist/cjs/src/rimraf-posix.js', {
+    '../dist/cjs/src/fs.js': {
       ...fs,
       unlinkSync: path => {
         throw Object.assign(new Error('cannot unlink'), { code: 'FOO' })
@@ -76,8 +76,8 @@ t.test('throw unlink errors', async t => {
 })
 
 t.test('throw rmdir errors', async t => {
-  const { rimrafPosix, rimrafPosixSync } = t.mock('../lib/rimraf-posix.js', {
-    '../lib/fs.js': {
+  const { rimrafPosix, rimrafPosixSync } = t.mock('../dist/cjs/src/rimraf-posix.js', {
+    '../dist/cjs/src/fs.js': {
       ...fs,
       rmdirSync: path => {
         throw Object.assign(new Error('cannot rmdir'), { code: 'FOO' })
@@ -96,8 +96,8 @@ t.test('throw rmdir errors', async t => {
 })
 
 t.test('throw unexpected readdir errors', async t => {
-  const { rimrafPosix, rimrafPosixSync } = t.mock('../lib/rimraf-posix.js', {
-    '../lib/fs.js': {
+  const { rimrafPosix, rimrafPosixSync } = t.mock('../dist/cjs/src/rimraf-posix.js', {
+    '../dist/cjs/src/fs.js': {
       ...fs,
       readdirSync: path => {
         throw Object.assign(new Error('cannot readdir'), { code: 'FOO' })
@@ -116,8 +116,8 @@ t.test('throw unexpected readdir errors', async t => {
 })
 
 t.test('ignore ENOENTs from unlink/rmdir', async t => {
-  const { rimrafPosix, rimrafPosixSync } = t.mock('../lib/rimraf-posix.js', {
-    '../lib/fs.js': {
+  const { rimrafPosix, rimrafPosixSync } = t.mock('../dist/cjs/src/rimraf-posix.js', {
+    '../dist/cjs/src/fs.js': {
       ...fs,
       // simulate a case where two rimrafs are happening in parallel,
       // so the deletion happens AFTER the readdir, but before ours.
@@ -161,7 +161,7 @@ t.test('ignore ENOENTs from unlink/rmdir', async t => {
 t.test('rimraffing root, do not actually rmdir root', async t => {
   let ROOT = null
   const { parse } = require('path')
-  const { rimrafPosix, rimrafPosixSync } = t.mock('../lib/rimraf-posix.js', {
+  const { rimrafPosix, rimrafPosixSync } = t.mock('../dist/cjs/src/rimraf-posix.js', {
     path: {
       ...require('path'),
       parse: path => {

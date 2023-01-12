@@ -13,14 +13,15 @@ t.test('basic arg parsing stuff', t => {
 
   const CALLS = []
   const rimraf = async (path, opt) => CALLS.push(['rimraf', path, opt])
-  const bin = t.mock('../lib/bin.js', {
-    '../lib/index.js': Object.assign(rimraf, {
+  const bin = t.mock('../dist/cjs/src/bin.js', {
+    '../dist/cjs/src/index.js': Object.assign(rimraf, {
       native: async (path, opt) => CALLS.push(['native', path, opt]),
       manual: async (path, opt) => CALLS.push(['manual', path, opt]),
       posix: async (path, opt) => CALLS.push(['posix', path, opt]),
       windows: async (path, opt) => CALLS.push(['windows', path, opt]),
+      moveRemove: async (path, opt) => CALLS.push(['move-remove', path, opt]),
     }),
-  })
+  }).default
 
   t.afterEach(() => {
     LOGS.length = 0
@@ -92,6 +93,13 @@ t.test('basic arg parsing stuff', t => {
     t.same(CALLS, [['rimraf', ['foo'], { tmp: 'some-path' }]])
   })
 
+  t.test('--tmp=<path>', async t => {
+    t.equal(await bin('--backoff=1.3', 'foo'), 0)
+    t.same(LOGS, [])
+    t.same(ERRS, [])
+    t.same(CALLS, [['rimraf', ['foo'], { backoff: 1.3 }]])
+  })
+
   t.test('--max-retries=n', async t => {
     t.equal(await bin('--max-retries=100', 'foo'), 0)
     t.same(LOGS, [])
@@ -126,7 +134,7 @@ t.test('basic arg parsing stuff', t => {
     t.same(CALLS, [])
   })
 
-  const impls = ['rimraf', 'native', 'manual', 'posix', 'windows']
+  const impls = ['rimraf', 'native', 'manual', 'posix', 'windows', 'move-remove']
   for (const impl of impls) {
     t.test(`--impl=${impl}`, async t => {
       t.equal(await bin('foo', `--impl=${impl}`), 0)
@@ -148,7 +156,7 @@ t.test('actually delete something with it', async t => {
     },
   })
 
-  const bin = require.resolve('../lib/bin.js')
+  const bin = require.resolve('../dist/cjs/src/bin.js')
   const { spawnSync } = require('child_process')
   const res = spawnSync(process.execPath, [bin, path])
   const { statSync } = require('fs')
@@ -165,7 +173,7 @@ t.test('print failure when impl throws', async t => {
     },
   })
 
-  const bin = require.resolve('../lib/bin.js')
+  const bin = require.resolve('../dist/cjs/src/bin.js')
   const { spawnSync } = require('child_process')
   const res = spawnSync(process.execPath, [bin, path], {
     env: {

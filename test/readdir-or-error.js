@@ -2,7 +2,7 @@ const t = require('tap')
 const {
   readdirOrError,
   readdirOrErrorSync,
-} = require('../lib/readdir-or-error.js')
+} = require('../dist/cjs/src/readdir-or-error.js')
 
 const path = t.testdir({
   file: 'file',

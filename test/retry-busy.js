@@ -5,7 +5,7 @@ const {
   RATE,
   MAXRETRIES,
   codes,
-} = require('../lib/retry-busy.js')
+} = require('../dist/cjs/src/retry-busy.js')
 
 const t = require('tap')
 
@@ -72,7 +72,7 @@ t.test('retry and eventually give up', t => {
   t.plan(codes.size)
   const opt = {
     maxBackoff: 2,
-    retries: 2,
+    maxRetries: 2,
   }
 
   for (const code of codes) {

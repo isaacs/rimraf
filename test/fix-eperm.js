@@ -1,8 +1,8 @@
 const t = require('tap')
-const fs = require('../lib/fs.js')
+const fs = require('../dist/cjs/src/fs.js')
 
 t.test('works if it works', async t => {
-  const { fixEPERM, fixEPERMSync } = t.mock('../lib/fix-eperm.js', {})
+  const { fixEPERM, fixEPERMSync } = t.mock('../dist/cjs/src/fix-eperm.js', {})
   const fixed = fixEPERM(() => 1)
   await fixed().then(n => t.equal(n, 1))
   const fixedSync = fixEPERMSync(() => 1)
@@ -10,7 +10,7 @@ t.test('works if it works', async t => {
 })
 
 t.test('throw non-EPERM just throws', async t => {
-  const { fixEPERM, fixEPERMSync } = t.mock('../lib/fix-eperm.js', {})
+  const { fixEPERM, fixEPERMSync } = t.mock('../dist/cjs/src/fix-eperm.js', {})
   const fixed = fixEPERM(() => {
     throw new Error('oops')
   })
@@ -23,7 +23,7 @@ t.test('throw non-EPERM just throws', async t => {
 
 t.test('throw ENOENT returns void', async t => {
   const er = Object.assign(new Error('no ents'), { code: 'ENOENT' })
-  const { fixEPERM, fixEPERMSync } = t.mock('../lib/fix-eperm.js', {})
+  const { fixEPERM, fixEPERMSync } = t.mock('../dist/cjs/src/fix-eperm.js', {})
   const fixed = fixEPERM(() => {
     throw er
   })
@@ -55,8 +55,8 @@ t.test('chmod and try again', async t => {
     t.equal(mode, 0o666)
   }
   const chmod = async (p, mode) => chmodSync(p, mode)
-  const { fixEPERM, fixEPERMSync } = t.mock('../lib/fix-eperm.js', {
-    '../lib/fs.js': {
+  const { fixEPERM, fixEPERMSync } = t.mock('../dist/cjs/src/fix-eperm.js', {
+    '../dist/cjs/src/fs.js': {
       promises: { chmod },
       chmodSync,
     },
@@ -92,8 +92,8 @@ t.test('chmod ENOENT is fine, abort', async t => {
     throw Object.assign(new Error('no ent'), { code: 'ENOENT' })
   }
   const chmod = async (p, mode) => chmodSync(p, mode)
-  const { fixEPERM, fixEPERMSync } = t.mock('../lib/fix-eperm.js', {
-    '../lib/fs.js': {
+  const { fixEPERM, fixEPERMSync } = t.mock('../dist/cjs/src/fix-eperm.js', {
+    '../dist/cjs/src/fs.js': {
       promises: { chmod },
       chmodSync,
     },
@@ -129,8 +129,8 @@ t.test('chmod other than ENOENT is failure', async t => {
     throw Object.assign(new Error('ent bro'), { code: 'OHNO' })
   }
   const chmod = async (p, mode) => chmodSync(p, mode)
-  const { fixEPERM, fixEPERMSync } = t.mock('../lib/fix-eperm.js', {
-    '../lib/fs.js': {
+  const { fixEPERM, fixEPERMSync } = t.mock('../dist/cjs/src/fix-eperm.js', {
+    '../dist/cjs/src/fs.js': {
       promises: { chmod },
       chmodSync,
     },
