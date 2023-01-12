@@ -35,16 +35,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run Tests (no linting)
-        if: matrix.platform.os != 'ubuntu-latest' || matrix.node-version != '16.x'
-        run: npm test --ignore-scripts -- -c -t0
-        env:
-          RIMRAF_TEST_START_CHAR: a
-          RIMRAF_TEST_END_CHAR: j
-          RIMRAF_TEST_DEPTH: 5
-
       - name: Run Tests
-        if: matrix.platform.os == 'ubuntu-latest' && matrix.node-version == '16.x'
         run: npm test -- -t0 -c
         env:
           RIMRAF_TEST_START_CHAR: a
