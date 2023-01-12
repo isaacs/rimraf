@@ -33,7 +33,7 @@ jobs:
       - name: benchmark
         run: node benchmark/index.js
         env:
-          - RIMRAF_TEST_START_CHAR: a
-          - RIMRAF_TEST_END_CHAR: j
-          - RIMRAF_TEST_DEPTH: 7
-          - RIMRAF_TEST_ITERATIONS: 7
+          RIMRAF_TEST_START_CHAR: a
+          RIMRAF_TEST_END_CHAR: j
+          RIMRAF_TEST_DEPTH: 7
+          RIMRAF_TEST_ITERATIONS: 7
