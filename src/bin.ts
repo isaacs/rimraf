@@ -18,7 +18,7 @@ Options:
 
   --impl=<type>       Specify the implementationt to use.
                       rimraf: choose the best option
-                      native: the C++ implementation in Node.js
+                      native: the built-in implementation in Node.js
                       manual: the platform-specific JS implementation
                       posix: the Posix JS implementation
                       windows: the Windows JS implementation

@@ -1,6 +1,6 @@
 The [UNIX command](<http://en.wikipedia.org/wiki/Rm_(Unix)>) `rm -rf` for node.
 
-Install with `npm install rimraf`, or just drop rimraf.js somewhere.
+Install with `npm install rimraf`.
 
 ## Major Changes from v3 to v4
 
@@ -12,8 +12,8 @@ Install with `npm install rimraf`, or just drop rimraf.js somewhere.
 - New implementation on Windows, falling back to "move then
   remove" strategy when exponential backoff for `EBUSY` fails to
   resolve the situation.
-- Simplified implementation on Posix, since the Windows affordances are not
-  necessary there.
+- Simplified implementation on Posix, since the Windows
+  affordances are not necessary there.
 
 ## API
 
@@ -136,6 +136,8 @@ Synchronous form of `rimraf.moveRemove()`
 ### Command Line Interface
 
 ```
+rimraf version 4.0.4
+
 Usage: rimraf <path> [<path> ...]
 Deletes all files and folders at "path", recursively.
 
@@ -147,7 +149,7 @@ Options:
 
   --impl=<type>       Specify the implementationt to use.
                       rimraf: choose the best option
-                      native: the C++ implementation in Node.js
+                      native: the built-in implementation in Node.js
                       manual: the platform-specific JS implementation
                       posix: the Posix JS implementation
                       windows: the Windows JS implementation
