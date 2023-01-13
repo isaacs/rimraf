@@ -24,7 +24,7 @@ export const retryBusy = (fn: (path: string) => Promise<any>) => {
         return await fn(path)
       } catch (er) {
         const fer = er as FsError
-        if (fer?.code && codes.has(fer.code)) {
+        if (fer?.path === path && fer?.code && codes.has(fer.code)) {
           backoff = Math.ceil(backoff * rate)
           total = backoff + total
           if (total < mbo) {
@@ -57,7 +57,12 @@ export const retryBusySync = (fn: (path: string) => any) => {
         return fn(path)
       } catch (er) {
         const fer = er as FsError
-        if (fer?.code && codes.has(fer.code) && retries < max) {
+        if (
+          fer?.path === path &&
+          fer?.code &&
+          codes.has(fer.code) &&
+          retries < max
+        ) {
           retries++
           continue
         }

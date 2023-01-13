@@ -51,7 +51,7 @@ t.test('retry when known error code thrown', t => {
           thrown = true
           t.equal(calls, 0, 'first call')
           calls++
-          throw Object.assign(new Error(code), { code })
+          throw Object.assign(new Error(code), { path: a, code })
         } else {
           t.equal(calls, 1, 'second call')
           calls++
@@ -83,10 +83,10 @@ t.test('retry and eventually give up', t => {
         t.equal(a, arg, 'got first argument')
         t.equal(b, undefined, 'did not get another argument')
         calls++
-        throw Object.assign(new Error(code), { code })
+        throw Object.assign(new Error(code), { path: a, code })
       }
       const rBS = retryBusySync(method)
-      t.throws(() => rBS(arg, opt), { code })
+      t.throws(() => rBS(arg, opt), { path: arg, code })
       t.equal(calls, 3)
       calls = 0
       const rB = retryBusy(method)
@@ -101,7 +101,7 @@ t.test('throw unknown error gives up right away', async t => {
   const method = (a, b) => {
     t.equal(a, arg, 'got first argument')
     t.equal(b, undefined, 'did not get another argument')
-    throw Object.assign(new Error('nope'), { code: 'nope' })
+    throw Object.assign(new Error('nope'), { path: a, code: 'nope' })
   }
   const rBS = retryBusySync(method)
   t.throws(() => rBS(arg, opt), { code: 'nope' })

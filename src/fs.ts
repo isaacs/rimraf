@@ -2,7 +2,10 @@
 
 import fs from 'fs'
 
-export type FsError = Error & { code?: string }
+export type FsError = Error & {
+  code?: string
+  path?: string
+}
 
 // sync ones just take the sync version from node
 export {
