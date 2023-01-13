@@ -1,7 +1,7 @@
-import platform from './platform'
+import platform from './platform.js'
 import { resolve, parse } from 'path'
 import { inspect } from 'util'
-import { RimrafOptions } from './index'
+import { RimrafOptions } from './index.js'
 
 const pathArg = (path: string, opt: RimrafOptions = {}) => {
   const type = typeof path

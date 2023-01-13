@@ -1,4 +1,4 @@
-import { promises, chmodSync, FsError } from './fs'
+import { promises, chmodSync, FsError } from './fs.js'
 const { chmod } = promises
 
 export const fixEPERM =

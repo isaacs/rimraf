@@ -10,8 +10,8 @@
 // it uses os.tmpdir() always.
 import { tmpdir } from 'os'
 import { parse, resolve } from 'path'
-import { promises, statSync } from './fs'
-import platform from './platform'
+import { promises, statSync } from './fs.js'
+import platform from './platform.js'
 const { stat } = promises
 
 const isDirSync = (path: string) => {

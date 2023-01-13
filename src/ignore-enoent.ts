@@ -1,4 +1,4 @@
-import { FsError } from './fs'
+import { FsError } from './fs.js'
 
 export const ignoreENOENT = async (p: Promise<any>) =>
   p.catch(er => {

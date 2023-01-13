@@ -5,15 +5,15 @@
 // calls), because sunos will let root unlink a directory, and some
 // SUPER weird breakage happens as a result.
 
-import { promises, rmdirSync, unlinkSync } from './fs'
+import { promises, rmdirSync, unlinkSync } from './fs.js'
 const { rmdir, unlink } = promises
 
 import { parse, resolve } from 'path'
 
-import { readdirOrError, readdirOrErrorSync } from './readdir-or-error'
+import { readdirOrError, readdirOrErrorSync } from './readdir-or-error.js'
 
 import { RimrafOptions } from '.'
-import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent'
+import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'
 
 export const rimrafPosix = async (path: string, opt: RimrafOptions) => {
   const entries = await readdirOrError(path)

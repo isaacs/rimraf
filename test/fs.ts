@@ -5,7 +5,7 @@ import t from 'tap'
 // and that when the cb returns an error, the promised version fails,
 // and when the cb returns data, the promisified version resolves to it.
 import realFS from 'fs'
-import * as fs from '../src/fs'
+import * as fs from '../dist/cjs/src/fs.js'
 
 const mockFSMethodPass =
   (method: string) =>
@@ -20,7 +20,7 @@ const mockFSMethodFail =
     process.nextTick(() => cb(new Error('oops'), method, 1, 2, 3))
   }
 
-import { useNative } from '../src/use-native'
+import { useNative } from '../dist/cjs/src/use-native.js'
 t.type(fs.promises, Object)
 const mockFSPass: { [k: string]: (...a: any[]) => any } = {}
 const mockFSFail: { [k: string]: (...a: any[]) => any } = {}

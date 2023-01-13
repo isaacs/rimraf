@@ -1,7 +1,7 @@
-import platform from './platform'
+import platform from './platform.js'
 
-import { rimrafPosix, rimrafPosixSync } from './rimraf-posix'
-import { rimrafWindows, rimrafWindowsSync } from './rimraf-windows'
+import { rimrafPosix, rimrafPosixSync } from './rimraf-posix.js'
+import { rimrafWindows, rimrafWindowsSync } from './rimraf-windows.js'
 
 export const rimrafManual = platform === 'win32' ? rimrafWindows : rimrafPosix
 export const rimrafManualSync =

@@ -1,5 +1,5 @@
-import optArg from './opt-arg'
-import pathArg from './path-arg'
+import optArg from './opt-arg.js'
+import pathArg from './path-arg.js'
 
 export interface RimrafOptions {
   preserveRoot?: boolean
@@ -35,12 +35,12 @@ export const assertRimrafOptions: (o: any) => void = (
 }
 /* c8 ignore stop */
 
-import { rimrafManual, rimrafManualSync } from './rimraf-manual'
-import { rimrafMoveRemove, rimrafMoveRemoveSync } from './rimraf-move-remove'
-import { rimrafNative, rimrafNativeSync } from './rimraf-native'
-import { rimrafPosix, rimrafPosixSync } from './rimraf-posix'
-import { rimrafWindows, rimrafWindowsSync } from './rimraf-windows'
-import { useNative, useNativeSync } from './use-native'
+import { rimrafManual, rimrafManualSync } from './rimraf-manual.js'
+import { rimrafMoveRemove, rimrafMoveRemoveSync } from './rimraf-move-remove.js'
+import { rimrafNative, rimrafNativeSync } from './rimraf-native.js'
+import { rimrafPosix, rimrafPosixSync } from './rimraf-posix.js'
+import { rimrafWindows, rimrafWindowsSync } from './rimraf-windows.js'
+import { useNative, useNativeSync } from './use-native.js'
 
 const wrap =
   (fn: (p: string, o: RimrafOptions) => Promise<void>) =>

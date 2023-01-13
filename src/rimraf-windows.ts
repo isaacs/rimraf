@@ -9,12 +9,12 @@
 // Note: "move then remove" is 2-10 times slower, and just as unreliable.
 
 import { parse, resolve } from 'path'
-import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent'
-import { fixEPERM, fixEPERMSync } from './fix-eperm'
-import { readdirOrError, readdirOrErrorSync } from './readdir-or-error'
-import { retryBusy, retryBusySync } from './retry-busy'
-import { rimrafMoveRemove, rimrafMoveRemoveSync } from './rimraf-move-remove'
-import { FsError, promises, rmdirSync, unlinkSync } from './fs'
+import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'
+import { fixEPERM, fixEPERMSync } from './fix-eperm.js'
+import { readdirOrError, readdirOrErrorSync } from './readdir-or-error.js'
+import { retryBusy, retryBusySync } from './retry-busy.js'
+import { rimrafMoveRemove, rimrafMoveRemoveSync } from './rimraf-move-remove.js'
+import { FsError, promises, rmdirSync, unlinkSync } from './fs.js'
 import { RimrafOptions } from '.'
 const { unlink, rmdir } = promises
 

@@ -1,4 +1,4 @@
-import { assertRimrafOptions, RimrafOptions } from './index'
+import { assertRimrafOptions, RimrafOptions } from './index.js'
 export default (opt: RimrafOptions = {}) => {
   assertRimrafOptions(opt)
   return opt

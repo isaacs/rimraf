@@ -1,6 +1,6 @@
 // returns an array of entries if readdir() works,
 // or the error that readdir() raised if not.
-import { FsError, promises, readdirSync } from './fs'
+import { FsError, promises, readdirSync } from './fs.js'
 const { readdir } = promises
 export const readdirOrError = (path: string) =>
   readdir(path).catch(er => er as FsError)

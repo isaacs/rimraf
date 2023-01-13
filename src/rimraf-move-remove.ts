@@ -12,9 +12,9 @@
 // However, it is HELLA SLOW, like 2-10x slower than a naive recursive rm.
 
 import { basename, parse, resolve } from 'path'
-import { defaultTmp, defaultTmpSync } from './default-tmp'
+import { defaultTmp, defaultTmpSync } from './default-tmp.js'
 
-import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent'
+import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'
 
 import {
   chmodSync,
@@ -27,7 +27,7 @@ import {
 const { rename, unlink, rmdir, chmod } = fsPromises
 
 import { RimrafOptions } from '.'
-import { readdirOrError, readdirOrErrorSync } from './readdir-or-error'
+import { readdirOrError, readdirOrErrorSync } from './readdir-or-error.js'
 
 // crypto.randomBytes is much slower, and Math.random() is enough here
 const uniqueFilename = (path: string) => `.${basename(path)}.${Math.random()}`
