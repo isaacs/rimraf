@@ -23,7 +23,7 @@ import {
   renameSync,
   rmdirSync,
   unlinkSync,
-} from './fs'
+} from './fs.js'
 const { rename, unlink, rmdir, chmod } = fsPromises
 
 import { RimrafOptions } from '.'

@@ -61,8 +61,3 @@ export const rimrafPosixSync = (path: string, opt: RimrafOptions) => {
 
   return ignoreENOENTSync(() => rmdirSync(path))
 }
-
-module.exports = {
-  rimrafPosix,
-  rimrafPosixSync,
-}
