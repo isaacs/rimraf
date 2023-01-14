@@ -4,6 +4,7 @@ t.same(
   require('../package.json').exports,
   {
     '.': {
+      types: './dist/cjs/src/index.d.ts',
       import: './dist/mjs/src/index.js',
       require: './dist/cjs/src/index.js',
     },

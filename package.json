@@ -4,8 +4,10 @@
   "main": "./dist/cjs/src/index.js",
   "module": "./dist/mjs/src/index.js",
   "bin": "./dist/cjs/src/bin.js",
+  "types": "./dist/cjs/src/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/cjs/src/index.d.ts",
       "import": "./dist/mjs/src/index.js",
       "require": "./dist/cjs/src/index.js"
     }
