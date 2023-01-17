@@ -1,3 +1,9 @@
+# v4.1
+
+- Improved hybrid module with no need to look at the `.default`
+  dangly bit.  `.default` preserved as a reference to `rimraf`
+  for compatibility with anyone who came to rely on it in v4.0.
+
 # v4.0
 
 - Remove `glob` dependency entirely. This library now only

@@ -5,12 +5,12 @@ t.same(
   {
     '.': {
       import: {
-        default: './dist/mjs/src/index.js',
-        types: './dist/mjs/src/index.d.ts',
+        default: './dist/mjs/index.js',
+        types: './dist/mjs/index.d.ts',
       },
       require: {
-        default: './dist/cjs/src/index.js',
-        types: './dist/cjs/src/index.d.ts',
+        default: './dist/cjs/src/index-cjs.js',
+        types: './dist/cjs/src/index-cjs.d.ts',
       },
     },
   },
@@ -66,7 +66,7 @@ t.test('mocky unit tests to select the correct function', t => {
     },
   }
   process.env.__TESTING_RIMRAF_PLATFORM__ = 'posix'
-  const rimraf = t.mock('../', mocks).default
+  const rimraf = t.mock('../', mocks)
 
   t.afterEach(() => (CALLS.length = 0))
   for (const useNative of [true, false]) {

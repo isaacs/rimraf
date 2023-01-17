@@ -21,9 +21,9 @@ Hybrid module, load either with `import` or `require()`.
 
 ```js
 // default export is the main rimraf function, or use named imports
-import { rimraf } from 'rimraf'
+import rimraf from 'rimraf'
 // or
-const { rimraf } = require('rimraf')
+const rimraf = require('rimraf')
 
 // other strategies exported as well
 import { rimraf, rimrafSync, native, nativeSync } from 'rimraf'

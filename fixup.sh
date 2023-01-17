@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-cat >dist/cjs/src/package.json <<!EOF
+cat >dist/cjs/package.json <<!EOF
 {
   "type": "commonjs"
 }
 !EOF
 
-cat >dist/mjs/src/package.json <<!EOF
+cat >dist/mjs/package.json <<!EOF
 {
   "type": "module"
 }

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { version } from '../package.json'
-import rimraf, { RimrafOptions } from './'
+import rimraf from './index-cjs.js'
+import type { RimrafOptions } from './index.js'
 
 const runHelpForUsage = () =>
   console.error('run `rimraf --help` for usage information')
