@@ -10,10 +10,8 @@ export interface RimrafOptions {
   maxBackoff?: number
 }
 
-/* c8 ignore start */
 const typeOrUndef = (val: any, t: string) =>
   typeof val === 'undefined' || typeof val === t
-/* c8 ignore stop */
 
 export const isRimrafOptions = (o: any): o is RimrafOptions =>
   !!o &&
@@ -25,7 +23,6 @@ export const isRimrafOptions = (o: any): o is RimrafOptions =>
   typeOrUndef(o.backoff, 'number') &&
   typeOrUndef(o.maxBackoff, 'number')
 
-/* c8 ignore start */
 export const assertRimrafOptions: (o: any) => void = (
   o: any
 ): asserts o is RimrafOptions => {
@@ -33,7 +30,6 @@ export const assertRimrafOptions: (o: any) => void = (
     throw new Error('invalid rimraf options')
   }
 }
-/* c8 ignore stop */
 
 import { rimrafManual, rimrafManualSync } from './rimraf-manual.js'
 import { rimrafMoveRemove, rimrafMoveRemoveSync } from './rimraf-move-remove.js'
