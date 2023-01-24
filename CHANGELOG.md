@@ -15,8 +15,8 @@
 - Drop support for Node.js below version 14
 - rewrite in TypeScript
 - ship CJS/ESM hybrid module
-- Error on ignore unknown arguments to the bin. (Previously they
-  were silently ignored.)
+- Error on unknown arguments to the bin. (Previously they were
+  silently ignored.)
 
 # v3.0
 
