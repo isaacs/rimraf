@@ -17,7 +17,7 @@ export const isRimrafOptions = (o: any): o is RimrafOptions =>
   !!o &&
   typeof o === 'object' &&
   typeOrUndef(o.preserveRoot, 'boolean') &&
-  typeOrUndef(o.preserveRoot, 'number') &&
+  typeOrUndef(o.tmp, 'string') &&
   typeOrUndef(o.maxRetries, 'number') &&
   typeOrUndef(o.retryDelay, 'number') &&
   typeOrUndef(o.backoff, 'number') &&
