@@ -51,6 +51,21 @@ t.test('basic arg parsing stuff', t => {
     ])
   })
 
+  t.test('unnecessary -rf', async t => {
+    t.equal(await bin('-rf', 'foo'), 0)
+    t.equal(await bin('-fr', 'foo'), 0)
+    t.equal(await bin('foo', '-rf'), 0)
+    t.equal(await bin('foo', '-fr'), 0)
+    t.same(LOGS, [])
+    t.same(ERRS, [])
+    t.same(CALLS, [
+      ['rimraf', ['foo'], {}],
+      ['rimraf', ['foo'], {}],
+      ['rimraf', ['foo'], {}],
+      ['rimraf', ['foo'], {}],
+    ])
+  })
+
   t.test('dashdash', async t => {
     t.equal(await bin('--', '-h'), 0)
     t.same(LOGS, [])
@@ -134,7 +149,14 @@ t.test('basic arg parsing stuff', t => {
     t.same(CALLS, [])
   })
 
-  const impls = ['rimraf', 'native', 'manual', 'posix', 'windows', 'move-remove']
+  const impls = [
+    'rimraf',
+    'native',
+    'manual',
+    'posix',
+    'windows',
+    'move-remove',
+  ]
   for (const impl of impls) {
     t.test(`--impl=${impl}`, async t => {
       t.equal(await bin('foo', `--impl=${impl}`), 0)

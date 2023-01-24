@@ -3,6 +3,7 @@
 - Improved hybrid module with no need to look at the `.default`
   dangly bit.  `.default` preserved as a reference to `rimraf`
   for compatibility with anyone who came to rely on it in v4.0.
+- Accept and ignore `-rf` and `-fr` arguments to the bin.
 
 # v4.0
 
@@ -14,6 +15,8 @@
 - Drop support for Node.js below version 14
 - rewrite in TypeScript
 - ship CJS/ESM hybrid module
+- Error on ignore unknown arguments to the bin. (Previously they
+  were silently ignored.)
 
 # v3.0
 

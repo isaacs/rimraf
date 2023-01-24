@@ -53,6 +53,9 @@ const main = async (...args: string[]) => {
     if (arg === '--') {
       dashdash = true
       continue
+    } else if (arg === '-rf' || arg === '-fr') {
+      // this never did anything, but people put it there I guess
+      continue
     } else if (arg === '-h' || arg === '--help') {
       console.log(help)
       return 0
