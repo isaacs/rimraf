@@ -147,7 +147,7 @@ Options:
   --preserve-root     Do not remove '/' recursively (default)
   --no-preserve-root  Do not treat '/' specially
 
-  --impl=<type>       Specify the implementationt to use.
+  --impl=<type>       Specify the implementation to use.
                       rimraf: choose the best option
                       native: the built-in implementation in Node.js
                       manual: the platform-specific JS implementation
