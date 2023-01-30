@@ -2,3 +2,4 @@
 /.nyc_output
 /coverage
 /dist
+!/typedoc.json
