@@ -1,5 +1,8 @@
 const t = require('tap')
-const { ignoreENOENT, ignoreENOENTSync } = require('../dist/cjs/src/ignore-enoent.js')
+const {
+  ignoreENOENT,
+  ignoreENOENTSync,
+} = require('../dist/cjs/src/ignore-enoent.js')
 
 const enoent = Object.assign(new Error('no ent'), { code: 'ENOENT' })
 const eperm = Object.assign(new Error('eperm'), { code: 'EPERM' })

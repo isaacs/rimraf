@@ -1,7 +1,7 @@
 # v4.1
 
 - Improved hybrid module with no need to look at the `.default`
-  dangly bit.  `.default` preserved as a reference to `rimraf`
+  dangly bit. `.default` preserved as a reference to `rimraf`
   for compatibility with anyone who came to rely on it in v4.0.
 - Accept and ignore `-rf` and `-fr` arguments to the bin.
 

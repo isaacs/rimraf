@@ -13,11 +13,7 @@ const START = (process.env.RIMRAF_TEST_START_CHAR || 'a').charCodeAt(0)
 const END = (process.env.RIMRAF_TEST_END_CHAR || 'f').charCodeAt(0)
 const DEPTH = +process.env.RIMRAF_TEST_DEPTH || 4
 
-const {
-  statSync,
-  mkdirSync,
-  readdirSync,
-} = require('../dist/cjs/src/fs.js')
+const { statSync, mkdirSync, readdirSync } = require('../dist/cjs/src/fs.js')
 const { writeFileSync } = require('fs')
 const { resolve, dirname } = require('path')
 

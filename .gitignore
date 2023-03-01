@@ -3,3 +3,5 @@
 /coverage
 /dist
 !/typedoc.json
+!/tsconfig-*.json
+!/.prettierignore

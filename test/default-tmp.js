@@ -2,9 +2,12 @@ const t = require('tap')
 
 t.test('posix platform', async t => {
   const { tmpdir } = require('os')
-  const { defaultTmp, defaultTmpSync } = t.mock('../dist/cjs/src/default-tmp.js', {
-    '../dist/cjs/src/platform.js': 'posix',
-  })
+  const { defaultTmp, defaultTmpSync } = t.mock(
+    '../dist/cjs/src/default-tmp.js',
+    {
+      '../dist/cjs/src/platform.js': 'posix',
+    }
+  )
   t.equal(defaultTmpSync('anything'), tmpdir())
   t.equal(await defaultTmp('anything').then(t => t), tmpdir())
 })
@@ -20,19 +23,22 @@ t.test('windows', async t => {
         throw Object.assign(new Error('no ents here'), { code: 'ENOENT' })
     }
   }
-  const { defaultTmp, defaultTmpSync } = t.mock('../dist/cjs/src/default-tmp.js', {
-    os: {
-      tmpdir: () => 'C:\\Windows\\Temp',
-    },
-    path: require('path').win32,
-    '../dist/cjs/src/platform.js': 'win32',
-    '../dist/cjs/src/fs.js': {
-      statSync: tempDirCheck,
-      promises: {
-        stat: async path => tempDirCheck(path),
+  const { defaultTmp, defaultTmpSync } = t.mock(
+    '../dist/cjs/src/default-tmp.js',
+    {
+      os: {
+        tmpdir: () => 'C:\\Windows\\Temp',
       },
-    },
-  })
+      path: require('path').win32,
+      '../dist/cjs/src/platform.js': 'win32',
+      '../dist/cjs/src/fs.js': {
+        statSync: tempDirCheck,
+        promises: {
+          stat: async path => tempDirCheck(path),
+        },
+      },
+    }
+  )
 
   const expect = {
     'c:\\some\\path': 'C:\\Windows\\Temp',

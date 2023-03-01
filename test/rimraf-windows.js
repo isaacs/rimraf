@@ -57,9 +57,12 @@ t.only('actually delete some stuff', async t => {
   // but actually do wait to clean them up, though
   t.teardown(() => Promise.all(danglers))
 
-  const { rimrafPosix, rimrafPosixSync } = t.mock('../dist/cjs/src/rimraf-posix.js', {
-    '../dist/cjs/src/fs.js': fsMock,
-  })
+  const { rimrafPosix, rimrafPosixSync } = t.mock(
+    '../dist/cjs/src/rimraf-posix.js',
+    {
+      '../dist/cjs/src/fs.js': fsMock,
+    }
+  )
 
   const { rimrafWindows, rimrafWindowsSync } = t.mock(
     '../dist/cjs/src/rimraf-windows.js',

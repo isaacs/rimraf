@@ -12,9 +12,12 @@ const fs = {
   },
 }
 
-const { rimrafNative, rimrafNativeSync } = t.mock('../dist/cjs/src/rimraf-native.js', {
-  '../dist/cjs/src/fs.js': fs,
-})
+const { rimrafNative, rimrafNativeSync } = t.mock(
+  '../dist/cjs/src/rimraf-native.js',
+  {
+    '../dist/cjs/src/fs.js': fs,
+  }
+)
 
 t.test('calls the right node function', async t => {
   await rimrafNative('path', { x: 'y' })

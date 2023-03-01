@@ -1,10 +1,19 @@
 const t = require('tap')
 
-const { rimrafWindows, rimrafWindowsSync } = require('../dist/cjs/src/rimraf-windows.js')
+const {
+  rimrafWindows,
+  rimrafWindowsSync,
+} = require('../dist/cjs/src/rimraf-windows.js')
 
-const { rimrafPosix, rimrafPosixSync } = require('../dist/cjs/src/rimraf-posix.js')
+const {
+  rimrafPosix,
+  rimrafPosixSync,
+} = require('../dist/cjs/src/rimraf-posix.js')
 
-const { rimrafManual, rimrafManualSync } = require('../dist/cjs/src/rimraf-manual.js')
+const {
+  rimrafManual,
+  rimrafManualSync,
+} = require('../dist/cjs/src/rimraf-manual.js')
 
 if (!process.env.__TESTING_RIMRAF_PLATFORM__) {
   const otherPlatform = process.platform !== 'win32' ? 'win32' : 'posix'
