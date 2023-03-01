@@ -1,6 +1,6 @@
 {
   "name": "rimraf",
-  "version": "4.1.2",
+  "version": "4.1.3",
   "main": "./dist/cjs/src/index-cjs.js",
   "module": "./dist/mjs/index.js",
   "bin": "./dist/cjs/src/bin.js",
