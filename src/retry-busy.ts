@@ -1,7 +1,6 @@
 // note: max backoff is the maximum that any *single* backoff will do
 
 import { RimrafOptions } from '.'
-import { FsError } from './fs.js'
 
 export const MAXBACKOFF = 200
 export const RATE = 1.2
@@ -23,7 +22,7 @@ export const retryBusy = (fn: (path: string) => Promise<any>) => {
       try {
         return await fn(path)
       } catch (er) {
-        const fer = er as FsError
+        const fer = er as NodeJS.ErrnoException
         if (fer?.path === path && fer?.code && codes.has(fer.code)) {
           backoff = Math.ceil(backoff * rate)
           total = backoff + total
@@ -56,7 +55,7 @@ export const retryBusySync = (fn: (path: string) => any) => {
       try {
         return fn(path)
       } catch (er) {
-        const fer = er as FsError
+        const fer = er as NodeJS.ErrnoException
         if (
           fer?.path === path &&
           fer?.code &&

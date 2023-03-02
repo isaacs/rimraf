@@ -18,7 +18,6 @@ import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'
 
 import {
   chmodSync,
-  FsError,
   promises as fsPromises,
   renameSync,
   rmdirSync,
@@ -54,16 +53,16 @@ const unlinkFixEPERMSync = (path: string) => {
   try {
     unlinkSync(path)
   } catch (er) {
-    if ((er as FsError)?.code === 'EPERM') {
+    if ((er as NodeJS.ErrnoException)?.code === 'EPERM') {
       try {
         return chmodSync(path, 0o666)
       } catch (er2) {
-        if ((er2 as FsError)?.code === 'ENOENT') {
+        if ((er2 as NodeJS.ErrnoException)?.code === 'ENOENT') {
           return
         }
         throw er
       }
-    } else if ((er as FsError)?.code === 'ENOENT') {
+    } else if ((er as NodeJS.ErrnoException)?.code === 'ENOENT') {
       return
     }
     throw er

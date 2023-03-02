@@ -1,4 +1,4 @@
-import { promises, chmodSync, FsError } from './fs.js'
+import { chmodSync, promises } from './fs.js'
 const { chmod } = promises
 
 export const fixEPERM =
@@ -6,7 +6,7 @@ export const fixEPERM =
     try {
       return await fn(path)
     } catch (er) {
-      const fer = er as FsError
+      const fer = er as NodeJS.ErrnoException
       if (fer?.code === 'ENOENT') {
         return
       }
@@ -14,7 +14,7 @@ export const fixEPERM =
         try {
           await chmod(path, 0o666)
         } catch (er2) {
-          const fer2 = er2 as FsError
+          const fer2 = er2 as NodeJS.ErrnoException
           if (fer2?.code === 'ENOENT') {
             return
           }
@@ -30,7 +30,7 @@ export const fixEPERMSync = (fn: (path: string) => any) => (path: string) => {
   try {
     return fn(path)
   } catch (er) {
-    const fer = er as FsError
+    const fer = er as NodeJS.ErrnoException
     if (fer?.code === 'ENOENT') {
       return
     }
@@ -38,7 +38,7 @@ export const fixEPERMSync = (fn: (path: string) => any) => (path: string) => {
       try {
         chmodSync(path, 0o666)
       } catch (er2) {
-        const fer2 = er2 as FsError
+        const fer2 = er2 as NodeJS.ErrnoException
         if (fer2?.code === 'ENOENT') {
           return
         }

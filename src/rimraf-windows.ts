@@ -9,13 +9,13 @@
 // Note: "move then remove" is 2-10 times slower, and just as unreliable.
 
 import { parse, resolve } from 'path'
-import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'
+import { RimrafOptions } from '.'
 import { fixEPERM, fixEPERMSync } from './fix-eperm.js'
+import { promises, rmdirSync, unlinkSync } from './fs.js'
+import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'
 import { readdirOrError, readdirOrErrorSync } from './readdir-or-error.js'
 import { retryBusy, retryBusySync } from './retry-busy.js'
 import { rimrafMoveRemove, rimrafMoveRemoveSync } from './rimraf-move-remove.js'
-import { FsError, promises, rmdirSync, unlinkSync } from './fs.js'
-import { RimrafOptions } from '.'
 const { unlink, rmdir } = promises
 
 const rimrafWindowsFile = retryBusy(fixEPERM(unlink))
@@ -30,7 +30,7 @@ const rimrafWindowsDirMoveRemoveFallback = async (
   try {
     await rimrafWindowsDir(path, opt)
   } catch (er) {
-    if ((er as FsError)?.code === 'ENOTEMPTY') {
+    if ((er as NodeJS.ErrnoException)?.code === 'ENOTEMPTY') {
       return await rimrafMoveRemove(path, opt)
     }
     throw er
@@ -44,7 +44,7 @@ const rimrafWindowsDirMoveRemoveFallbackSync = (
   try {
     rimrafWindowsDirSync(path, opt)
   } catch (er) {
-    if ((er as FsError)?.code === 'ENOTEMPTY') {
+    if ((er as NodeJS.ErrnoException)?.code === 'ENOTEMPTY') {
       return rimrafMoveRemoveSync(path, opt)
     }
     throw er
