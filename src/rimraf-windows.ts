@@ -27,6 +27,11 @@ const rimrafWindowsDirMoveRemoveFallback = async (
   path: string,
   opt: RimrafOptions
 ) => {
+  /* c8 ignore start */
+  if (opt?.signal?.aborted) {
+    throw opt.signal.reason
+  }
+  /* c8 ignore stop */
   try {
     await rimrafWindowsDir(path, opt)
   } catch (er) {
@@ -41,6 +46,9 @@ const rimrafWindowsDirMoveRemoveFallbackSync = (
   path: string,
   opt: RimrafOptions
 ) => {
+  if (opt?.signal?.aborted) {
+    throw opt.signal.reason
+  }
   try {
     rimrafWindowsDirSync(path, opt)
   } catch (er) {
@@ -61,6 +69,9 @@ export const rimrafWindows = async (
   opt: RimrafOptions,
   state = START
 ): Promise<void> => {
+  if (opt?.signal?.aborted) {
+    throw opt.signal.reason
+  }
   if (!states.has(state)) {
     throw new TypeError('invalid third argument passed to rimraf')
   }

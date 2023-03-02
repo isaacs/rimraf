@@ -8,6 +8,7 @@ export interface RimrafOptions {
   retryDelay?: number
   backoff?: number
   maxBackoff?: number
+  signal?: AbortSignal
 }
 
 const typeOrUndef = (val: any, t: string) =>
@@ -74,13 +75,13 @@ export const moveRemove = Object.assign(wrap(rimrafMoveRemove), {
 })
 
 export const rimrafSync = wrapSync((path, opt) =>
-  useNativeSync() ? rimrafNativeSync(path, opt) : rimrafManualSync(path, opt)
+  useNativeSync(opt) ? rimrafNativeSync(path, opt) : rimrafManualSync(path, opt)
 )
 export const sync = rimrafSync
 
 export const rimraf = Object.assign(
   wrap((path, opt) =>
-    useNative() ? rimrafNative(path, opt) : rimrafManual(path, opt)
+    useNative(opt) ? rimrafNative(path, opt) : rimrafManual(path, opt)
   ),
   {
     // this weirdness because it's easier than explicitly declaring

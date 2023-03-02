@@ -73,6 +73,9 @@ export const rimrafMoveRemove = async (
   path: string,
   opt: RimrafOptions
 ): Promise<void> => {
+  if (opt?.signal?.aborted) {
+    throw opt.signal.reason
+  }
   if (!opt.tmp) {
     return rimrafMoveRemove(path, { ...opt, tmp: await defaultTmp(path) })
   }
@@ -122,6 +125,9 @@ export const rimrafMoveRemoveSync = (
   path: string,
   opt: RimrafOptions
 ): void => {
+  if (opt?.signal?.aborted) {
+    throw opt.signal.reason
+  }
   if (!opt.tmp) {
     return rimrafMoveRemoveSync(path, { ...opt, tmp: defaultTmpSync(path) })
   }

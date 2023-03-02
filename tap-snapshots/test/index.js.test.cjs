@@ -19,7 +19,9 @@ Array [
   ],
   Array [
     "useNative",
-    undefined,
+    Object {
+      "a": 1,
+    },
   ],
   Array [
     "rimrafPosix",
@@ -40,7 +42,9 @@ Array [
   ],
   Array [
     "useNativeSync",
-    undefined,
+    Object {
+      "a": 2,
+    },
   ],
   Array [
     "rimrafPosixSync",
@@ -66,7 +70,9 @@ Array [
   ],
   Array [
     "useNative",
-    undefined,
+    Object {
+      "a": 1,
+    },
   ],
   Array [
     "rimrafNative",
@@ -87,7 +93,9 @@ Array [
   ],
   Array [
     "useNativeSync",
-    undefined,
+    Object {
+      "a": 2,
+    },
   ],
   Array [
     "rimrafNativeSync",

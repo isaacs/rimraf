@@ -61,6 +61,11 @@ Options:
   delayed 33ms.
 - `retryDelay`: Native only. Time to wait between retries, using
   linear backoff. Default `100`.
+- `signal` Pass in an AbortSignal to cancel the directory
+  removal. This is useful when removing large folder structures,
+  if you'd like to limit the amount of time spent. Using a
+  `signal` option prevents the use of Node's built-in `fs.rm`
+  because that implementation does not support abort signals.
 
 Any other options are provided to the native Node.js `fs.rm` implementation
 when that is used.

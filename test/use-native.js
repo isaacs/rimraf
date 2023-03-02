@@ -46,6 +46,15 @@ if (!process.env.__TESTING_RIMRAF_EXPECT_USE_NATIVE__) {
   })
 } else {
   const expect = process.env.__TESTING_RIMRAF_EXPECT_USE_NATIVE__ === '1'
+  if (expect) {
+    // always need manual if a signal is passed in
+    const signal =
+      typeof AbortController !== 'undefined' ? new AbortController().signal : {}
+    //@ts-ignore
+    t.equal(useNative({ signal }), false)
+    //@ts-ignore
+    t.equal(useNativeSync({ signal }), false)
+  }
   t.equal(useNative(), expect)
   t.equal(useNativeSync(), expect)
 }

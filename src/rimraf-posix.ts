@@ -16,6 +16,9 @@ import { RimrafOptions } from '.'
 import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'
 
 export const rimrafPosix = async (path: string, opt: RimrafOptions) => {
+  if (opt?.signal?.aborted) {
+    throw opt.signal.reason
+  }
   const entries = await readdirOrError(path)
   if (!Array.isArray(entries)) {
     if (entries.code === 'ENOENT') {
@@ -41,6 +44,9 @@ export const rimrafPosix = async (path: string, opt: RimrafOptions) => {
 }
 
 export const rimrafPosixSync = (path: string, opt: RimrafOptions) => {
+  if (opt?.signal?.aborted) {
+    throw opt.signal.reason
+  }
   const entries = readdirOrErrorSync(path)
   if (!Array.isArray(entries)) {
     if (entries.code === 'ENOENT') {

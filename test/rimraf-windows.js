@@ -490,3 +490,38 @@ t.test('do not allow third arg', async t => {
   t.rejects(rimrafWindows(ROOT, {}, true))
   t.throws(() => rimrafWindowsSync(ROOT, {}, true))
 })
+
+t.test(
+  'abort on signal',
+  { skip: typeof AbortController === 'undefined' },
+  t => {
+    const {
+      rimrafWindows,
+      rimrafWindowsSync,
+    } = require('../dist/cjs/src/rimraf-windows.js')
+    t.test('sync', t => {
+      const d = t.testdir(fixture)
+      const ac = new AbortController()
+      const { signal } = ac
+      ac.abort(new Error('aborted rimraf'))
+      t.throws(() => rimrafWindowsSync(d, { signal }))
+      t.end()
+    })
+    t.test('async', async t => {
+      const d = t.testdir(fixture)
+      const ac = new AbortController()
+      const { signal } = ac
+      const p = t.rejects(() => rimrafWindows(d, { signal }))
+      ac.abort(new Error('aborted rimraf'))
+      await p
+    })
+    t.test('async, pre-aborted', async t => {
+      const ac = new AbortController()
+      const { signal } = ac
+      const d = t.testdir(fixture)
+      ac.abort(new Error('aborted rimraf'))
+      await t.rejects(() => rimrafWindows(d, { signal }))
+    })
+    t.end()
+  }
+)

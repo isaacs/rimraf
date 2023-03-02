@@ -500,3 +500,39 @@ t.test('rimraffing root, do not actually rmdir root', async t => {
   })
   t.end()
 })
+
+t.test(
+  'abort if the signal says to',
+  { skip: typeof AbortController === 'undefined' },
+  t => {
+    const { rimrafMoveRemove, rimrafMoveRemoveSync } = t.mock(
+      '../dist/cjs/src/rimraf-move-remove.js',
+      {}
+    )
+    t.test('sync', t => {
+      const ac = new AbortController()
+      const { signal } = ac
+      ac.abort(new Error('aborted rimraf'))
+      const d = t.testdir(fixture)
+      t.throws(() => rimrafMoveRemoveSync(d, { signal }))
+      t.end()
+    })
+    t.test('async', async t => {
+      const ac = new AbortController()
+      const { signal } = ac
+      const d = t.testdir(fixture)
+      const p = t.rejects(() => rimrafMoveRemove(d, { signal }))
+      ac.abort(new Error('aborted rimraf'))
+      await p
+    })
+    t.test('async, pre-aborted', async t => {
+      const ac = new AbortController()
+      const { signal } = ac
+      const d = t.testdir(fixture)
+      ac.abort(new Error('aborted rimraf'))
+      await t.rejects(() => rimrafMoveRemove(d, { signal }))
+    })
+
+    t.end()
+  }
+)

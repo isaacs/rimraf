@@ -205,3 +205,27 @@ t.test('rimraffing root, do not actually rmdir root', async t => {
   })
   t.end()
 })
+
+t.test('abort on signal', { skip: typeof AbortController === 'undefined' }, t => {
+  const {
+    rimrafPosix,
+    rimrafPosixSync,
+  } = require('../dist/cjs/src/rimraf-posix.js')
+  t.test('sync', t => {
+    const d = t.testdir(fixture)
+    const ac = new AbortController()
+    const { signal } = ac
+    ac.abort(new Error('aborted rimraf'))
+    t.throws(() => rimrafPosixSync(d, { signal }))
+    t.end()
+  })
+  t.test('async', async t => {
+    const d = t.testdir(fixture)
+    const ac = new AbortController()
+    const { signal } = ac
+    const p = t.rejects(() => rimrafPosix(d, { signal }))
+    ac.abort(new Error('aborted rimraf'))
+    await p
+  })
+  t.end()
+})
