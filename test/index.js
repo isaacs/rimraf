@@ -10,7 +10,7 @@ t.same(
       },
       require: {
         default: './dist/cjs/src/index-cjs.js',
-        types: './dist/cjs/src/index-cjs.d.ts',
+        types: './dist/cjs/src/index.d.ts',
       },
     },
   },
