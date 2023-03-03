@@ -18,6 +18,10 @@ Options:
   --no-preserve-root  Do not treat '/' specially
   -G --no-glob        Treat arguments as literal paths, not globs (default)
   -g --glob           Treat arguments as glob patterns
+  -v --verbose        Be verbose when deleting files, showing them as
+                      they are removed
+  -V --no-verbose     Be silent when deleting files, showing nothing as
+                      they are removed (default)
 
   --impl=<type>       Specify the implementation to use.
                       rimraf: choose the best option
@@ -34,9 +38,16 @@ Implementation-specific options:
   --backoff=<n>       Exponential backoff factor for retries (default: 1.2)
 `
 
-import { parse, resolve } from 'path'
+import { parse, relative, resolve } from 'path'
+const cwd = process.cwd()
 
 const main = async (...args: string[]) => {
+  const yesFilter = () => true
+  const verboseFilter = (s: string) => {
+    console.log(relative(cwd, s))
+    return true
+  }
+
   if (process.env.__RIMRAF_TESTING_BIN_FAIL__ === '1') {
     throw new Error('simulated rimraf failure')
   }
@@ -61,6 +72,12 @@ const main = async (...args: string[]) => {
     } else if (arg === '-h' || arg === '--help') {
       console.log(help)
       return 0
+    } else if (arg === '--verbose' || arg === '-v') {
+      opt.filter = verboseFilter
+      continue
+    } else if (arg === '--no-verbose' || arg === '-V') {
+      opt.filter = yesFilter
+      continue
     } else if (arg === '-g' || arg === '--glob') {
       opt.glob = true
       continue

@@ -2,6 +2,8 @@
 
 - Return boolean indicating whether the path was fully removed
 - Add filter option
+- bin: add --verbose, -v to print files as they are deleted
+- bin: add --no-verbose, -V to not print files as they are deleted
 
 # v4.2
 

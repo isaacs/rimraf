@@ -66,6 +66,59 @@ t.test('basic arg parsing stuff', t => {
     ])
   })
 
+  t.test('verbose', async t => {
+    t.equal(await bin('-v', 'foo'), 0)
+    t.equal(await bin('--verbose', 'foo'), 0)
+    t.equal(await bin('-v', '-V', '--verbose', 'foo'), 0)
+    t.same(LOGS, [])
+    t.same(ERRS, [])
+    for (const c of CALLS) {
+      t.equal(c[0], 'rimraf')
+      t.same(c[1], ['foo'])
+      t.type(c[2].filter, 'function')
+      t.equal(c[2].filter('x'), true)
+    }
+  })
+
+  t.test('verbose', async t => {
+    t.equal(await bin('-v', 'foo'), 0)
+    t.equal(await bin('--verbose', 'foo'), 0)
+    t.equal(await bin('-v', '-V', '--verbose', 'foo'), 0)
+    t.same(LOGS, [])
+    t.same(ERRS, [])
+    const { log } = console
+    t.teardown(() => { console.log = log })
+    const logs = []
+    console.log = (s) => logs.push(s)
+    for (const c of CALLS) {
+      t.equal(c[0], 'rimraf')
+      t.same(c[1], ['foo'])
+      t.type(c[2].filter, 'function')
+      t.equal(c[2].filter('x'), true)
+      t.same(logs, ['x'])
+      logs.length = 0
+    }
+  })
+
+  t.test('silent', async t => {
+    t.equal(await bin('-V', 'foo'), 0)
+    t.equal(await bin('--no-verbose', 'foo'), 0)
+    t.equal(await bin('-V', '-v', '--no-verbose', 'foo'), 0)
+    t.same(LOGS, [])
+    t.same(ERRS, [])
+    const { log } = console
+    t.teardown(() => { console.log = log })
+    const logs = []
+    console.log = (s) => logs.push(s)
+    for (const c of CALLS) {
+      t.equal(c[0], 'rimraf')
+      t.same(c[1], ['foo'])
+      t.type(c[2].filter, 'function')
+      t.equal(c[2].filter('x'), true)
+      t.same(logs, [])
+    }
+  })
+
   t.test('glob true', async t => {
     t.equal(await bin('-g', 'foo'), 0)
     t.equal(await bin('--glob', 'foo'), 0)
