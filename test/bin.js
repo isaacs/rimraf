@@ -66,6 +66,25 @@ t.test('basic arg parsing stuff', t => {
     ])
   })
 
+  t.test('glob true', async t => {
+    t.equal(await bin('-g', 'foo'), 0)
+    t.equal(await bin('--glob', 'foo'), 0)
+    t.equal(await bin('-G', '-g', 'foo'), 0)
+    t.equal(await bin('-g', '-G', 'foo'), 0)
+    t.equal(await bin('-G', 'foo'), 0)
+    t.equal(await bin('--no-glob', 'foo'), 0)
+    t.same(LOGS, [])
+    t.same(ERRS, [])
+    t.same(CALLS, [
+      ['rimraf', ['foo'], { glob: true }],
+      ['rimraf', ['foo'], { glob: true }],
+      ['rimraf', ['foo'], { glob: true }],
+      ['rimraf', ['foo'], { glob: false }],
+      ['rimraf', ['foo'], { glob: false }],
+      ['rimraf', ['foo'], { glob: false }],
+    ])
+  })
+
   t.test('dashdash', async t => {
     t.equal(await bin('--', '-h'), 0)
     t.same(LOGS, [])

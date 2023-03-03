@@ -532,7 +532,6 @@ t.test(
       ac.abort(new Error('aborted rimraf'))
       await t.rejects(() => rimrafMoveRemove(d, { signal }))
     })
-
     t.end()
   }
 )

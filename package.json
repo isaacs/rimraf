@@ -77,5 +77,8 @@
   },
   "engines": {
     "node": ">=14"
+  },
+  "dependencies": {
+    "glob": "^9.2.0"
   }
 }

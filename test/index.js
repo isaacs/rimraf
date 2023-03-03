@@ -1,3 +1,4 @@
+const {statSync} = require('fs')
 const t = require('tap')
 
 t.same(
@@ -138,7 +139,7 @@ t.test('actually delete some stuff', t => {
       },
     },
   }
-  const { rimraf } = require('../')
+  const { rimraf, rimrafSync } = require('../')
   const { statSync } = require('../dist/cjs/src/fs.js')
   t.test('sync', t => {
     const path = t.testdir(fixture)
@@ -189,4 +190,46 @@ t.test('accept array of paths as first arg', async t => {
     [resolve('n'), { cat: 'chai' }],
     [resolve('o'), { cat: 'chai' }],
   ])
+})
+
+t.test('deleting globs', t => {
+  const { rimraf, rimrafSync } = require('../')
+
+  const fixture = {
+    a: 'a',
+    b: 'b',
+    c: {
+      d: 'd',
+      e: 'e',
+      f: {
+        g: 'g',
+        h: 'h',
+        i: {
+          j: 'j',
+          k: 'k',
+          l: 'l',
+          m: {
+            n: 'n',
+            o: 'o',
+          },
+        },
+      },
+    },
+  }
+
+  t.test('sync', t => {
+    const cwd = t.testdir(fixture)
+    rimrafSync('**/f/**/m', { glob: { cwd }})
+    t.throws(() => statSync(cwd + '/c/f/i/m'))
+    statSync(cwd + '/c/f/i/l')
+    t.end()
+  })
+  t.test('async', async t => {
+    const cwd = t.testdir(fixture)
+    await rimraf('**/f/**/m', { glob: { cwd }})
+    t.throws(() => statSync(cwd + '/c/f/i/m'))
+    statSync(cwd + '/c/f/i/l')
+  })
+
+  t.end()
 })

@@ -1,6 +1,8 @@
 import optArg from './opt-arg.js'
 import pathArg from './path-arg.js'
 
+import { glob, GlobOptions, globSync } from 'glob'
+
 export interface RimrafOptions {
   preserveRoot?: boolean
   tmp?: string
@@ -9,6 +11,7 @@ export interface RimrafOptions {
   backoff?: number
   maxBackoff?: number
   signal?: AbortSignal
+  glob?: boolean | GlobOptions
 }
 
 const typeOrUndef = (val: any, t: string) =>
@@ -22,7 +25,8 @@ export const isRimrafOptions = (o: any): o is RimrafOptions =>
   typeOrUndef(o.maxRetries, 'number') &&
   typeOrUndef(o.retryDelay, 'number') &&
   typeOrUndef(o.backoff, 'number') &&
-  typeOrUndef(o.maxBackoff, 'number')
+  typeOrUndef(o.maxBackoff, 'number') &&
+  (typeOrUndef(o.glob, 'boolean') || (o.glob && typeof o.glob === 'object'))
 
 export const assertRimrafOptions: (o: any) => void = (
   o: any
@@ -42,7 +46,10 @@ import { useNative, useNativeSync } from './use-native.js'
 const wrap =
   (fn: (p: string, o: RimrafOptions) => Promise<void>) =>
   async (path: string | string[], opt?: RimrafOptions): Promise<void> => {
-    const options: RimrafOptions = optArg(opt)
+    const options = optArg(opt)
+    if (options.glob) {
+      path = await glob(path, options.glob)
+    }
     await (Array.isArray(path)
       ? Promise.all(path.map(p => fn(pathArg(p, options), options)))
       : fn(pathArg(path, options), options))
@@ -52,6 +59,9 @@ const wrapSync =
   (fn: (p: string, o: RimrafOptions) => void) =>
   (path: string | string[], opt?: RimrafOptions): void => {
     const options = optArg(opt)
+    if (options.glob) {
+      path = globSync(path, options.glob)
+    }
     return Array.isArray(path)
       ? path.forEach(p => fn(pathArg(p, options), options))
       : fn(pathArg(path, options), options)

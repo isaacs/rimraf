@@ -1,7 +1,7 @@
 const t = require('tap')
 const optArg = require('../dist/cjs/src/opt-arg.js').default
 const opt = { a: 1 }
-t.equal(optArg(opt), opt, 'returns object if provided')
+t.same(optArg(opt), opt, 'returns equivalent object if provided')
 t.same(optArg(), {}, 'returns new object otherwise')
 
 t.throws(() => optArg(true))
@@ -27,7 +27,8 @@ t.test('every kind of invalid option value', t => {
                 maxRetries === undefined &&
                 retryDelay === undefined &&
                 backoff === undefined &&
-                maxBackoff === undefined
+                maxBackoff === undefined &&
+                tmp === undefined
               ) {
                 continue
               }
@@ -38,6 +39,7 @@ t.test('every kind of invalid option value', t => {
                   retryDelay,
                   backoff,
                   maxBackoff,
+                  tmp,
                 })
               )
             }
@@ -68,6 +70,7 @@ t.test('test every allowed combination', t => {
                   retryDelay,
                   backoff,
                   maxBackoff,
+                  tmp,
                 })
               )
             }
@@ -76,5 +79,44 @@ t.test('test every allowed combination', t => {
       }
     }
   }
+  t.end()
+})
+
+t.test('glob option handling', t => {
+  t.same(optArg({ glob: true }), {
+    glob: { absolute: true, withFileTypes: false },
+  })
+  const gws = optArg({ signal: { x: 1 }, glob: true })
+  t.same(gws, {
+    signal: { x: 1 },
+    glob: { absolute: true, signal: { x: 1 }, withFileTypes: false },
+  })
+  t.equal(gws.signal, gws.glob.signal)
+  t.same(optArg({ glob: { nodir: true } }), {
+    glob: { absolute: true, nodir: true, withFileTypes: false },
+  })
+  const gwsg = optArg({ signal: { x: 1 }, glob: { nodir: true } })
+  t.same(gwsg, {
+    signal: { x: 1 },
+    glob: {
+      absolute: true,
+      nodir: true,
+      withFileTypes: false,
+      signal: { x: 1 },
+    },
+  })
+  t.equal(gwsg.signal, gwsg.glob.signal)
+  t.same(
+    optArg({ signal: { x: 1 }, glob: { nodir: true, signal: { y: 1 } } }),
+    {
+      signal: { x: 1 },
+      glob: {
+        absolute: true,
+        nodir: true,
+        signal: { y: 1 },
+        withFileTypes: false,
+      },
+    }
+  )
   t.end()
 })
