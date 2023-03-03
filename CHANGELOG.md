@@ -1,3 +1,7 @@
+# v4.2
+
+- Brought back `glob` support, using the new and improved glob v9
+
 # v4.1
 
 - Improved hybrid module with no need to look at the `.default`
