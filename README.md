@@ -5,7 +5,8 @@ Install with `npm install rimraf`.
 ## Major Changes from v3 to v4
 
 - The function returns a `Promise` instead of taking a callback.
-- Built-in glob support removed.
+- Globbing requires the `--glob` option to be set. (Removed in
+  4.0 and 4.1, opt-in support added in 4.2.)
 - Functions take arrays of paths, as well as a single path.
 - Native implementation used by default when available, except on
   Windows, where this implementation is faster and more reliable.
