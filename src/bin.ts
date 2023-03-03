@@ -44,7 +44,7 @@ const main = async (...args: string[]) => {
   const opt: RimrafOptions = {}
   const paths: string[] = []
   let dashdash = false
-  let impl: (path: string | string[], opt?: RimrafOptions) => Promise<void> =
+  let impl: (path: string | string[], opt?: RimrafOptions) => Promise<boolean> =
     rimraf
 
   for (const arg of args) {

@@ -6,6 +6,10 @@ import { RimrafOptions } from './index.js'
 // rm implementation is less advanced.  Change this code if that changes.
 import platform from './platform.js'
 export const useNative: (opt?: RimrafOptions) => boolean =
-  !hasNative || platform === 'win32' ? () => false : opt => !opt?.signal
+  !hasNative || platform === 'win32'
+    ? () => false
+    : opt => !opt?.signal && !opt?.filter
 export const useNativeSync: (opt?: RimrafOptions) => boolean =
-  !hasNative || platform === 'win32' ? () => false : opt => !opt?.signal
+  !hasNative || platform === 'win32'
+    ? () => false
+    : opt => !opt?.signal && !opt?.filter

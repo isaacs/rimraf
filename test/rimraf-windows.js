@@ -1,4 +1,6 @@
 const t = require('tap')
+const { parse, basename, relative } = require('path')
+const { statSync } = require('fs')
 t.formatSnapshot = calls =>
   calls.map(args =>
     args.map(arg =>
@@ -32,7 +34,7 @@ const fixture = {
   },
 }
 
-t.only('actually delete some stuff', async t => {
+t.test('actually delete some stuff', async t => {
   const fs = require('../dist/cjs/src/fs.js')
   const fsMock = { ...fs, promises: { ...fs.promises } }
 
@@ -47,7 +49,7 @@ t.only('actually delete some stuff', async t => {
   const danglers = []
   const unlinkLater = path => {
     const p = new Promise(res => {
-      setTimeout(() => unlink(path).then(res, res), 50)
+      setTimeout(() => unlink(path).then(res, res), 100)
     })
     danglers.push(p)
   }
@@ -55,7 +57,9 @@ t.only('actually delete some stuff', async t => {
   fsMock.promises.unlink = async path => unlinkLater(path)
 
   // but actually do wait to clean them up, though
-  t.teardown(() => Promise.all(danglers))
+  t.teardown(async () => {
+    await Promise.all(danglers)
+  })
 
   const { rimrafPosix, rimrafPosixSync } = t.mock(
     '../dist/cjs/src/rimraf-posix.js',
@@ -75,9 +79,9 @@ t.only('actually delete some stuff', async t => {
       t.throws(() => rimrafPosixSync(path))
       t.end()
     })
-    t.test('async', t => {
+    t.test('async', async t => {
       const path = t.testdir(fixture)
-      t.rejects(() => rimrafPosix(path))
+      await t.rejects(() => rimrafPosix(path))
       t.end()
     })
     t.end()
@@ -98,12 +102,12 @@ t.only('actually delete some stuff', async t => {
     const path = t.testdir(fixture)
     await rimrafWindows(path, {})
     t.throws(() => statSync(path), { code: 'ENOENT' }, 'deleted')
-    t.resolves(rimrafWindows(path, {}), 'deleting a second time is OK')
+    await t.resolves(rimrafWindows(path, {}), 'deleting a second time is OK')
   })
   t.end()
 })
 
-t.only('throw unlink errors', async t => {
+t.test('throw unlink errors', async t => {
   const fs = require('../dist/cjs/src/fs.js')
   // only throw once here, or else it messes with tap's fixture cleanup
   // that's probably a bug in t.mock?
@@ -148,7 +152,7 @@ t.only('throw unlink errors', async t => {
   t.end()
 })
 
-t.only('ignore ENOENT unlink errors', async t => {
+t.test('ignore ENOENT unlink errors', async t => {
   const fs = require('../dist/cjs/src/fs.js')
   const threwAsync = false
   let threwSync = false
@@ -200,12 +204,12 @@ t.test('throw rmdir errors', async t => {
     {
       '../dist/cjs/src/fs.js': {
         ...fs,
-        rmdirSync: path => {
+        rmdirSync: () => {
           throw Object.assign(new Error('cannot rmdir'), { code: 'FOO' })
         },
         promises: {
           ...fs.promises,
-          rmdir: async path => {
+          rmdir: async () => {
             throw Object.assign(new Error('cannot rmdir'), { code: 'FOO' })
           },
         },
@@ -234,12 +238,12 @@ t.test('throw unexpected readdir errors', async t => {
     {
       '../dist/cjs/src/fs.js': {
         ...fs,
-        readdirSync: path => {
+        readdirSync: () => {
           throw Object.assign(new Error('cannot readdir'), { code: 'FOO' })
         },
         promises: {
           ...fs.promises,
-          readdir: async path => {
+          readdir: async () => {
             throw Object.assign(new Error('cannot readdir'), { code: 'FOO' })
           },
         },
@@ -450,7 +454,6 @@ t.test('handle EPERMs, chmod raises something other than ENOENT', async t => {
 t.test('rimraffing root, do not actually rmdir root', async t => {
   const fs = require('../dist/cjs/src/fs.js')
   let ROOT = null
-  const { parse } = require('path')
   const { rimrafWindows, rimrafWindowsSync } = t.mock(
     '../dist/cjs/src/rimraf-windows.js',
     {
@@ -525,3 +528,82 @@ t.test(
     t.end()
   }
 )
+
+t.test('filter function', t => {
+  t.formatSnapshot = undefined
+  const {
+    rimrafWindows,
+    rimrafWindowsSync,
+  } = require('../dist/cjs/src/rimraf-windows.js')
+
+  for (const f of ['i', 'j']) {
+    t.test(`filter=${f}`, t => {
+      t.test('sync', t => {
+        const dir = t.testdir(fixture)
+        const saw = []
+        const filter = p => {
+          saw.push(relative(process.cwd(), p).replace(/\\/g, '/'))
+          return basename(p) !== f
+        }
+        rimrafWindowsSync(dir, { filter })
+        t.matchSnapshot(
+          saw.sort((a, b) => a.localeCompare(b, 'en')),
+          'paths seen'
+        )
+        statSync(dir)
+        statSync(dir + '/c')
+        statSync(dir + '/c/f')
+        statSync(dir + '/c/f/i')
+        if (f === 'j') {
+          statSync(dir + '/c/f/i/j')
+        } else {
+          t.throws(() => statSync(dir + '/c/f/i/j'))
+        }
+        t.throws(() => statSync(dir + '/a'))
+        t.throws(() => statSync(dir + '/b'))
+        t.throws(() => statSync(dir + '/c/d'))
+        t.throws(() => statSync(dir + '/c/e'))
+        t.throws(() => statSync(dir + '/c/f/g'))
+        t.throws(() => statSync(dir + '/c/f/h'))
+        t.throws(() => statSync(dir + '/c/f/i/k'))
+        t.throws(() => statSync(dir + '/c/f/i/l'))
+        t.throws(() => statSync(dir + '/c/f/i/m'))
+        t.end()
+      })
+
+      t.test('async', async t => {
+        const dir = t.testdir(fixture)
+        const saw = []
+        const filter = p => {
+          saw.push(relative(process.cwd(), p).replace(/\\/g, '/'))
+          return basename(p) !== f
+        }
+        await rimrafWindows(dir, { filter })
+        t.matchSnapshot(
+          saw.sort((a, b) => a.localeCompare(b, 'en')),
+          'paths seen'
+        )
+        statSync(dir)
+        statSync(dir + '/c')
+        statSync(dir + '/c/f')
+        statSync(dir + '/c/f/i')
+        if (f === 'j') {
+          statSync(dir + '/c/f/i/j')
+        } else {
+          t.throws(() => statSync(dir + '/c/f/i/j'))
+        }
+        t.throws(() => statSync(dir + '/a'))
+        t.throws(() => statSync(dir + '/b'))
+        t.throws(() => statSync(dir + '/c/d'))
+        t.throws(() => statSync(dir + '/c/e'))
+        t.throws(() => statSync(dir + '/c/f/g'))
+        t.throws(() => statSync(dir + '/c/f/h'))
+        t.throws(() => statSync(dir + '/c/f/i/k'))
+        t.throws(() => statSync(dir + '/c/f/i/l'))
+        t.throws(() => statSync(dir + '/c/f/i/m'))
+      })
+      t.end()
+    })
+  }
+  t.end()
+})

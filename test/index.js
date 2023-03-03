@@ -139,8 +139,8 @@ t.test('actually delete some stuff', t => {
       },
     },
   }
-  const { rimraf, rimrafSync } = require('../')
-  const { statSync } = require('../dist/cjs/src/fs.js')
+  const { rimraf } = require('../')
+  const { statSync } = require('fs')
   t.test('sync', t => {
     const path = t.testdir(fixture)
     rimraf.sync(path)
@@ -150,7 +150,7 @@ t.test('actually delete some stuff', t => {
   t.test('async', async t => {
     const path = t.testdir(fixture)
     await rimraf(path)
-    t.throws(() => statSync(path), { code: 'ENOENT' }, 'deleted')
+    t.throws(() => statSync(path), { code: 'ENOENT' })
   })
   t.end()
 })
@@ -169,8 +169,8 @@ t.test('accept array of paths as first arg', async t => {
       rimrafNativeSync: (path, opt) => SYNC_CALLS.push([path, opt]),
     },
   })
-  t.equal(await rimraf(['a', 'b', 'c']), undefined)
-  t.equal(await rimraf(['i', 'j', 'k'], { x: 'ya' }), undefined)
+  t.equal(await rimraf(['a', 'b', 'c']), true)
+  t.equal(await rimraf(['i', 'j', 'k'], { x: 'ya' }), true)
   t.same(ASYNC_CALLS, [
     [resolve('a'), {}],
     [resolve('b'), {}],
@@ -180,8 +180,8 @@ t.test('accept array of paths as first arg', async t => {
     [resolve('k'), { x: 'ya' }],
   ])
 
-  t.equal(rimrafSync(['x', 'y', 'z']), undefined)
-  t.equal(rimrafSync(['m', 'n', 'o'], { cat: 'chai' }), undefined)
+  t.equal(rimrafSync(['x', 'y', 'z']), true)
+  t.equal(rimrafSync(['m', 'n', 'o'], { cat: 'chai' }), true)
   t.same(SYNC_CALLS, [
     [resolve('x'), {}],
     [resolve('y'), {}],

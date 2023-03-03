@@ -72,14 +72,13 @@ const unlinkFixEPERMSync = (path: string) => {
 export const rimrafMoveRemove = async (
   path: string,
   opt: RimrafOptions
-): Promise<void> => {
+): Promise<boolean> => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason
   }
   if (!opt.tmp) {
     return rimrafMoveRemove(path, { ...opt, tmp: await defaultTmp(path) })
   }
-
   if (path === opt.tmp && parse(path).root !== path) {
     throw new Error('cannot delete temp directory used for deletion')
   }
@@ -87,28 +86,38 @@ export const rimrafMoveRemove = async (
   const entries = await readdirOrError(path)
   if (!Array.isArray(entries)) {
     if (entries.code === 'ENOENT') {
-      return
+      return true
     }
-
     if (entries.code !== 'ENOTDIR') {
       throw entries
     }
-
-    return await ignoreENOENT(tmpUnlink(path, opt.tmp, unlinkFixEPERM))
+    if (opt.filter && !opt.filter(path)) {
+      return false
+    }
+    await ignoreENOENT(tmpUnlink(path, opt.tmp, unlinkFixEPERM))
+    return true
   }
 
-  await Promise.all(
-    entries.map(entry => rimrafMoveRemove(resolve(path, entry), opt))
-  )
+  const removedAll = (
+    await Promise.all(
+      entries.map(entry => rimrafMoveRemove(resolve(path, entry), opt))
+    )
+  ).reduce((a, b) => a && b, true)
+  if (!removedAll) {
+    return false
+  }
 
   // we don't ever ACTUALLY try to unlink /, because that can never work
   // but when preserveRoot is false, we could be operating on it.
   // No need to check if preserveRoot is not false.
   if (opt.preserveRoot === false && path === parse(path).root) {
-    return
+    return false
   }
-
-  return await ignoreENOENT(tmpUnlink(path, opt.tmp, rmdir))
+  if (opt.filter && !opt.filter(path)) {
+    return false
+  }
+  await ignoreENOENT(tmpUnlink(path, opt.tmp, rmdir))
+  return true
 }
 
 const tmpUnlink = async (
@@ -124,7 +133,7 @@ const tmpUnlink = async (
 export const rimrafMoveRemoveSync = (
   path: string,
   opt: RimrafOptions
-): void => {
+): boolean => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason
   }
@@ -140,25 +149,33 @@ export const rimrafMoveRemoveSync = (
   const entries = readdirOrErrorSync(path)
   if (!Array.isArray(entries)) {
     if (entries.code === 'ENOENT') {
-      return
+      return true
     }
-
     if (entries.code !== 'ENOTDIR') {
       throw entries
     }
-
-    return ignoreENOENTSync(() => tmpUnlinkSync(path, tmp, unlinkFixEPERMSync))
+    if (opt.filter && !opt.filter(path)) {
+      return false
+    }
+    ignoreENOENTSync(() => tmpUnlinkSync(path, tmp, unlinkFixEPERMSync))
+    return true
   }
 
+  let removedAll = true
   for (const entry of entries) {
-    rimrafMoveRemoveSync(resolve(path, entry), opt)
+    removedAll = rimrafMoveRemoveSync(resolve(path, entry), opt) && removedAll
   }
-
+  if (!removedAll) {
+    return false
+  }
   if (opt.preserveRoot === false && path === parse(path).root) {
-    return
+    return false
   }
-
-  return ignoreENOENTSync(() => tmpUnlinkSync(path, tmp, rmdirSync))
+  if (opt.filter && !opt.filter(path)) {
+    return false
+  }
+  ignoreENOENTSync(() => tmpUnlinkSync(path, tmp, rmdirSync))
+  return true
 }
 
 const tmpUnlinkSync = (

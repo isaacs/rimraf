@@ -1,3 +1,8 @@
+# 4.3
+
+- Return boolean indicating whether the path was fully removed
+- Add filter option
+
 # v4.2
 
 - Brought back `glob` support, using the new and improved glob v9

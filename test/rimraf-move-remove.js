@@ -10,6 +10,9 @@ t.formatSnapshot = calls =>
     )
   )
 
+const { relative, basename } = require('path')
+const { statSync } = require('fs')
+
 const fixture = {
   a: 'a',
   b: 'b',
@@ -535,3 +538,82 @@ t.test(
     t.end()
   }
 )
+
+t.test('filter function', t => {
+  t.formatSnapshot = undefined
+  const {
+    rimrafMoveRemove,
+    rimrafMoveRemoveSync,
+  } = require('../dist/cjs/src/rimraf-move-remove.js')
+
+  for (const f of ['i', 'j']) {
+    t.test(`filter=${f}`, t => {
+      t.test('sync', t => {
+        const dir = t.testdir(fixture)
+        const saw = []
+        const filter = p => {
+          saw.push(relative(process.cwd(), p).replace(/\\/g, '/'))
+          return basename(p) !== f
+        }
+        rimrafMoveRemoveSync(dir, { filter })
+        t.matchSnapshot(
+          saw.sort((a, b) => a.localeCompare(b, 'en')),
+          'paths seen'
+        )
+        statSync(dir)
+        statSync(dir + '/c')
+        statSync(dir + '/c/f')
+        statSync(dir + '/c/f/i')
+        if (f === 'j') {
+          statSync(dir + '/c/f/i/j')
+        } else {
+          t.throws(() => statSync(dir + '/c/f/i/j'))
+        }
+        t.throws(() => statSync(dir + '/a'))
+        t.throws(() => statSync(dir + '/b'))
+        t.throws(() => statSync(dir + '/c/d'))
+        t.throws(() => statSync(dir + '/c/e'))
+        t.throws(() => statSync(dir + '/c/f/g'))
+        t.throws(() => statSync(dir + '/c/f/h'))
+        t.throws(() => statSync(dir + '/c/f/i/k'))
+        t.throws(() => statSync(dir + '/c/f/i/l'))
+        t.throws(() => statSync(dir + '/c/f/i/m'))
+        t.end()
+      })
+
+      t.test('async', async t => {
+        const dir = t.testdir(fixture)
+        const saw = []
+        const filter = p => {
+          saw.push(relative(process.cwd(), p).replace(/\\/g, '/'))
+          return basename(p) !== f
+        }
+        await rimrafMoveRemove(dir, { filter })
+        t.matchSnapshot(
+          saw.sort((a, b) => a.localeCompare(b, 'en')),
+          'paths seen'
+        )
+        statSync(dir)
+        statSync(dir + '/c')
+        statSync(dir + '/c/f')
+        statSync(dir + '/c/f/i')
+        if (f === 'j') {
+          statSync(dir + '/c/f/i/j')
+        } else {
+          t.throws(() => statSync(dir + '/c/f/i/j'))
+        }
+        t.throws(() => statSync(dir + '/a'))
+        t.throws(() => statSync(dir + '/b'))
+        t.throws(() => statSync(dir + '/c/d'))
+        t.throws(() => statSync(dir + '/c/e'))
+        t.throws(() => statSync(dir + '/c/f/g'))
+        t.throws(() => statSync(dir + '/c/f/h'))
+        t.throws(() => statSync(dir + '/c/f/i/k'))
+        t.throws(() => statSync(dir + '/c/f/i/l'))
+        t.throws(() => statSync(dir + '/c/f/i/m'))
+      })
+      t.end()
+    })
+  }
+  t.end()
+})

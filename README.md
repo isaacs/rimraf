@@ -15,6 +15,7 @@ Install with `npm install rimraf`.
   resolve the situation.
 - Simplified implementation on Posix, since the Windows
   affordances are not necessary there.
+- As of 4.3, return/resolve value is boolean instead of undefined
 
 ## API
 
@@ -31,6 +32,12 @@ import { rimraf, rimrafSync, native, nativeSync } from 'rimraf'
 // or
 const { rimraf, rimrafSync, native, nativeSync } = require('rimraf')
 ```
+
+All removal functions return a boolean indicating that all
+entries were successfully removed.
+
+The only case in which this will not return `true` is if
+something was omitted from the removal via a `filter` option.
 
 ### `rimraf(f, [opts]) -> Promise`
 
@@ -64,9 +71,24 @@ Options:
   linear backoff. Default `100`.
 - `signal` Pass in an AbortSignal to cancel the directory
   removal. This is useful when removing large folder structures,
-  if you'd like to limit the amount of time spent. Using a
-  `signal` option prevents the use of Node's built-in `fs.rm`
-  because that implementation does not support abort signals.
+  if you'd like to limit the amount of time spent.
+
+  Using a `signal` option prevents the use of Node's built-in
+  `fs.rm` because that implementation does not support abort
+  signals.
+
+- `filter` Method that receives a path string as an argument, and
+  returns a boolean indicating whether that path should be
+  deleted.
+
+  If a filter method is provided, it _must_ return a truthy
+  value, or nothing will be removed. Filtering out a directory
+  will still allow its children to be removed, unless they are
+  also filtered out, but any parents of a filtered entry will not
+  be removed.
+
+  Using a filter method prevents the use of Node's built-in
+  `fs.rm` because that implementation does not support filtering.
 
 Any other options are provided to the native Node.js `fs.rm` implementation
 when that is used.

@@ -12,6 +12,8 @@ const {
   rimrafPosix,
   rimrafPosixSync,
 } = require('../dist/cjs/src/rimraf-posix.js')
+const { parse, relative, basename } = require('path')
+const { statSync } = require('fs')
 
 const fs = require('../dist/cjs/src/fs.js')
 
@@ -175,7 +177,6 @@ t.test('ignore ENOENTs from unlink/rmdir', async t => {
 
 t.test('rimraffing root, do not actually rmdir root', async t => {
   let ROOT = null
-  const { parse } = require('path')
   const { rimrafPosix, rimrafPosixSync } = t.mock(
     '../dist/cjs/src/rimraf-posix.js',
     {
@@ -206,26 +207,109 @@ t.test('rimraffing root, do not actually rmdir root', async t => {
   t.end()
 })
 
-t.test('abort on signal', { skip: typeof AbortController === 'undefined' }, t => {
+t.test(
+  'abort on signal',
+  { skip: typeof AbortController === 'undefined' },
+  t => {
+    const {
+      rimrafPosix,
+      rimrafPosixSync,
+    } = require('../dist/cjs/src/rimraf-posix.js')
+    t.test('sync', t => {
+      const d = t.testdir(fixture)
+      const ac = new AbortController()
+      const { signal } = ac
+      ac.abort(new Error('aborted rimraf'))
+      t.throws(() => rimrafPosixSync(d, { signal }))
+      t.end()
+    })
+    t.test('async', async t => {
+      const d = t.testdir(fixture)
+      const ac = new AbortController()
+      const { signal } = ac
+      const p = t.rejects(() => rimrafPosix(d, { signal }))
+      ac.abort(new Error('aborted rimraf'))
+      await p
+    })
+    t.end()
+  }
+)
+
+t.test('filter function', t => {
+  t.formatSnapshot = undefined
   const {
     rimrafPosix,
     rimrafPosixSync,
   } = require('../dist/cjs/src/rimraf-posix.js')
-  t.test('sync', t => {
-    const d = t.testdir(fixture)
-    const ac = new AbortController()
-    const { signal } = ac
-    ac.abort(new Error('aborted rimraf'))
-    t.throws(() => rimrafPosixSync(d, { signal }))
-    t.end()
-  })
-  t.test('async', async t => {
-    const d = t.testdir(fixture)
-    const ac = new AbortController()
-    const { signal } = ac
-    const p = t.rejects(() => rimrafPosix(d, { signal }))
-    ac.abort(new Error('aborted rimraf'))
-    await p
-  })
+
+  for (const f of ['i', 'j']) {
+    t.test(`filter=${f}`, t => {
+      t.test('sync', t => {
+        const dir = t.testdir(fixture)
+        const saw = []
+        const filter = p => {
+          saw.push(relative(process.cwd(), p).replace(/\\/g, '/'))
+          return basename(p) !== f
+        }
+        rimrafPosixSync(dir, { filter })
+        t.matchSnapshot(
+          saw.sort((a, b) => a.localeCompare(b, 'en')),
+          'paths seen'
+        )
+        statSync(dir)
+        statSync(dir + '/c')
+        statSync(dir + '/c/f')
+        statSync(dir + '/c/f/i')
+        if (f === 'j') {
+          statSync(dir + '/c/f/i/j')
+        } else {
+          t.throws(() => statSync(dir + '/c/f/i/j'))
+        }
+        t.throws(() => statSync(dir + '/a'))
+        t.throws(() => statSync(dir + '/b'))
+        t.throws(() => statSync(dir + '/c/d'))
+        t.throws(() => statSync(dir + '/c/e'))
+        t.throws(() => statSync(dir + '/c/f/g'))
+        t.throws(() => statSync(dir + '/c/f/h'))
+        t.throws(() => statSync(dir + '/c/f/i/k'))
+        t.throws(() => statSync(dir + '/c/f/i/l'))
+        t.throws(() => statSync(dir + '/c/f/i/m'))
+        t.end()
+      })
+
+      t.test('async', async t => {
+        const dir = t.testdir(fixture)
+        const saw = []
+        const filter = p => {
+          saw.push(relative(process.cwd(), p).replace(/\\/g, '/'))
+          return basename(p) !== f
+        }
+        await rimrafPosix(dir, { filter })
+        t.matchSnapshot(
+          saw.sort((a, b) => a.localeCompare(b, 'en')),
+          'paths seen'
+        )
+        statSync(dir)
+        statSync(dir + '/c')
+        statSync(dir + '/c/f')
+        statSync(dir + '/c/f/i')
+        if (f === 'j') {
+          statSync(dir + '/c/f/i/j')
+        } else {
+          t.throws(() => statSync(dir + '/c/f/i/j'))
+        }
+        t.throws(() => statSync(dir + '/a'))
+        t.throws(() => statSync(dir + '/b'))
+        t.throws(() => statSync(dir + '/c/d'))
+        t.throws(() => statSync(dir + '/c/e'))
+        t.throws(() => statSync(dir + '/c/f/g'))
+        t.throws(() => statSync(dir + '/c/f/h'))
+        t.throws(() => statSync(dir + '/c/f/i/k'))
+        t.throws(() => statSync(dir + '/c/f/i/l'))
+        t.throws(() => statSync(dir + '/c/f/i/m'))
+      })
+      t.end()
+    })
+  }
   t.end()
 })

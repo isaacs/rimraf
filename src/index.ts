@@ -12,6 +12,7 @@ export interface RimrafOptions {
   maxBackoff?: number
   signal?: AbortSignal
   glob?: boolean | GlobOptions
+  filter?: (path: string) => boolean
 }
 
 const typeOrUndef = (val: any, t: string) =>
@@ -26,7 +27,8 @@ export const isRimrafOptions = (o: any): o is RimrafOptions =>
   typeOrUndef(o.retryDelay, 'number') &&
   typeOrUndef(o.backoff, 'number') &&
   typeOrUndef(o.maxBackoff, 'number') &&
-  (typeOrUndef(o.glob, 'boolean') || (o.glob && typeof o.glob === 'object'))
+  (typeOrUndef(o.glob, 'boolean') || (o.glob && typeof o.glob === 'object')) &&
+  typeOrUndef(o.filter, 'function')
 
 export const assertRimrafOptions: (o: any) => void = (
   o: any
@@ -44,27 +46,35 @@ import { rimrafWindows, rimrafWindowsSync } from './rimraf-windows.js'
 import { useNative, useNativeSync } from './use-native.js'
 
 const wrap =
-  (fn: (p: string, o: RimrafOptions) => Promise<void>) =>
-  async (path: string | string[], opt?: RimrafOptions): Promise<void> => {
+  (fn: (p: string, o: RimrafOptions) => Promise<boolean>) =>
+  async (path: string | string[], opt?: RimrafOptions): Promise<boolean> => {
     const options = optArg(opt)
     if (options.glob) {
       path = await glob(path, options.glob)
     }
-    await (Array.isArray(path)
-      ? Promise.all(path.map(p => fn(pathArg(p, options), options)))
-      : fn(pathArg(path, options), options))
+    if (Array.isArray(path)) {
+      return !!(
+        await Promise.all(path.map(p => fn(pathArg(p, options), options)))
+      ).reduce((a, b) => a && b, true)
+    } else {
+      return !!(await fn(pathArg(path, options), options))
+    }
   }
 
 const wrapSync =
-  (fn: (p: string, o: RimrafOptions) => void) =>
-  (path: string | string[], opt?: RimrafOptions): void => {
+  (fn: (p: string, o: RimrafOptions) => boolean) =>
+  (path: string | string[], opt?: RimrafOptions): boolean => {
     const options = optArg(opt)
     if (options.glob) {
       path = globSync(path, options.glob)
     }
-    return Array.isArray(path)
-      ? path.forEach(p => fn(pathArg(p, options), options))
-      : fn(pathArg(path, options), options)
+    if (Array.isArray(path)) {
+      return !!path
+        .map(p => fn(pathArg(p, options), options))
+        .reduce((a, b) => a && b, true)
+    } else {
+      return !!fn(pathArg(path, options), options)
+    }
   }
 
 export const nativeSync = wrapSync(rimrafNativeSync)

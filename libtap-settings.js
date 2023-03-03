@@ -4,6 +4,6 @@ const rimraf = require('./')
 module.exports = {
   rmdirRecursiveSync: path => rimraf.sync(path),
   rmdirRecursive(path, cb) {
-    rimraf(path).then(cb, cb)
+    rimraf(path, {}).then(() => cb(), cb)
   },
 }

@@ -15,55 +15,87 @@ import { readdirOrError, readdirOrErrorSync } from './readdir-or-error.js'
 import { RimrafOptions } from '.'
 import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'
 
-export const rimrafPosix = async (path: string, opt: RimrafOptions) => {
+export const rimrafPosix = async (
+  path: string,
+  opt: RimrafOptions
+): Promise<boolean> => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason
   }
   const entries = await readdirOrError(path)
   if (!Array.isArray(entries)) {
     if (entries.code === 'ENOENT') {
-      return
+      return true
     }
     if (entries.code !== 'ENOTDIR') {
       throw entries
     }
-    return ignoreENOENT(unlink(path))
+    if (opt.filter && !opt.filter(path)) {
+      return false
+    }
+    await ignoreENOENT(unlink(path))
+    return true
   }
-  await Promise.all(
-    entries.map(entry => rimrafPosix(resolve(path, entry), opt))
-  )
+
+  const removedAll = (
+    await Promise.all(
+      entries.map(entry => rimrafPosix(resolve(path, entry), opt))
+    )
+  ).reduce((a, b) => a && b, true)
+
+  if (!removedAll) {
+    return false
+  }
 
   // we don't ever ACTUALLY try to unlink /, because that can never work
   // but when preserveRoot is false, we could be operating on it.
   // No need to check if preserveRoot is not false.
   if (opt.preserveRoot === false && path === parse(path).root) {
-    return
+    return false
   }
 
-  return ignoreENOENT(rmdir(path))
+  if (opt.filter && !opt.filter(path)) {
+    return false
+  }
+
+  await ignoreENOENT(rmdir(path))
+  return true
 }
 
-export const rimrafPosixSync = (path: string, opt: RimrafOptions) => {
+export const rimrafPosixSync = (path: string, opt: RimrafOptions): boolean => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason
   }
   const entries = readdirOrErrorSync(path)
   if (!Array.isArray(entries)) {
     if (entries.code === 'ENOENT') {
-      return
+      return true
     }
     if (entries.code !== 'ENOTDIR') {
       throw entries
     }
-    return ignoreENOENTSync(() => unlinkSync(path))
+    if (opt.filter && !opt.filter(path)) {
+      return false
+    }
+    ignoreENOENTSync(() => unlinkSync(path))
+    return true
   }
+  let removedAll: boolean = true
   for (const entry of entries) {
-    rimrafPosixSync(resolve(path, entry), opt)
+    removedAll = rimrafPosixSync(resolve(path, entry), opt) && removedAll
+  }
+  if (!removedAll) {
+    return false
   }
 
   if (opt.preserveRoot === false && path === parse(path).root) {
-    return
+    return false
   }
 
-  return ignoreENOENTSync(() => rmdirSync(path))
+  if (opt.filter && !opt.filter(path)) {
+    return false
+  }
+
+  ignoreENOENTSync(() => rmdirSync(path))
+  return true
 }
