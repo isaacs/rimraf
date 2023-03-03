@@ -1,10 +1,10 @@
-import { RimrafOptions } from '.'
+import { RimrafAsyncOptions, RimrafSyncOptions } from '.'
 import { promises, rmSync } from './fs.js'
 const { rm } = promises
 
 export const rimrafNative = async (
   path: string,
-  opt: RimrafOptions
+  opt: RimrafAsyncOptions
 ): Promise<boolean> => {
   await rm(path, {
     ...opt,
@@ -14,7 +14,10 @@ export const rimrafNative = async (
   return true
 }
 
-export const rimrafNativeSync = (path: string, opt: RimrafOptions): boolean => {
+export const rimrafNativeSync = (
+  path: string,
+  opt: RimrafSyncOptions
+): boolean => {
   rmSync(path, {
     ...opt,
     force: true,

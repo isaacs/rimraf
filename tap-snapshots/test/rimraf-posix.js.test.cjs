@@ -23,6 +23,24 @@ Array [
 ]
 `
 
+exports[`test/rimraf-posix.js TAP filter function filter=i async filter > paths seen 1`] = `
+Array [
+  "test/tap-testdir-rimraf-posix-filter-function-filter-i-async-filter/a",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-i-async-filter/b",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-i-async-filter/c/d",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-i-async-filter/c/e",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-i-async-filter/c/f/g",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-i-async-filter/c/f/h",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-i-async-filter/c/f/i",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-i-async-filter/c/f/i/j",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-i-async-filter/c/f/i/k",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-i-async-filter/c/f/i/l",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-i-async-filter/c/f/i/m",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-i-async-filter/c/f/i/m/n",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-i-async-filter/c/f/i/m/o",
+]
+`
+
 exports[`test/rimraf-posix.js TAP filter function filter=i sync > paths seen 1`] = `
 Array [
   "test/tap-testdir-rimraf-posix-filter-function-filter-i-sync/a",
@@ -55,6 +73,23 @@ Array [
   "test/tap-testdir-rimraf-posix-filter-function-filter-j-async/c/f/i/m",
   "test/tap-testdir-rimraf-posix-filter-function-filter-j-async/c/f/i/m/n",
   "test/tap-testdir-rimraf-posix-filter-function-filter-j-async/c/f/i/m/o",
+]
+`
+
+exports[`test/rimraf-posix.js TAP filter function filter=j async filter > paths seen 1`] = `
+Array [
+  "test/tap-testdir-rimraf-posix-filter-function-filter-j-async-filter/a",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-j-async-filter/b",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-j-async-filter/c/d",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-j-async-filter/c/e",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-j-async-filter/c/f/g",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-j-async-filter/c/f/h",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-j-async-filter/c/f/i/j",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-j-async-filter/c/f/i/k",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-j-async-filter/c/f/i/l",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-j-async-filter/c/f/i/m",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-j-async-filter/c/f/i/m/n",
+  "test/tap-testdir-rimraf-posix-filter-function-filter-j-async-filter/c/f/i/m/o",
 ]
 `
 

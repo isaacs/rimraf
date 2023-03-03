@@ -9,7 +9,7 @@
 // Note: "move then remove" is 2-10 times slower, and just as unreliable.
 
 import { parse, resolve } from 'path'
-import { RimrafOptions } from '.'
+import { RimrafAsyncOptions, RimrafSyncOptions } from '.'
 import { fixEPERM, fixEPERMSync } from './fix-eperm.js'
 import { promises, rmdirSync, unlinkSync } from './fs.js'
 import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'
@@ -25,7 +25,7 @@ const rimrafWindowsDirSync = retryBusySync(fixEPERMSync(rmdirSync))
 
 const rimrafWindowsDirMoveRemoveFallback = async (
   path: string,
-  opt: RimrafOptions
+  opt: RimrafAsyncOptions
 ): Promise<boolean> => {
   /* c8 ignore start */
   if (opt?.signal?.aborted) {
@@ -46,7 +46,7 @@ const rimrafWindowsDirMoveRemoveFallback = async (
 
 const rimrafWindowsDirMoveRemoveFallbackSync = (
   path: string,
-  opt: RimrafOptions
+  opt: RimrafSyncOptions
 ): boolean => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason
@@ -71,7 +71,7 @@ const states = new Set([START, CHILD, FINISH])
 
 export const rimrafWindows = async (
   path: string,
-  opt: RimrafOptions,
+  opt: RimrafAsyncOptions,
   state = START
 ): Promise<boolean> => {
   if (opt?.signal?.aborted) {
@@ -89,7 +89,7 @@ export const rimrafWindows = async (
     if (entries.code !== 'ENOTDIR') {
       throw entries
     }
-    if (opt.filter && !opt.filter(path)) {
+    if (opt.filter && !(await opt.filter(path))) {
       return false
     }
     // is a file
@@ -110,10 +110,10 @@ export const rimrafWindows = async (
     if (opt.preserveRoot === false && path === parse(path).root) {
       return false
     }
-    if (opt.filter && !opt.filter(path)) {
+    if (!removedAll) {
       return false
     }
-    if (!removedAll) {
+    if (opt.filter && !(await opt.filter(path))) {
       return false
     }
     await ignoreENOENT(rimrafWindowsDirMoveRemoveFallback(path, opt))
@@ -123,7 +123,7 @@ export const rimrafWindows = async (
 
 export const rimrafWindowsSync = (
   path: string,
-  opt: RimrafOptions,
+  opt: RimrafSyncOptions,
   state = START
 ): boolean => {
   if (!states.has(state)) {
@@ -158,10 +158,10 @@ export const rimrafWindowsSync = (
     if (opt.preserveRoot === false && path === parse(path).root) {
       return false
     }
-    if (opt.filter && !opt.filter(path)) {
+    if (!removedAll) {
       return false
     }
-    if (!removedAll) {
+    if (opt.filter && !opt.filter(path)) {
       return false
     }
     ignoreENOENTSync(() => {

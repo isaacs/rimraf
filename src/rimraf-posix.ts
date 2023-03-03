@@ -12,12 +12,12 @@ import { parse, resolve } from 'path'
 
 import { readdirOrError, readdirOrErrorSync } from './readdir-or-error.js'
 
-import { RimrafOptions } from '.'
+import { RimrafAsyncOptions, RimrafSyncOptions } from '.'
 import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'
 
 export const rimrafPosix = async (
   path: string,
-  opt: RimrafOptions
+  opt: RimrafAsyncOptions
 ): Promise<boolean> => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason
@@ -30,7 +30,7 @@ export const rimrafPosix = async (
     if (entries.code !== 'ENOTDIR') {
       throw entries
     }
-    if (opt.filter && !opt.filter(path)) {
+    if (opt.filter && !(await opt.filter(path))) {
       return false
     }
     await ignoreENOENT(unlink(path))
@@ -54,7 +54,7 @@ export const rimrafPosix = async (
     return false
   }
 
-  if (opt.filter && !opt.filter(path)) {
+  if (opt.filter && !(await opt.filter(path))) {
     return false
   }
 
@@ -62,7 +62,10 @@ export const rimrafPosix = async (
   return true
 }
 
-export const rimrafPosixSync = (path: string, opt: RimrafOptions): boolean => {
+export const rimrafPosixSync = (
+  path: string,
+  opt: RimrafSyncOptions
+): boolean => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason
   }
@@ -84,11 +87,11 @@ export const rimrafPosixSync = (path: string, opt: RimrafOptions): boolean => {
   for (const entry of entries) {
     removedAll = rimrafPosixSync(resolve(path, entry), opt) && removedAll
   }
-  if (!removedAll) {
+  if (opt.preserveRoot === false && path === parse(path).root) {
     return false
   }
 
-  if (opt.preserveRoot === false && path === parse(path).root) {
+  if (!removedAll) {
     return false
   }
 

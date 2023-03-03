@@ -1,9 +1,9 @@
-import platform from './platform.js'
-import { resolve, parse } from 'path'
+import { parse, resolve } from 'path'
 import { inspect } from 'util'
-import { RimrafOptions } from './index.js'
+import { RimrafAsyncOptions } from './index.js'
+import platform from './platform.js'
 
-const pathArg = (path: string, opt: RimrafOptions = {}) => {
+const pathArg = (path: string, opt: RimrafAsyncOptions = {}) => {
   const type = typeof path
   if (type !== 'string') {
     const ctor = path && type === 'object' && path.constructor

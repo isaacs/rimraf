@@ -79,13 +79,17 @@ Options:
 
 - `filter` Method that receives a path string as an argument, and
   returns a boolean indicating whether that path should be
-  deleted.
+  deleted.  With async rimraf methods, this may return a Promise
+  that resolves to a boolean.  (Since Promises are truthy,
+  returning a Promise from a sync filter is the same as just not
+  filtering anything.)
 
-  If a filter method is provided, it _must_ return a truthy
-  value, or nothing will be removed. Filtering out a directory
-  will still allow its children to be removed, unless they are
-  also filtered out, but any parents of a filtered entry will not
-  be removed.
+  If a filter method is provided, it will _only_ remove entries
+  if the filter returns (or resolves to) a truthy value. Omitting
+  a directory will still allow its children to be removed, unless
+  they are also filtered out, but any parents of a filtered entry
+  will not be removed, since the directory would not be empty in
+  that case.
 
   Using a filter method prevents the use of Node's built-in
   `fs.rm` because that implementation does not support filtering.

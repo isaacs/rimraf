@@ -1,13 +1,23 @@
 import { GlobOptions } from 'glob'
-import { assertRimrafOptions, RimrafOptions } from './index.js'
-export default (
-  opt: RimrafOptions = {}
-): RimrafOptions & {
-  glob?: GlobOptions & { withFileTypes: false }
-} => {
+import {
+  assertRimrafOptions,
+  RimrafAsyncOptions,
+  RimrafOptions,
+  RimrafSyncOptions,
+} from './index.js'
+
+const optArgT = <T extends RimrafOptions>(
+  opt: T
+):
+  | (T & {
+      glob: GlobOptions & { withFileTypes: false }
+    })
+  | (T & { glob: undefined }) => {
   assertRimrafOptions(opt)
   const { glob, ...options } = opt
-  if (!glob) return options
+  if (!glob) {
+    return options as T & { glob: undefined }
+  }
   const globOpt =
     glob === true
       ? opt.signal
@@ -28,5 +38,8 @@ export default (
       absolute: true,
       withFileTypes: false,
     },
-  }
+  } as T & { glob: GlobOptions & { withFileTypes: false } }
 }
+
+export const optArg = (opt: RimrafAsyncOptions = {}) => optArgT(opt)
+export const optArgSync = (opt: RimrafSyncOptions = {}) => optArgT(opt)

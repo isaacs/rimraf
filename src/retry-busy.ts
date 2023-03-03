@@ -1,6 +1,6 @@
 // note: max backoff is the maximum that any *single* backoff will do
 
-import { RimrafOptions } from '.'
+import { RimrafAsyncOptions, RimrafOptions } from '.'
 
 export const MAXBACKOFF = 200
 export const RATE = 1.2
@@ -10,7 +10,7 @@ export const codes = new Set(['EMFILE', 'ENFILE', 'EBUSY'])
 export const retryBusy = (fn: (path: string) => Promise<any>) => {
   const method = async (
     path: string,
-    opt: RimrafOptions,
+    opt: RimrafAsyncOptions,
     backoff = 1,
     total = 0
   ) => {

@@ -25,7 +25,7 @@ import {
 } from './fs.js'
 const { rename, unlink, rmdir, chmod } = fsPromises
 
-import { RimrafOptions } from '.'
+import { RimrafAsyncOptions, RimrafSyncOptions } from '.'
 import { readdirOrError, readdirOrErrorSync } from './readdir-or-error.js'
 
 // crypto.randomBytes is much slower, and Math.random() is enough here
@@ -71,7 +71,7 @@ const unlinkFixEPERMSync = (path: string) => {
 
 export const rimrafMoveRemove = async (
   path: string,
-  opt: RimrafOptions
+  opt: RimrafAsyncOptions
 ): Promise<boolean> => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason
@@ -91,7 +91,7 @@ export const rimrafMoveRemove = async (
     if (entries.code !== 'ENOTDIR') {
       throw entries
     }
-    if (opt.filter && !opt.filter(path)) {
+    if (opt.filter && !(await opt.filter(path))) {
       return false
     }
     await ignoreENOENT(tmpUnlink(path, opt.tmp, unlinkFixEPERM))
@@ -113,7 +113,7 @@ export const rimrafMoveRemove = async (
   if (opt.preserveRoot === false && path === parse(path).root) {
     return false
   }
-  if (opt.filter && !opt.filter(path)) {
+  if (opt.filter && !(await opt.filter(path))) {
     return false
   }
   await ignoreENOENT(tmpUnlink(path, opt.tmp, rmdir))
@@ -132,7 +132,7 @@ const tmpUnlink = async (
 
 export const rimrafMoveRemoveSync = (
   path: string,
-  opt: RimrafOptions
+  opt: RimrafSyncOptions
 ): boolean => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason

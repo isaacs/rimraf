@@ -1,9 +1,9 @@
-import optArg from './opt-arg.js'
+import { optArg, optArgSync } from './opt-arg.js'
 import pathArg from './path-arg.js'
 
 import { glob, GlobOptions, globSync } from 'glob'
 
-export interface RimrafOptions {
+export interface RimrafAsyncOptions {
   preserveRoot?: boolean
   tmp?: string
   maxRetries?: number
@@ -12,8 +12,14 @@ export interface RimrafOptions {
   maxBackoff?: number
   signal?: AbortSignal
   glob?: boolean | GlobOptions
+  filter?: ((path: string) => boolean) | ((path: string) => Promise<boolean>)
+}
+
+export interface RimrafSyncOptions extends RimrafAsyncOptions {
   filter?: (path: string) => boolean
 }
+
+export type RimrafOptions = RimrafSyncOptions | RimrafAsyncOptions
 
 const typeOrUndef = (val: any, t: string) =>
   typeof val === 'undefined' || typeof val === t
@@ -46,8 +52,11 @@ import { rimrafWindows, rimrafWindowsSync } from './rimraf-windows.js'
 import { useNative, useNativeSync } from './use-native.js'
 
 const wrap =
-  (fn: (p: string, o: RimrafOptions) => Promise<boolean>) =>
-  async (path: string | string[], opt?: RimrafOptions): Promise<boolean> => {
+  (fn: (p: string, o: RimrafAsyncOptions) => Promise<boolean>) =>
+  async (
+    path: string | string[],
+    opt?: RimrafAsyncOptions
+  ): Promise<boolean> => {
     const options = optArg(opt)
     if (options.glob) {
       path = await glob(path, options.glob)
@@ -62,9 +71,9 @@ const wrap =
   }
 
 const wrapSync =
-  (fn: (p: string, o: RimrafOptions) => boolean) =>
-  (path: string | string[], opt?: RimrafOptions): boolean => {
-    const options = optArg(opt)
+  (fn: (p: string, o: RimrafSyncOptions) => boolean) =>
+  (path: string | string[], opt?: RimrafSyncOptions): boolean => {
+    const options = optArgSync(opt)
     if (options.glob) {
       path = globSync(path, options.glob)
     }

@@ -37,9 +37,15 @@ t.test('mocky unit tests to select the correct function', t => {
       CALLS.push(['pathArg', path])
       return path
     },
-    '../dist/cjs/src/opt-arg.js': opt => {
-      CALLS.push(['optArg', opt])
-      return opt
+    '../dist/cjs/src/opt-arg.js': {
+      optArg: opt => {
+        CALLS.push(['optArg', opt])
+        return opt
+      },
+      optArgSync: opt => {
+        CALLS.push(['optArg', opt])
+        return opt
+      },
     },
     '../dist/cjs/src/rimraf-posix.js': {
       rimrafPosix: async (path, opt) => {

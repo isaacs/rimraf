@@ -1,13 +1,15 @@
 const t = require('tap')
-const optArg = require('../dist/cjs/src/opt-arg.js').default
+const { optArg: oa, optArgSync: oas } = require('../dist/cjs/src/opt-arg.js')
 const opt = { a: 1 }
-t.same(optArg(opt), opt, 'returns equivalent object if provided')
-t.same(optArg(), {}, 'returns new object otherwise')
 
-t.throws(() => optArg(true))
-t.throws(() => optArg(null))
-t.throws(() => optArg('hello'))
-t.throws(() => optArg({ maxRetries: 'banana' }))
+t.same(oa(opt), opt, 'returns equivalent object if provided')
+t.same(oas(opt), oa(opt), 'optArgSync does the same thing')
+t.same(oa(), {}, 'returns new object otherwise')
+
+t.throws(() => oa(true))
+t.throws(() => oa(null))
+t.throws(() => oa('hello'))
+t.throws(() => oa({ maxRetries: 'banana' }))
 
 t.test('every kind of invalid option value', t => {
   // skip them when it's undefined, and skip the case
@@ -33,7 +35,7 @@ t.test('every kind of invalid option value', t => {
                 continue
               }
               t.throws(() =>
-                optArg({
+                oa({
                   preserveRoot,
                   maxRetries,
                   retryDelay,
@@ -64,7 +66,7 @@ t.test('test every allowed combination', t => {
           for (const backoff of goodNum) {
             for (const maxBackoff of goodNum) {
               t.ok(
-                optArg({
+                oa({
                   preserveRoot,
                   maxRetries,
                   retryDelay,
@@ -83,19 +85,19 @@ t.test('test every allowed combination', t => {
 })
 
 t.test('glob option handling', t => {
-  t.same(optArg({ glob: true }), {
+  t.same(oa({ glob: true }), {
     glob: { absolute: true, withFileTypes: false },
   })
-  const gws = optArg({ signal: { x: 1 }, glob: true })
+  const gws = oa({ signal: { x: 1 }, glob: true })
   t.same(gws, {
     signal: { x: 1 },
     glob: { absolute: true, signal: { x: 1 }, withFileTypes: false },
   })
   t.equal(gws.signal, gws.glob.signal)
-  t.same(optArg({ glob: { nodir: true } }), {
+  t.same(oa({ glob: { nodir: true } }), {
     glob: { absolute: true, nodir: true, withFileTypes: false },
   })
-  const gwsg = optArg({ signal: { x: 1 }, glob: { nodir: true } })
+  const gwsg = oa({ signal: { x: 1 }, glob: { nodir: true } })
   t.same(gwsg, {
     signal: { x: 1 },
     glob: {
@@ -106,17 +108,14 @@ t.test('glob option handling', t => {
     },
   })
   t.equal(gwsg.signal, gwsg.glob.signal)
-  t.same(
-    optArg({ signal: { x: 1 }, glob: { nodir: true, signal: { y: 1 } } }),
-    {
-      signal: { x: 1 },
-      glob: {
-        absolute: true,
-        nodir: true,
-        signal: { y: 1 },
-        withFileTypes: false,
-      },
-    }
-  )
+  t.same(oa({ signal: { x: 1 }, glob: { nodir: true, signal: { y: 1 } } }), {
+    signal: { x: 1 },
+    glob: {
+      absolute: true,
+      nodir: true,
+      signal: { y: 1 },
+      withFileTypes: false,
+    },
+  })
   t.end()
 })
