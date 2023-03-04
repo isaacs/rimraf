@@ -113,56 +113,26 @@ Array [
 ]
 `
 
-exports[`test/rimraf-windows.js TAP handle EPERMs on unlink by trying to chmod 0o666 async > must match snapshot 1`] = `
-Array [
-  Array [
-    "chmod",
-    "{CWD}/test/tap-testdir-rimraf-windows-handle-EPERMs-on-unlink-by-trying-to-chmod-0o666-async/test/a",
-    "438",
-  ],
-]
+exports[`test/rimraf-windows.js TAP handle EPERMs on unlink by trying to chmod 0o666 async > chmods 1`] = `
+1
 `
 
-exports[`test/rimraf-windows.js TAP handle EPERMs on unlink by trying to chmod 0o666 sync > must match snapshot 1`] = `
-Array [
-  Array [
-    "chmodSync",
-    "{CWD}/test/tap-testdir-rimraf-windows-handle-EPERMs-on-unlink-by-trying-to-chmod-0o666-sync/test/a",
-    "438",
-  ],
-]
+exports[`test/rimraf-windows.js TAP handle EPERMs on unlink by trying to chmod 0o666 sync > chmods 1`] = `
+1
 `
 
-exports[`test/rimraf-windows.js TAP handle EPERMs, chmod raises something other than ENOENT async > must match snapshot 1`] = `
-Array []
+exports[`test/rimraf-windows.js TAP handle EPERMs, chmod raises something other than ENOENT async > chmods 1`] = `
+0
 `
 
-exports[`test/rimraf-windows.js TAP handle EPERMs, chmod raises something other than ENOENT sync > must match snapshot 1`] = `
-Array [
-  Array [
-    "chmodSync",
-    "{CWD}/test/tap-testdir-rimraf-windows-handle-EPERMs-chmod-raises-something-other-than-ENOENT-sync/test/a",
-    "438",
-  ],
-]
+exports[`test/rimraf-windows.js TAP handle EPERMs, chmod raises something other than ENOENT sync > chmods 1`] = `
+1
 `
 
-exports[`test/rimraf-windows.js TAP handle EPERMs, chmod returns ENOENT async > must match snapshot 1`] = `
-Array [
-  Array [
-    "chmod",
-    "{CWD}/test/tap-testdir-rimraf-windows-handle-EPERMs-chmod-returns-ENOENT-async/test/a",
-    "438",
-  ],
-]
+exports[`test/rimraf-windows.js TAP handle EPERMs, chmod returns ENOENT async > chmods 1`] = `
+1
 `
 
-exports[`test/rimraf-windows.js TAP handle EPERMs, chmod returns ENOENT sync > must match snapshot 1`] = `
-Array [
-  Array [
-    "chmodSync",
-    "{CWD}/test/tap-testdir-rimraf-windows-handle-EPERMs-chmod-returns-ENOENT-sync/test/a",
-    "438",
-  ],
-]
+exports[`test/rimraf-windows.js TAP handle EPERMs, chmod returns ENOENT sync > chmods 1`] = `
+1
 `

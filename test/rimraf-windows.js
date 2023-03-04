@@ -2,15 +2,17 @@ const t = require('tap')
 const { parse, basename, relative } = require('path')
 const { statSync } = require('fs')
 t.formatSnapshot = calls =>
-  calls.map(args =>
-    args.map(arg =>
-      String(arg)
-        .split(process.cwd())
-        .join('{CWD}')
-        .replace(/\\/g, '/')
-        .replace(/.*\/(\.[a-z]\.)[^/]*$/, '{tmpfile}')
-    )
-  )
+  Array.isArray(calls)
+    ? calls.map(args =>
+        args.map(arg =>
+          String(arg)
+            .split(process.cwd())
+            .join('{CWD}')
+            .replace(/\\/g, '/')
+            .replace(/.*\/(\.[a-z]\.)[^/]*$/, '{tmpfile}')
+        )
+      )
+    : calls
 
 const fixture = {
   a: 'a',
@@ -310,14 +312,14 @@ t.test('handle EPERMs on unlink by trying to chmod 0o666', async t => {
     // nest it so that we clean up the mess
     const path = t.testdir({ test: fixture }) + '/test'
     rimrafWindowsSync(path, {})
-    t.matchSnapshot(CHMODS)
+    t.matchSnapshot(CHMODS.length, 'chmods')
     t.end()
   })
   t.test('async', async t => {
     // nest it so that we clean up the mess
     const path = t.testdir({ test: fixture }) + '/test'
     await rimrafWindows(path, {})
-    t.matchSnapshot(CHMODS)
+    t.matchSnapshot(CHMODS.length, 'chmods')
     t.end()
   })
   t.end()
@@ -374,14 +376,14 @@ t.test('handle EPERMs, chmod returns ENOENT', async t => {
     // nest it so that we clean up the mess
     const path = t.testdir({ test: fixture }) + '/test'
     rimrafWindowsSync(path, {})
-    t.matchSnapshot(CHMODS)
+    t.matchSnapshot(CHMODS.length, 'chmods')
     t.end()
   })
   t.test('async', async t => {
     // nest it so that we clean up the mess
     const path = t.testdir({ test: fixture }) + '/test'
     await rimrafWindows(path, {})
-    t.matchSnapshot(CHMODS)
+    t.matchSnapshot(CHMODS.length, 'chmods')
     t.end()
   })
   t.end()
@@ -438,14 +440,14 @@ t.test('handle EPERMs, chmod raises something other than ENOENT', async t => {
     // nest it so that we clean up the mess
     const path = t.testdir({ test: fixture }) + '/test'
     t.throws(() => rimrafWindowsSync(path, {}), { code: 'EPERM' })
-    t.matchSnapshot(CHMODS)
+    t.matchSnapshot(CHMODS.length, 'chmods')
     t.end()
   })
   t.test('async', async t => {
     // nest it so that we clean up the mess
     const path = t.testdir({ test: fixture }) + '/test'
     t.rejects(rimrafWindows(path, {}), { code: 'EPERM' })
-    t.matchSnapshot(CHMODS)
+    t.matchSnapshot(CHMODS.length, 'chmods')
     t.end()
   })
   t.end()
