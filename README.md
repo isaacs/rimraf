@@ -168,31 +168,39 @@ Synchronous form of `rimraf.moveRemove()`
 ### Command Line Interface
 
 ```
-rimraf version 4.2.0
+rimraf version 4.3.0
 
 Usage: rimraf <path> [<path> ...]
 Deletes all files and folders at "path", recursively.
 
 Options:
-  --                  Treat all subsequent arguments as paths
-  -h --help           Display this usage info
-  --preserve-root     Do not remove '/' recursively (default)
-  --no-preserve-root  Do not treat '/' specially
-  -G --no-glob        Treat arguments as literal paths, not globs (default)
-  -g --glob           Treat arguments as glob patterns
+  --                   Treat all subsequent arguments as paths
+  -h --help            Display this usage info
+  --preserve-root      Do not remove '/' recursively (default)
+  --no-preserve-root   Do not treat '/' specially
+  -G --no-glob         Treat arguments as literal paths, not globs (default)
+  -g --glob            Treat arguments as glob patterns
+  -v --verbose         Be verbose when deleting files, showing them as
+                       they are removed. Not compatible with --impl=native
+  -V --no-verbose      Be silent when deleting files, showing nothing as
+                       they are removed (default)
+  -i --interactive     Ask for confirmation before deleting anything
+                       Not compatible with --impl=native
+  -I --no-interactive  Do not ask for confirmation before deleting
 
-  --impl=<type>       Specify the implementation to use.
-                      rimraf: choose the best option
-                      native: the built-in implementation in Node.js
-                      manual: the platform-specific JS implementation
-                      posix: the Posix JS implementation
-                      windows: the Windows JS implementation
-                      move-remove: a slower Windows JS fallback implementation
+  --impl=<type>        Specify the implementation to use:
+                       rimraf: choose the best option (default)
+                       native: the built-in implementation in Node.js
+                       manual: the platform-specific JS implementation
+                       posix: the Posix JS implementation
+                       windows: the Windows JS implementation (falls back to
+                                move-remove on ENOTEMPTY)
+                       move-remove: a slow reliable Windows fallback
 
 Implementation-specific options:
-  --tmp=<path>        Folder to hold temp files for 'move-remove' implementation
-  --max-retries=<n>   maxRetries for the 'native' and 'windows' implementations
-  --retry-delay=<n>   retryDelay for the 'native' implementation, default 100
+  --tmp=<path>        Temp file folder for 'move-remove' implementation
+  --max-retries=<n>   maxRetries for 'native' and 'windows' implementations
+  --retry-delay=<n>   retryDelay for 'native' implementation, default 100
   --backoff=<n>       Exponential backoff factor for retries (default: 1.2)
 ```
 

@@ -1,4 +1,6 @@
+const { basename } = require('path')
 const t = require('tap')
+const { readdirSync } = require('fs')
 
 t.test('basic arg parsing stuff', t => {
   const LOGS = []
@@ -72,24 +74,12 @@ t.test('basic arg parsing stuff', t => {
     t.equal(await bin('-v', '-V', '--verbose', 'foo'), 0)
     t.same(LOGS, [])
     t.same(ERRS, [])
-    for (const c of CALLS) {
-      t.equal(c[0], 'rimraf')
-      t.same(c[1], ['foo'])
-      t.type(c[2].filter, 'function')
-      t.equal(c[2].filter('x'), true)
-    }
-  })
-
-  t.test('verbose', async t => {
-    t.equal(await bin('-v', 'foo'), 0)
-    t.equal(await bin('--verbose', 'foo'), 0)
-    t.equal(await bin('-v', '-V', '--verbose', 'foo'), 0)
-    t.same(LOGS, [])
-    t.same(ERRS, [])
     const { log } = console
-    t.teardown(() => { console.log = log })
+    t.teardown(() => {
+      console.log = log
+    })
     const logs = []
-    console.log = (s) => logs.push(s)
+    console.log = s => logs.push(s)
     for (const c of CALLS) {
       t.equal(c[0], 'rimraf')
       t.same(c[1], ['foo'])
@@ -107,14 +97,15 @@ t.test('basic arg parsing stuff', t => {
     t.same(LOGS, [])
     t.same(ERRS, [])
     const { log } = console
-    t.teardown(() => { console.log = log })
+    t.teardown(() => {
+      console.log = log
+    })
     const logs = []
-    console.log = (s) => logs.push(s)
+    console.log = s => logs.push(s)
     for (const c of CALLS) {
       t.equal(c[0], 'rimraf')
       t.same(c[1], ['foo'])
-      t.type(c[2].filter, 'function')
-      t.equal(c[2].filter('x'), true)
+      t.type(c[2].filter, 'undefined')
       t.same(logs, [])
     }
   })
@@ -221,6 +212,26 @@ t.test('basic arg parsing stuff', t => {
     t.same(CALLS, [])
   })
 
+  t.test('native cannot do filters', async t => {
+    t.equal(await bin('--impl=native', '-v', 'foo'), 1)
+    t.same(ERRS, [
+      ['native implementation does not support -v or -i'],
+      ['run `rimraf --help` for usage information'],
+    ])
+    ERRS.length = 0
+    t.equal(await bin('--impl=native', '-i', 'foo'), 1)
+    t.same(ERRS, [
+      ['native implementation does not support -v or -i'],
+      ['run `rimraf --help` for usage information'],
+    ])
+    ERRS.length = 0
+    t.same(CALLS, [])
+    t.same(LOGS, [])
+    // ok to turn it on and back off though
+    t.equal(await bin('--impl=native', '-i', '-I', 'foo'), 0)
+    t.same(CALLS, [['native', ['foo'], {}]])
+  })
+
   const impls = [
     'rimraf',
     'native',
@@ -253,7 +264,7 @@ t.test('actually delete something with it', async t => {
   const bin = require.resolve('../dist/cjs/src/bin.js')
   const { spawnSync } = require('child_process')
   const res = spawnSync(process.execPath, [bin, path])
-  const { statSync } = require('fs')
+  const { statSync, readdirSync } = require('fs')
   t.throws(() => statSync(path))
   t.equal(res.status, 0)
 })
@@ -279,4 +290,81 @@ t.test('print failure when impl throws', async t => {
   t.equal(statSync(path).isDirectory(), true)
   t.equal(res.status, 1)
   t.match(res.stderr.toString(), /^Error: simulated rimraf failure/)
+})
+
+t.test('interactive deletes', t => {
+  const scripts = [
+    ['a'],
+    ['y', 'YOLO', 'no', 'quit'],
+    ['hehaha', 'yes i think so', '', 'A'],
+    ['no', 'n', 'N', 'N', 'Q'],
+  ]
+  const fixture = {
+    a: { b: '', c: '', d: '' },
+    b: { c: '', d: '', e: '' },
+    c: { d: '', e: '', f: '' },
+  }
+  const verboseOpt = ['-v', '-V']
+
+  // t.jobs = scripts.length * verboseOpt.length
+
+  const { spawn } = require('child_process')
+  const bin = require.resolve('../dist/cjs/src/bin.js')
+  const node = process.execPath
+
+  const leftovers = d => {
+    try {
+      readdirSync(d)
+      return true
+    } catch (_) {
+      return false
+    }
+  }
+
+  for (const verbose of verboseOpt) {
+    t.test(verbose, async t => {
+      for (const s of scripts) {
+        const script = s.slice()
+        t.test(script.join(', '), async t => {
+          const d = t.testdir(fixture)
+          const args = [bin, '-i', verbose, d]
+          const child = spawn(node, args, {
+            stdio: 'pipe',
+          })
+          const out = []
+          const err = []
+          const timer = setTimeout(() => {
+            t.fail('timed out')
+            child.kill('SIGKILL')
+          }, 10000)
+          child.stdout.setEncoding('utf8')
+          child.stderr.setEncoding('utf8')
+          child.stdout.on('data', async c => {
+            await new Promise(r => setTimeout(r, 50))
+            out.push(c.trim())
+            const s = script.shift()
+            if (s !== undefined) {
+              out.push(s.trim())
+              child.stdin.write(s + '\n')
+            }
+          })
+          child.stderr.on('data', c => {
+            err.push(c)
+          })
+          return new Promise(res => {
+            child.on('close', (code, signal) => {
+              clearTimeout(timer)
+              t.same(err, [], 'should not see any stderr')
+              t.equal(code, 0, 'code')
+              t.equal(signal, null, 'signal')
+              t.matchSnapshot(leftovers(d), 'had any leftover')
+              res()
+            })
+          })
+        })
+      }
+      t.end()
+    })
+  }
+  t.end()
 })

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { version } from '../package.json'
 import rimraf from './index-cjs.js'
-import type { RimrafOptions } from './index.js'
+import type { RimrafAsyncOptions } from './index.js'
 
 const runHelpForUsage = () =>
   console.error('run `rimraf --help` for usage information')
@@ -12,37 +12,110 @@ Usage: rimraf <path> [<path> ...]
 Deletes all files and folders at "path", recursively.
 
 Options:
-  --                  Treat all subsequent arguments as paths
-  -h --help           Display this usage info
-  --preserve-root     Do not remove '/' recursively (default)
-  --no-preserve-root  Do not treat '/' specially
-  -G --no-glob        Treat arguments as literal paths, not globs (default)
-  -g --glob           Treat arguments as glob patterns
-  -v --verbose        Be verbose when deleting files, showing them as
-                      they are removed
-  -V --no-verbose     Be silent when deleting files, showing nothing as
-                      they are removed (default)
+  --                   Treat all subsequent arguments as paths
+  -h --help            Display this usage info
+  --preserve-root      Do not remove '/' recursively (default)
+  --no-preserve-root   Do not treat '/' specially
+  -G --no-glob         Treat arguments as literal paths, not globs (default)
+  -g --glob            Treat arguments as glob patterns
+  -v --verbose         Be verbose when deleting files, showing them as
+                       they are removed. Not compatible with --impl=native
+  -V --no-verbose      Be silent when deleting files, showing nothing as
+                       they are removed (default)
+  -i --interactive     Ask for confirmation before deleting anything
+                       Not compatible with --impl=native
+  -I --no-interactive  Do not ask for confirmation before deleting
 
-  --impl=<type>       Specify the implementation to use.
-                      rimraf: choose the best option
-                      native: the built-in implementation in Node.js
-                      manual: the platform-specific JS implementation
-                      posix: the Posix JS implementation
-                      windows: the Windows JS implementation
-                      move-remove: a slower Windows JS fallback implementation
+  --impl=<type>        Specify the implementation to use:
+                       rimraf: choose the best option (default)
+                       native: the built-in implementation in Node.js
+                       manual: the platform-specific JS implementation
+                       posix: the Posix JS implementation
+                       windows: the Windows JS implementation (falls back to
+                                move-remove on ENOTEMPTY)
+                       move-remove: a slow reliable Windows fallback
 
 Implementation-specific options:
-  --tmp=<path>        Folder to hold temp files for 'move-remove' implementation
-  --max-retries=<n>   maxRetries for the 'native' and 'windows' implementations
-  --retry-delay=<n>   retryDelay for the 'native' implementation, default 100
+  --tmp=<path>        Temp file folder for 'move-remove' implementation
+  --max-retries=<n>   maxRetries for 'native' and 'windows' implementations
+  --retry-delay=<n>   retryDelay for 'native' implementation, default 100
   --backoff=<n>       Exponential backoff factor for retries (default: 1.2)
 `
 
 import { parse, relative, resolve } from 'path'
 const cwd = process.cwd()
 
+import { createInterface, Interface } from 'readline'
+
+const prompt = async (rl: Interface, q: string) =>
+  new Promise<string>(res => rl.question(q, res))
+
+const interactiveRimraf = async (
+  impl: (path: string | string[], opt?: RimrafAsyncOptions) => Promise<boolean>,
+  paths: string[],
+  opt: RimrafAsyncOptions
+) => {
+  const existingFilter = opt.filter || (() => true)
+  let allRemaining = false
+  let noneRemaining = false
+  const queue: (() => Promise<boolean>)[] = []
+  let processing = false
+  const processQueue = async () => {
+    if (processing) return
+    processing = true
+    let next: (() => Promise<boolean>) | undefined
+    while ((next = queue.shift())) {
+      await next()
+    }
+    processing = false
+  }
+  const oneAtATime =
+    (fn: (s: string) => Promise<boolean>) =>
+    async (s: string): Promise<boolean> => {
+      const p = new Promise<boolean>(res => {
+        queue.push(async () => {
+          const result = await fn(s)
+          res(result)
+          return result
+        })
+      })
+      processQueue()
+      return p
+    }
+  const rl = createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  })
+  opt.filter = oneAtATime(async (path: string): Promise<boolean> => {
+    if (noneRemaining) {
+      return false
+    }
+    while (!allRemaining) {
+      const a = (await prompt(
+        rl,
+        `rm? ${relative(cwd, path)}\n[(Yes)/No/All/Quit] > `
+      )).trim()
+      if (/^n/i.test(a)) {
+        return false
+      } else if (/^a/i.test(a)) {
+        allRemaining = true
+        break
+      } else if (/^q/i.test(a)) {
+        noneRemaining = true
+        return false
+      } else if (a === '' || /^y/i.test(a)) {
+        break
+      } else {
+        continue
+      }
+    }
+    return existingFilter(path)
+  })
+  await impl(paths, opt)
+  rl.close()
+}
+
 const main = async (...args: string[]) => {
-  const yesFilter = () => true
   const verboseFilter = (s: string) => {
     console.log(relative(cwd, s))
     return true
@@ -52,11 +125,15 @@ const main = async (...args: string[]) => {
     throw new Error('simulated rimraf failure')
   }
 
-  const opt: RimrafOptions = {}
+  const opt: RimrafAsyncOptions = {}
   const paths: string[] = []
   let dashdash = false
-  let impl: (path: string | string[], opt?: RimrafOptions) => Promise<boolean> =
-    rimraf
+  let impl: (
+    path: string | string[],
+    opt?: RimrafAsyncOptions
+  ) => Promise<boolean> = rimraf
+
+  let interactive = false
 
   for (const arg of args) {
     if (dashdash) {
@@ -72,11 +149,17 @@ const main = async (...args: string[]) => {
     } else if (arg === '-h' || arg === '--help') {
       console.log(help)
       return 0
+    } else if (arg === '--interactive' || arg === '-i') {
+      interactive = true
+      continue
+    } else if (arg === '--no-interactive' || arg === '-I') {
+      interactive = false
+      continue
     } else if (arg === '--verbose' || arg === '-v') {
       opt.filter = verboseFilter
       continue
     } else if (arg === '--no-verbose' || arg === '-V') {
-      opt.filter = yesFilter
+      opt.filter = undefined
       continue
     } else if (arg === '-g' || arg === '--glob') {
       opt.glob = true
@@ -151,7 +234,18 @@ const main = async (...args: string[]) => {
     return 1
   }
 
-  await impl(paths, opt)
+  if (impl === rimraf.native && (interactive || opt.filter)) {
+    console.error('native implementation does not support -v or -i')
+    runHelpForUsage()
+    return 1
+  }
+
+  if (interactive) {
+    await interactiveRimraf(impl, paths, opt)
+  } else {
+    await impl(paths, opt)
+  }
+
   return 0
 }
 main.help = help
