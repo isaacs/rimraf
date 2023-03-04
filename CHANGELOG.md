@@ -4,6 +4,9 @@
 - Add filter option
 - bin: add --verbose, -v to print files as they are deleted
 - bin: add --no-verbose, -V to not print files as they are deleted
+- bin: add -i --interactive to be prompted on each deletion
+- bin: add -I --no-interactive to not be prompted on each
+  deletion
 
 # v4.2
 
