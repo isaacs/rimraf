@@ -339,13 +339,18 @@ t.test('interactive deletes', t => {
           }, 10000)
           child.stdout.setEncoding('utf8')
           child.stderr.setEncoding('utf8')
+          let last = ''
           child.stdout.on('data', async c => {
             await new Promise(r => setTimeout(r, 50))
             out.push(c.trim())
             const s = script.shift()
             if (s !== undefined) {
+              last === s
               out.push(s.trim())
               child.stdin.write(s + '\n')
+            } else {
+              // keep writing whatever the last option was
+              child.stdin.write(last + '\n')
             }
           })
           child.stderr.on('data', c => {
