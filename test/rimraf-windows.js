@@ -649,7 +649,7 @@ t.test('filter function', t => {
   t.end()
 })
 
-t.test('do not follow symlinks', t => {
+t.test('following symlinks', t => {
   const {
     rimrafWindows,
     rimrafWindowsSync,
@@ -672,12 +672,27 @@ t.test('do not follow symlinks', t => {
     statSync(d + '/z/b/c')
     t.end()
   })
+  t.test('sync follow', t => {
+    const d = t.testdir(fixture)
+    t.equal(rimrafWindowsSync(d + '/x', { follow: true }), true)
+    statSync(d + '/z')
+    t.throws(() => statSync(d + '/z/a'))
+    t.throws(() => statSync(d + '/z/b/c'))
+    t.end()
+  })
   t.test('async', async t => {
     const d = t.testdir(fixture)
     t.equal(await rimrafWindows(d + '/x', {}), true)
     statSync(d + '/z')
     statSync(d + '/z/a')
     statSync(d + '/z/b/c')
+  })
+  t.test('async follow', async t => {
+    const d = t.testdir(fixture)
+    t.equal(await rimrafWindows(d + '/x', { follow: true }), true)
+    statSync(d + '/z')
+    t.throws(() => statSync(d + '/z/a'))
+    t.throws(() => statSync(d + '/z/b/c'))
   })
   t.end()
 })

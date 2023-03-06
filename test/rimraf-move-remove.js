@@ -669,7 +669,7 @@ t.test('filter function', t => {
   t.end()
 })
 
-t.test('do not follow symlinks', t => {
+t.test('following symlinks', t => {
   const {
     rimrafMoveRemove,
     rimrafMoveRemoveSync,
@@ -692,12 +692,27 @@ t.test('do not follow symlinks', t => {
     statSync(d + '/z/b/c')
     t.end()
   })
+  t.test('sync follow', t => {
+    const d = t.testdir(fixture)
+    t.equal(rimrafMoveRemoveSync(d + '/x', { follow: true }), true)
+    statSync(d + '/z')
+    t.throws(() => statSync(d + '/z/a'))
+    t.throws(() => statSync(d + '/z/b/c'))
+    t.end()
+  })
   t.test('async', async t => {
     const d = t.testdir(fixture)
     t.equal(await rimrafMoveRemove(d + '/x', {}), true)
     statSync(d + '/z')
     statSync(d + '/z/a')
     statSync(d + '/z/b/c')
+  })
+  t.test('async follow', async t => {
+    const d = t.testdir(fixture)
+    t.equal(await rimrafMoveRemove(d + '/x', {follow:true}), true)
+    statSync(d + '/z')
+    t.throws(() => statSync(d + '/z/a'))
+    t.throws(() => statSync(d + '/z/b/c'))
   })
   t.end()
 })

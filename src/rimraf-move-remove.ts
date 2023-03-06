@@ -105,7 +105,8 @@ const rimrafMoveRemoveDir = async (
     throw new Error('cannot delete temp directory used for deletion')
   }
 
-  const entries = ent.isDirectory() ? await readdirOrError(path) : null
+  const entries =
+    opt.follow || ent.isDirectory() ? await readdirOrError(path) : null
   if (!Array.isArray(entries)) {
     // this can only happen if lstat/readdir lied, or if the dir was
     // swapped out with a file at just the right moment.
@@ -122,7 +123,7 @@ const rimrafMoveRemoveDir = async (
     if (opt.filter && !(await opt.filter(path))) {
       return false
     }
-    await ignoreENOENT(tmpUnlink(path, opt.tmp, unlinkFixEPERM))
+    await ignoreENOENT(tmpUnlink(path, opt.tmp, ent))
     return true
   }
 
@@ -144,17 +145,14 @@ const rimrafMoveRemoveDir = async (
   if (opt.filter && !(await opt.filter(path))) {
     return false
   }
-  await ignoreENOENT(tmpUnlink(path, opt.tmp, rmdir))
+  await ignoreENOENT(tmpUnlink(path, opt.tmp, ent))
   return true
 }
 
-const tmpUnlink = async (
-  path: string,
-  tmp: string,
-  rm: (p: string) => Promise<any>
-) => {
+const tmpUnlink = async (path: string, tmp: string, ent: Dirent | Stats) => {
   const tmpFile = resolve(tmp, uniqueFilename(path))
   await rename(path, tmpFile)
+  const rm = ent.isDirectory() ? rmdir : unlinkFixEPERM
   return await rm(tmpFile)
 }
 
@@ -191,24 +189,23 @@ const rimrafMoveRemoveDirSync = (
     throw new Error('cannot delete temp directory used for deletion')
   }
 
-  const entries = ent.isDirectory() ? readdirOrErrorSync(path) : null
+  const entries =
+    opt.follow || ent.isDirectory() ? readdirOrErrorSync(path) : null
   if (!Array.isArray(entries)) {
-    // this can only happen if lstat/readdir lied, or if the dir was
-    // swapped out with a file at just the right moment.
-    /* c8 ignore start */
     if (entries) {
+      /* c8 ignore start */
       if (entries.code === 'ENOENT') {
         return true
       }
+      /* c8 ignore stop */
       if (entries.code !== 'ENOTDIR') {
         throw entries
       }
     }
-    /* c8 ignore stop */
     if (opt.filter && !opt.filter(path)) {
       return false
     }
-    ignoreENOENTSync(() => tmpUnlinkSync(path, tmp, unlinkFixEPERMSync))
+    ignoreENOENTSync(() => tmpUnlinkSync(path, tmp, ent))
     return true
   }
 
@@ -226,16 +223,13 @@ const rimrafMoveRemoveDirSync = (
   if (opt.filter && !opt.filter(path)) {
     return false
   }
-  ignoreENOENTSync(() => tmpUnlinkSync(path, tmp, rmdirSync))
+  ignoreENOENTSync(() => tmpUnlinkSync(path, tmp, ent))
   return true
 }
 
-const tmpUnlinkSync = (
-  path: string,
-  tmp: string,
-  rmSync: (p: string) => void
-) => {
+const tmpUnlinkSync = (path: string, tmp: string, ent: Dirent | Stats) => {
   const tmpFile = resolve(tmp, uniqueFilename(path))
   renameSync(path, tmpFile)
+  const rmSync = ent.isDirectory() ? rmdirSync : unlinkFixEPERMSync
   return rmSync(tmpFile)
 }

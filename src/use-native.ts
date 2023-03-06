@@ -8,8 +8,8 @@ import platform from './platform.js'
 export const useNative: (opt?: RimrafAsyncOptions) => boolean =
   !hasNative || platform === 'win32'
     ? () => false
-    : opt => !opt?.signal && !opt?.filter
+    : opt => !opt?.signal && !opt?.filter && !opt?.follow
 export const useNativeSync: (opt?: RimrafOptions) => boolean =
   !hasNative || platform === 'win32'
     ? () => false
-    : opt => !opt?.signal && !opt?.filter
+    : opt => !opt?.signal && !opt?.filter && !opt?.follow

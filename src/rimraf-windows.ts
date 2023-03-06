@@ -103,20 +103,19 @@ const rimrafWindowsDir = async (
     throw opt.signal.reason
   }
 
-  const entries = ent.isDirectory() ? await readdirOrError(path) : null
+  const entries =
+    opt.follow || ent.isDirectory() ? await readdirOrError(path) : null
   if (!Array.isArray(entries)) {
-    // this can only happen if lstat/readdir lied, or if the dir was
-    // swapped out with a file at just the right moment.
-    /* c8 ignore start */
     if (entries) {
+      /* c8 ignore start */
       if (entries.code === 'ENOENT') {
         return true
       }
+      /* c8 ignore stop */
       if (entries.code !== 'ENOTDIR') {
         throw entries
       }
     }
-    /* c8 ignore stop */
     if (opt.filter && !(await opt.filter(path))) {
       return false
     }
@@ -144,7 +143,11 @@ const rimrafWindowsDir = async (
     if (opt.filter && !(await opt.filter(path))) {
       return false
     }
-    await ignoreENOENT(rimrafWindowsDirMoveRemoveFallback(path, opt))
+    await ignoreENOENT(
+      (ent.isDirectory()
+        ? rimrafWindowsDirMoveRemoveFallback
+        : rimrafWindowsFile)(path, opt)
+    )
   }
   return true
 }
@@ -155,20 +158,19 @@ const rimrafWindowsDirSync = (
   ent: Dirent | Stats,
   state = START
 ): boolean => {
-  const entries = ent.isDirectory() ? readdirOrErrorSync(path) : null
+  const entries =
+    opt.follow || ent.isDirectory() ? readdirOrErrorSync(path) : null
   if (!Array.isArray(entries)) {
-    // this can only happen if lstat/readdir lied, or if the dir was
-    // swapped out with a file at just the right moment.
-    /* c8 ignore start */
     if (entries) {
+      /* c8 ignore start */
       if (entries.code === 'ENOENT') {
         return true
       }
+      /* c8 ignore stop */
       if (entries.code !== 'ENOTDIR') {
         throw entries
       }
     }
-    /* c8 ignore stop */
     if (opt.filter && !opt.filter(path)) {
       return false
     }
@@ -196,9 +198,11 @@ const rimrafWindowsDirSync = (
     if (opt.filter && !opt.filter(path)) {
       return false
     }
-    ignoreENOENTSync(() => {
-      rimrafWindowsDirMoveRemoveFallbackSync(path, opt)
-    })
+    ignoreENOENTSync(() =>
+      (ent.isDirectory()
+        ? rimrafWindowsDirMoveRemoveFallbackSync
+        : rimrafWindowsFileSync)(path, opt)
+    )
   }
   return true
 }

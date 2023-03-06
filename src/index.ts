@@ -13,6 +13,7 @@ export interface RimrafAsyncOptions {
   signal?: AbortSignal
   glob?: boolean | GlobOptions
   filter?: ((path: string) => boolean) | ((path: string) => Promise<boolean>)
+  follow?: boolean
 }
 
 export interface RimrafSyncOptions extends RimrafAsyncOptions {
@@ -34,7 +35,8 @@ export const isRimrafOptions = (o: any): o is RimrafOptions =>
   typeOrUndef(o.backoff, 'number') &&
   typeOrUndef(o.maxBackoff, 'number') &&
   (typeOrUndef(o.glob, 'boolean') || (o.glob && typeof o.glob === 'object')) &&
-  typeOrUndef(o.filter, 'function')
+  typeOrUndef(o.filter, 'function') &&
+  typeOrUndef(o.follow, 'boolean')
 
 export const assertRimrafOptions: (o: any) => void = (
   o: any

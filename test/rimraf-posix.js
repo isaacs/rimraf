@@ -370,7 +370,7 @@ t.test('filter function', t => {
   t.end()
 })
 
-t.test('do not follow symlinks', t => {
+t.test('following symlinks', t => {
   const fixture = {
     x: {
       y: t.fixture('symlink', '../z'),
@@ -389,12 +389,27 @@ t.test('do not follow symlinks', t => {
     statSync(d + '/z/b/c')
     t.end()
   })
+  t.test('sync follow', t => {
+    const d = t.testdir(fixture)
+    t.equal(rimrafPosixSync(d + '/x', { follow: true }), true)
+    statSync(d + '/z')
+    t.throws(() => statSync(d + '/z/a'))
+    t.throws(() => statSync(d + '/z/b/c'))
+    t.end()
+  })
   t.test('async', async t => {
     const d = t.testdir(fixture)
     t.equal(await rimrafPosix(d + '/x', {}), true)
     statSync(d + '/z')
     statSync(d + '/z/a')
     statSync(d + '/z/b/c')
+  })
+  t.test('async', async t => {
+    const d = t.testdir(fixture)
+    t.equal(await rimrafPosix(d + '/x', {follow:true}), true)
+    statSync(d + '/z')
+    t.throws(() => statSync(d + '/z/a'))
+    t.throws(() => statSync(d + '/z/b/c'))
   })
   t.end()
 })
