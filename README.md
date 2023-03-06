@@ -79,8 +79,8 @@ Options:
 
 - `filter` Method that receives a path string as an argument, and
   returns a boolean indicating whether that path should be
-  deleted.  With async rimraf methods, this may return a Promise
-  that resolves to a boolean.  (Since Promises are truthy,
+  deleted. With async rimraf methods, this may return a Promise
+  that resolves to a boolean. (Since Promises are truthy,
   returning a Promise from a sync filter is the same as just not
   filtering anything.)
 
