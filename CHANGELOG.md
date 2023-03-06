@@ -7,6 +7,8 @@
 - bin: add -i --interactive to be prompted on each deletion
 - bin: add -I --no-interactive to not be prompted on each
   deletion
+- **4.3.1** Fixed inappropriately following symbolic links to
+  directories
 
 # v4.2
 
