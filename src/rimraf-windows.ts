@@ -100,7 +100,7 @@ export const rimrafWindows = async (
   const s = state === START ? CHILD : state
   const removedAll = (
     await Promise.all(
-      entries.map(entry => rimrafWindows(resolve(path, entry), opt, s))
+      entries.map(entry => rimrafWindows(resolve(path, entry.name), opt, s))
     )
   ).reduce((a, b) => a && b, true)
 
@@ -149,7 +149,7 @@ export const rimrafWindowsSync = (
   let removedAll = true
   for (const entry of entries) {
     const s = state === START ? CHILD : state
-    removedAll = rimrafWindowsSync(resolve(path, entry), opt, s) && removedAll
+    removedAll = rimrafWindowsSync(resolve(path, entry.name), opt, s) && removedAll
   }
 
   if (state === START) {

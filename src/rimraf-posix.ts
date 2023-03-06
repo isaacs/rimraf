@@ -39,7 +39,7 @@ export const rimrafPosix = async (
 
   const removedAll = (
     await Promise.all(
-      entries.map(entry => rimrafPosix(resolve(path, entry), opt))
+      entries.map(entry => rimrafPosix(resolve(path, entry.name), opt))
     )
   ).reduce((a, b) => a && b, true)
 
@@ -85,7 +85,7 @@ export const rimrafPosixSync = (
   }
   let removedAll: boolean = true
   for (const entry of entries) {
-    removedAll = rimrafPosixSync(resolve(path, entry), opt) && removedAll
+    removedAll = rimrafPosixSync(resolve(path, entry.name), opt) && removedAll
   }
   if (opt.preserveRoot === false && path === parse(path).root) {
     return false

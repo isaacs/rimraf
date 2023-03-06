@@ -100,7 +100,7 @@ export const rimrafMoveRemove = async (
 
   const removedAll = (
     await Promise.all(
-      entries.map(entry => rimrafMoveRemove(resolve(path, entry), opt))
+      entries.map(entry => rimrafMoveRemove(resolve(path, entry.name), opt))
     )
   ).reduce((a, b) => a && b, true)
   if (!removedAll) {
@@ -163,7 +163,8 @@ export const rimrafMoveRemoveSync = (
 
   let removedAll = true
   for (const entry of entries) {
-    removedAll = rimrafMoveRemoveSync(resolve(path, entry), opt) && removedAll
+    removedAll =
+      rimrafMoveRemoveSync(resolve(path, entry.name), opt) && removedAll
   }
   if (!removedAll) {
     return false

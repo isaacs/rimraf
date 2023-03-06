@@ -28,19 +28,22 @@ for (const method of Object.keys(
   fs.promises as { [k: string]: (...a: any[]) => any }
 )) {
   // of course fs.rm is missing when we shouldn't use native :)
+  // also, readdirSync is clubbed to always return file types
   if (method !== 'rm' || useNative()) {
     t.type(
       (realFS as { [k: string]: any })[method],
       Function,
       `real fs.${method} is a function`
     )
-    t.equal(
-      (fs as { [k: string]: any })[`${method}Sync`],
-      (realFS as unknown as { [k: string]: (...a: any[]) => any })[
-        `${method}Sync`
-      ],
-      `has ${method}Sync`
-    )
+    if (method !== 'readdir') {
+      t.equal(
+        (fs as { [k: string]: any })[`${method}Sync`],
+        (realFS as unknown as { [k: string]: (...a: any[]) => any })[
+          `${method}Sync`
+        ],
+        `has ${method}Sync`
+      )
+    }
   }
 
   // set up our pass/fails for the next tests

@@ -1,18 +1,21 @@
 // promisify ourselves, because older nodes don't have fs.promises
 
-import fs from 'fs'
+import fs, { Dirent } from 'fs'
 
 // sync ones just take the sync version from node
 export {
   chmodSync,
   mkdirSync,
-  readdirSync,
   renameSync,
   rmdirSync,
   rmSync,
   statSync,
   unlinkSync,
 } from 'fs'
+
+import { readdirSync as rdSync } from 'fs'
+export const readdirSync = (path: fs.PathLike): Dirent[] =>
+  rdSync(path, { withFileTypes: true })
 
 // unrolled for better inlining, this seems to get better performance
 // than something like:
@@ -36,9 +39,11 @@ const mkdir = (
     fs.mkdir(path, options, (er, made) => (er ? rej(er) : res(made)))
   )
 
-const readdir = (path: fs.PathLike): Promise<string[]> =>
-  new Promise((res, rej) =>
-    fs.readdir(path, (er, data) => (er ? rej(er) : res(data)))
+const readdir = (path: fs.PathLike): Promise<Dirent[]> =>
+  new Promise<Dirent[]>((res, rej) =>
+    fs.readdir(path, { withFileTypes: true }, (er, data) =>
+      er ? rej(er) : res(data)
+    )
   )
 
 const rename = (oldPath: fs.PathLike, newPath: fs.PathLike): Promise<void> =>

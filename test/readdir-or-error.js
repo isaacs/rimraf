@@ -27,8 +27,12 @@ for (const [c, expect] of cases) {
     const resAsync = await readdirOrError(p)
     const resSync = readdirOrErrorSync(p)
     if (Array.isArray(expect)) {
-      t.same(resAsync.sort(), expect.sort(), 'got async result')
-      t.same(resSync.sort(), expect.sort(), 'got sync result')
+      t.same(
+        resAsync.map(e => e.name).sort(),
+        expect.sort(),
+        'got async result'
+      )
+      t.same(resSync.map(e => e.name).sort(), expect.sort(), 'got sync result')
     } else {
       t.match(resAsync, expect, 'got async result')
       t.match(resSync, expect, 'got sync result')
