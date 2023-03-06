@@ -18,13 +18,15 @@ import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'
 
 import {
   chmodSync,
+  lstatSync,
   promises as fsPromises,
   renameSync,
   rmdirSync,
   unlinkSync,
 } from './fs.js'
-const { rename, unlink, rmdir, chmod } = fsPromises
+const { lstat, rename, unlink, rmdir, chmod } = fsPromises
 
+import { Dirent, Stats } from 'fs'
 import { RimrafAsyncOptions, RimrafSyncOptions } from '.'
 import { readdirOrError, readdirOrErrorSync } from './readdir-or-error.js'
 
@@ -72,25 +74,51 @@ const unlinkFixEPERMSync = (path: string) => {
 export const rimrafMoveRemove = async (
   path: string,
   opt: RimrafAsyncOptions
+) => {
+  if (opt?.signal?.aborted) {
+    throw opt.signal.reason
+  }
+  try {
+    return await rimrafMoveRemoveDir(path, opt, await lstat(path))
+  } catch (er) {
+    if ((er as NodeJS.ErrnoException)?.code === 'ENOENT') return true
+    throw er
+  }
+}
+
+const rimrafMoveRemoveDir = async (
+  path: string,
+  opt: RimrafAsyncOptions,
+  ent: Dirent | Stats
 ): Promise<boolean> => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason
   }
   if (!opt.tmp) {
-    return rimrafMoveRemove(path, { ...opt, tmp: await defaultTmp(path) })
+    return rimrafMoveRemoveDir(
+      path,
+      { ...opt, tmp: await defaultTmp(path) },
+      ent
+    )
   }
   if (path === opt.tmp && parse(path).root !== path) {
     throw new Error('cannot delete temp directory used for deletion')
   }
 
-  const entries = await readdirOrError(path)
+  const entries = ent.isDirectory() ? await readdirOrError(path) : null
   if (!Array.isArray(entries)) {
-    if (entries.code === 'ENOENT') {
-      return true
+    // this can only happen if lstat/readdir lied, or if the dir was
+    // swapped out with a file at just the right moment.
+    /* c8 ignore start */
+    if (entries) {
+      if (entries.code === 'ENOENT') {
+        return true
+      }
+      if (entries.code !== 'ENOTDIR') {
+        throw entries
+      }
     }
-    if (entries.code !== 'ENOTDIR') {
-      throw entries
-    }
+    /* c8 ignore stop */
     if (opt.filter && !(await opt.filter(path))) {
       return false
     }
@@ -100,7 +128,7 @@ export const rimrafMoveRemove = async (
 
   const removedAll = (
     await Promise.all(
-      entries.map(entry => rimrafMoveRemove(resolve(path, entry.name), opt))
+      entries.map(ent => rimrafMoveRemoveDir(resolve(path, ent.name), opt, ent))
     )
   ).reduce((a, b) => a && b, true)
   if (!removedAll) {
@@ -130,15 +158,32 @@ const tmpUnlink = async (
   return await rm(tmpFile)
 }
 
-export const rimrafMoveRemoveSync = (
+export const rimrafMoveRemoveSync = (path: string, opt: RimrafSyncOptions) => {
+  if (opt?.signal?.aborted) {
+    throw opt.signal.reason
+  }
+  try {
+    return rimrafMoveRemoveDirSync(path, opt, lstatSync(path))
+  } catch (er) {
+    if ((er as NodeJS.ErrnoException)?.code === 'ENOENT') return true
+    throw er
+  }
+}
+
+const rimrafMoveRemoveDirSync = (
   path: string,
-  opt: RimrafSyncOptions
+  opt: RimrafSyncOptions,
+  ent: Dirent | Stats
 ): boolean => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason
   }
   if (!opt.tmp) {
-    return rimrafMoveRemoveSync(path, { ...opt, tmp: defaultTmpSync(path) })
+    return rimrafMoveRemoveDirSync(
+      path,
+      { ...opt, tmp: defaultTmpSync(path) },
+      ent
+    )
   }
   const tmp: string = opt.tmp
 
@@ -146,14 +191,20 @@ export const rimrafMoveRemoveSync = (
     throw new Error('cannot delete temp directory used for deletion')
   }
 
-  const entries = readdirOrErrorSync(path)
+  const entries = ent.isDirectory() ? readdirOrErrorSync(path) : null
   if (!Array.isArray(entries)) {
-    if (entries.code === 'ENOENT') {
-      return true
+    // this can only happen if lstat/readdir lied, or if the dir was
+    // swapped out with a file at just the right moment.
+    /* c8 ignore start */
+    if (entries) {
+      if (entries.code === 'ENOENT') {
+        return true
+      }
+      if (entries.code !== 'ENOTDIR') {
+        throw entries
+      }
     }
-    if (entries.code !== 'ENOTDIR') {
-      throw entries
-    }
+    /* c8 ignore stop */
     if (opt.filter && !opt.filter(path)) {
       return false
     }
@@ -162,9 +213,9 @@ export const rimrafMoveRemoveSync = (
   }
 
   let removedAll = true
-  for (const entry of entries) {
-    removedAll =
-      rimrafMoveRemoveSync(resolve(path, entry.name), opt) && removedAll
+  for (const ent of entries) {
+    const p = resolve(path, ent.name)
+    removedAll = rimrafMoveRemoveDirSync(p, opt, ent) && removedAll
   }
   if (!removedAll) {
     return false

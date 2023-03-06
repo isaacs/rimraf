@@ -1,35 +1,66 @@
 // the simple recursive removal, where unlink and rmdir are atomic
 // Note that this approach does NOT work on Windows!
-// We rmdir before unlink even though that is arguably less efficient
-// (since the average folder contains >1 file, it means more system
-// calls), because sunos will let root unlink a directory, and some
+// We stat first and only unlink if the Dirent isn't a directory,
+// because sunos will let root unlink a directory, and some
 // SUPER weird breakage happens as a result.
 
-import { promises, rmdirSync, unlinkSync } from './fs.js'
-const { rmdir, unlink } = promises
+import { lstatSync, promises, rmdirSync, unlinkSync } from './fs.js'
+const { lstat, rmdir, unlink } = promises
 
 import { parse, resolve } from 'path'
 
 import { readdirOrError, readdirOrErrorSync } from './readdir-or-error.js'
 
+import { Dirent, Stats } from 'fs'
 import { RimrafAsyncOptions, RimrafSyncOptions } from '.'
 import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'
 
-export const rimrafPosix = async (
+export const rimrafPosix = async (path: string, opt: RimrafAsyncOptions) => {
+  if (opt?.signal?.aborted) {
+    throw opt.signal.reason
+  }
+  try {
+    return await rimrafPosixDir(path, opt, await lstat(path))
+  } catch (er) {
+    if ((er as NodeJS.ErrnoException)?.code === 'ENOENT') return true
+    throw er
+  }
+}
+
+export const rimrafPosixSync = (path: string, opt: RimrafSyncOptions) => {
+  if (opt?.signal?.aborted) {
+    throw opt.signal.reason
+  }
+  try {
+    return rimrafPosixDirSync(path, opt, lstatSync(path))
+  } catch (er) {
+    if ((er as NodeJS.ErrnoException)?.code === 'ENOENT') return true
+    throw er
+  }
+}
+
+const rimrafPosixDir = async (
   path: string,
-  opt: RimrafAsyncOptions
+  opt: RimrafAsyncOptions,
+  ent: Dirent | Stats
 ): Promise<boolean> => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason
   }
-  const entries = await readdirOrError(path)
+  const entries = ent.isDirectory() ? await readdirOrError(path) : null
   if (!Array.isArray(entries)) {
-    if (entries.code === 'ENOENT') {
-      return true
+    // this can only happen if lstat/readdir lied, or if the dir was
+    // swapped out with a file at just the right moment.
+    /* c8 ignore start */
+    if (entries) {
+      if (entries.code === 'ENOENT') {
+        return true
+      }
+      if (entries.code !== 'ENOTDIR') {
+        throw entries
+      }
     }
-    if (entries.code !== 'ENOTDIR') {
-      throw entries
-    }
+    /* c8 ignore stop */
     if (opt.filter && !(await opt.filter(path))) {
       return false
     }
@@ -39,7 +70,7 @@ export const rimrafPosix = async (
 
   const removedAll = (
     await Promise.all(
-      entries.map(entry => rimrafPosix(resolve(path, entry.name), opt))
+      entries.map(ent => rimrafPosixDir(resolve(path, ent.name), opt, ent))
     )
   ).reduce((a, b) => a && b, true)
 
@@ -62,21 +93,28 @@ export const rimrafPosix = async (
   return true
 }
 
-export const rimrafPosixSync = (
+const rimrafPosixDirSync = (
   path: string,
-  opt: RimrafSyncOptions
+  opt: RimrafSyncOptions,
+  ent: Dirent | Stats
 ): boolean => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason
   }
-  const entries = readdirOrErrorSync(path)
+  const entries = ent.isDirectory() ? readdirOrErrorSync(path) : null
   if (!Array.isArray(entries)) {
-    if (entries.code === 'ENOENT') {
-      return true
+    // this can only happen if lstat/readdir lied, or if the dir was
+    // swapped out with a file at just the right moment.
+    /* c8 ignore start */
+    if (entries) {
+      if (entries.code === 'ENOENT') {
+        return true
+      }
+      if (entries.code !== 'ENOTDIR') {
+        throw entries
+      }
     }
-    if (entries.code !== 'ENOTDIR') {
-      throw entries
-    }
+    /* c8 ignore stop */
     if (opt.filter && !opt.filter(path)) {
       return false
     }
@@ -84,8 +122,9 @@ export const rimrafPosixSync = (
     return true
   }
   let removedAll: boolean = true
-  for (const entry of entries) {
-    removedAll = rimrafPosixSync(resolve(path, entry.name), opt) && removedAll
+  for (const ent of entries) {
+    const p = resolve(path, ent.name)
+    removedAll = rimrafPosixDirSync(p, opt, ent) && removedAll
   }
   if (opt.preserveRoot === false && path === parse(path).root) {
     return false

@@ -91,10 +91,9 @@ const interactiveRimraf = async (
       return false
     }
     while (!allRemaining) {
-      const a = (await prompt(
-        rl,
-        `rm? ${relative(cwd, path)}\n[(Yes)/No/All/Quit] > `
-      )).trim()
+      const a = (
+        await prompt(rl, `rm? ${relative(cwd, path)}\n[(Yes)/No/All/Quit] > `)
+      ).trim()
       if (/^n/i.test(a)) {
         return false
       } else if (/^a/i.test(a)) {

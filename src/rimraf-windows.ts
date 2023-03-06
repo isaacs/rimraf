@@ -8,20 +8,21 @@
 //
 // Note: "move then remove" is 2-10 times slower, and just as unreliable.
 
+import { Dirent, Stats } from 'fs'
 import { parse, resolve } from 'path'
 import { RimrafAsyncOptions, RimrafSyncOptions } from '.'
 import { fixEPERM, fixEPERMSync } from './fix-eperm.js'
-import { promises, rmdirSync, unlinkSync } from './fs.js'
+import { lstatSync, promises, rmdirSync, unlinkSync } from './fs.js'
 import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'
 import { readdirOrError, readdirOrErrorSync } from './readdir-or-error.js'
 import { retryBusy, retryBusySync } from './retry-busy.js'
 import { rimrafMoveRemove, rimrafMoveRemoveSync } from './rimraf-move-remove.js'
-const { unlink, rmdir } = promises
+const { unlink, rmdir, lstat } = promises
 
 const rimrafWindowsFile = retryBusy(fixEPERM(unlink))
 const rimrafWindowsFileSync = retryBusySync(fixEPERMSync(unlinkSync))
-const rimrafWindowsDir = retryBusy(fixEPERM(rmdir))
-const rimrafWindowsDirSync = retryBusySync(fixEPERMSync(rmdirSync))
+const rimrafWindowsDirRetry = retryBusy(fixEPERM(rmdir))
+const rimrafWindowsDirRetrySync = retryBusySync(fixEPERMSync(rmdirSync))
 
 const rimrafWindowsDirMoveRemoveFallback = async (
   path: string,
@@ -35,7 +36,7 @@ const rimrafWindowsDirMoveRemoveFallback = async (
   // already filtered, remove from options so we don't call unnecessarily
   const { filter, ...options } = opt
   try {
-    return await rimrafWindowsDir(path, options)
+    return await rimrafWindowsDirRetry(path, options)
   } catch (er) {
     if ((er as NodeJS.ErrnoException)?.code === 'ENOTEMPTY') {
       return await rimrafMoveRemove(path, options)
@@ -54,7 +55,7 @@ const rimrafWindowsDirMoveRemoveFallbackSync = (
   // already filtered, remove from options so we don't call unnecessarily
   const { filter, ...options } = opt
   try {
-    return rimrafWindowsDirSync(path, options)
+    return rimrafWindowsDirRetrySync(path, options)
   } catch (er) {
     const fer = er as NodeJS.ErrnoException
     if (fer?.code === 'ENOTEMPTY') {
@@ -67,28 +68,55 @@ const rimrafWindowsDirMoveRemoveFallbackSync = (
 const START = Symbol('start')
 const CHILD = Symbol('child')
 const FINISH = Symbol('finish')
-const states = new Set([START, CHILD, FINISH])
 
-export const rimrafWindows = async (
+export const rimrafWindows = async (path: string, opt: RimrafAsyncOptions) => {
+  if (opt?.signal?.aborted) {
+    throw opt.signal.reason
+  }
+  try {
+    return await rimrafWindowsDir(path, opt, await lstat(path), START)
+  } catch (er) {
+    if ((er as NodeJS.ErrnoException)?.code === 'ENOENT') return true
+    throw er
+  }
+}
+
+export const rimrafWindowsSync = (path: string, opt: RimrafSyncOptions) => {
+  if (opt?.signal?.aborted) {
+    throw opt.signal.reason
+  }
+  try {
+    return rimrafWindowsDirSync(path, opt, lstatSync(path), START)
+  } catch (er) {
+    if ((er as NodeJS.ErrnoException)?.code === 'ENOENT') return true
+    throw er
+  }
+}
+
+const rimrafWindowsDir = async (
   path: string,
   opt: RimrafAsyncOptions,
+  ent: Dirent | Stats,
   state = START
 ): Promise<boolean> => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason
   }
-  if (!states.has(state)) {
-    throw new TypeError('invalid third argument passed to rimraf')
-  }
 
-  const entries = await readdirOrError(path)
+  const entries = ent.isDirectory() ? await readdirOrError(path) : null
   if (!Array.isArray(entries)) {
-    if (entries.code === 'ENOENT') {
-      return true
+    // this can only happen if lstat/readdir lied, or if the dir was
+    // swapped out with a file at just the right moment.
+    /* c8 ignore start */
+    if (entries) {
+      if (entries.code === 'ENOENT') {
+        return true
+      }
+      if (entries.code !== 'ENOTDIR') {
+        throw entries
+      }
     }
-    if (entries.code !== 'ENOTDIR') {
-      throw entries
-    }
+    /* c8 ignore stop */
     if (opt.filter && !(await opt.filter(path))) {
       return false
     }
@@ -100,12 +128,12 @@ export const rimrafWindows = async (
   const s = state === START ? CHILD : state
   const removedAll = (
     await Promise.all(
-      entries.map(entry => rimrafWindows(resolve(path, entry.name), opt, s))
+      entries.map(ent => rimrafWindowsDir(resolve(path, ent.name), opt, ent, s))
     )
   ).reduce((a, b) => a && b, true)
 
   if (state === START) {
-    return rimrafWindows(path, opt, FINISH)
+    return rimrafWindowsDir(path, opt, ent, FINISH)
   } else if (state === FINISH) {
     if (opt.preserveRoot === false && path === parse(path).root) {
       return false
@@ -121,23 +149,26 @@ export const rimrafWindows = async (
   return true
 }
 
-export const rimrafWindowsSync = (
+const rimrafWindowsDirSync = (
   path: string,
   opt: RimrafSyncOptions,
+  ent: Dirent | Stats,
   state = START
 ): boolean => {
-  if (!states.has(state)) {
-    throw new TypeError('invalid third argument passed to rimraf')
-  }
-
-  const entries = readdirOrErrorSync(path)
+  const entries = ent.isDirectory() ? readdirOrErrorSync(path) : null
   if (!Array.isArray(entries)) {
-    if (entries.code === 'ENOENT') {
-      return true
+    // this can only happen if lstat/readdir lied, or if the dir was
+    // swapped out with a file at just the right moment.
+    /* c8 ignore start */
+    if (entries) {
+      if (entries.code === 'ENOENT') {
+        return true
+      }
+      if (entries.code !== 'ENOTDIR') {
+        throw entries
+      }
     }
-    if (entries.code !== 'ENOTDIR') {
-      throw entries
-    }
+    /* c8 ignore stop */
     if (opt.filter && !opt.filter(path)) {
       return false
     }
@@ -147,13 +178,14 @@ export const rimrafWindowsSync = (
   }
 
   let removedAll = true
-  for (const entry of entries) {
+  for (const ent of entries) {
     const s = state === START ? CHILD : state
-    removedAll = rimrafWindowsSync(resolve(path, entry.name), opt, s) && removedAll
+    const p = resolve(path, ent.name)
+    removedAll = rimrafWindowsDirSync(p, opt, ent, s) && removedAll
   }
 
   if (state === START) {
-    return rimrafWindowsSync(path, opt, FINISH)
+    return rimrafWindowsDirSync(path, opt, ent, FINISH)
   } else if (state === FINISH) {
     if (opt.preserveRoot === false && path === parse(path).root) {
       return false

@@ -1,4 +1,3 @@
-
 export const ignoreENOENT = async (p: Promise<any>) =>
   p.catch(er => {
     if (er.code !== 'ENOENT') {

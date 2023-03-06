@@ -275,11 +275,13 @@ t.test('refuse to delete the root dir', async t => {
     }
   )
 
+  const d = t.testdir({})
+
   // not brave enough to pass the actual c:\\ here...
-  t.throws(() => rimrafMoveRemoveSync('some-path', { tmp: 'some-path' }), {
+  t.throws(() => rimrafMoveRemoveSync(d, { tmp: d }), {
     message: 'cannot delete temp directory used for deletion',
   })
-  t.rejects(() => rimrafMoveRemove('some-path', { tmp: 'some-path' }), {
+  t.rejects(() => rimrafMoveRemove(d, { tmp: d }), {
     message: 'cannot delete temp directory used for deletion',
   })
 })
@@ -520,6 +522,22 @@ t.test(
       t.throws(() => rimrafMoveRemoveSync(d, { signal }))
       t.end()
     })
+    t.test('sync abort in filter', t => {
+      const d = t.testdir(fixture)
+      const ac = new AbortController()
+      const { signal } = ac
+      const opt = {
+        signal,
+        filter: p => {
+          if (basename(p) === 'g') {
+            ac.abort(new Error('done'))
+          }
+          return true
+        },
+      }
+      t.throws(() => rimrafMoveRemoveSync(d, opt), { message: 'done' })
+      t.end()
+    })
     t.test('async', async t => {
       const ac = new AbortController()
       const { signal } = ac
@@ -648,5 +666,38 @@ t.test('filter function', t => {
       t.end()
     })
   }
+  t.end()
+})
+
+t.test('do not follow symlinks', t => {
+  const {
+    rimrafMoveRemove,
+    rimrafMoveRemoveSync,
+  } = require('../dist/cjs/src/rimraf-move-remove.js')
+  const fixture = {
+    x: {
+      y: t.fixture('symlink', '../z'),
+      z: '',
+    },
+    z: {
+      a: '',
+      b: { c: '' },
+    },
+  }
+  t.test('sync', t => {
+    const d = t.testdir(fixture)
+    t.equal(rimrafMoveRemoveSync(d + '/x', {}), true)
+    statSync(d + '/z')
+    statSync(d + '/z/a')
+    statSync(d + '/z/b/c')
+    t.end()
+  })
+  t.test('async', async t => {
+    const d = t.testdir(fixture)
+    t.equal(await rimrafMoveRemove(d + '/x', {}), true)
+    statSync(d + '/z')
+    statSync(d + '/z/a')
+    statSync(d + '/z/b/c')
+  })
   t.end()
 })

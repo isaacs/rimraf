@@ -486,16 +486,6 @@ t.test('rimraffing root, do not actually rmdir root', async t => {
   t.end()
 })
 
-t.test('do not allow third arg', async t => {
-  const ROOT = t.testdir(fixture)
-  const {
-    rimrafWindows,
-    rimrafWindowsSync,
-  } = require('../dist/cjs/src/rimraf-windows.js')
-  t.rejects(rimrafWindows(ROOT, {}, true))
-  t.throws(() => rimrafWindowsSync(ROOT, {}, true))
-})
-
 t.test(
   'abort on signal',
   { skip: typeof AbortController === 'undefined' },
@@ -510,6 +500,22 @@ t.test(
       const { signal } = ac
       ac.abort(new Error('aborted rimraf'))
       t.throws(() => rimrafWindowsSync(d, { signal }))
+      t.end()
+    })
+    t.test('sync abort in filter', t => {
+      const d = t.testdir(fixture)
+      const ac = new AbortController()
+      const { signal } = ac
+      const opt = {
+        signal,
+        filter: p => {
+          if (basename(p) === 'g') {
+            ac.abort(new Error('done'))
+          }
+          return true
+        },
+      }
+      t.throws(() => rimrafWindowsSync(d, opt), { message: 'done' })
       t.end()
     })
     t.test('async', async t => {
@@ -640,5 +646,38 @@ t.test('filter function', t => {
       t.end()
     })
   }
+  t.end()
+})
+
+t.test('do not follow symlinks', t => {
+  const {
+    rimrafWindows,
+    rimrafWindowsSync,
+  } = require('../dist/cjs/src/rimraf-windows.js')
+  const fixture = {
+    x: {
+      y: t.fixture('symlink', '../z'),
+      z: '',
+    },
+    z: {
+      a: '',
+      b: { c: '' },
+    },
+  }
+  t.test('sync', t => {
+    const d = t.testdir(fixture)
+    t.equal(rimrafWindowsSync(d + '/x', {}), true)
+    statSync(d + '/z')
+    statSync(d + '/z/a')
+    statSync(d + '/z/b/c')
+    t.end()
+  })
+  t.test('async', async t => {
+    const d = t.testdir(fixture)
+    t.equal(await rimrafWindows(d + '/x', {}), true)
+    statSync(d + '/z')
+    statSync(d + '/z/a')
+    statSync(d + '/z/b/c')
+  })
   t.end()
 })

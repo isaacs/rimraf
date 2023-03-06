@@ -223,6 +223,22 @@ t.test(
       t.throws(() => rimrafPosixSync(d, { signal }))
       t.end()
     })
+    t.test('sync abort in filter', t => {
+      const d = t.testdir(fixture)
+      const ac = new AbortController()
+      const { signal } = ac
+      const opt = {
+        signal,
+        filter: p => {
+          if (basename(p) === 'g') {
+            ac.abort(new Error('done'))
+          }
+          return true
+        },
+      }
+      t.throws(() => rimrafPosixSync(d, opt), { message: 'done' })
+      t.end()
+    })
     t.test('async', async t => {
       const d = t.testdir(fixture)
       const ac = new AbortController()
@@ -230,6 +246,13 @@ t.test(
       const p = t.rejects(() => rimrafPosix(d, { signal }))
       ac.abort(new Error('aborted rimraf'))
       await p
+    })
+    t.test('async preaborted', async t => {
+      const d = t.testdir(fixture)
+      const ac = new AbortController()
+      ac.abort(new Error('aborted rimraf'))
+      const { signal } = ac
+      await t.rejects(() => rimrafPosix(d, { signal }))
     })
     t.end()
   }
@@ -344,5 +367,34 @@ t.test('filter function', t => {
       t.end()
     })
   }
+  t.end()
+})
+
+t.test('do not follow symlinks', t => {
+  const fixture = {
+    x: {
+      y: t.fixture('symlink', '../z'),
+      z: '',
+    },
+    z: {
+      a: '',
+      b: { c: '' },
+    },
+  }
+  t.test('sync', t => {
+    const d = t.testdir(fixture)
+    t.equal(rimrafPosixSync(d + '/x', {}), true)
+    statSync(d + '/z')
+    statSync(d + '/z/a')
+    statSync(d + '/z/b/c')
+    t.end()
+  })
+  t.test('async', async t => {
+    const d = t.testdir(fixture)
+    t.equal(await rimrafPosix(d + '/x', {}), true)
+    statSync(d + '/z')
+    statSync(d + '/z/a')
+    statSync(d + '/z/b/c')
+  })
   t.end()
 })

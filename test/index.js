@@ -1,4 +1,4 @@
-const {statSync} = require('fs')
+const { statSync } = require('fs')
 const t = require('tap')
 
 t.same(
@@ -225,14 +225,14 @@ t.test('deleting globs', t => {
 
   t.test('sync', t => {
     const cwd = t.testdir(fixture)
-    rimrafSync('**/f/**/m', { glob: { cwd }})
+    rimrafSync('**/f/**/m', { glob: { cwd } })
     t.throws(() => statSync(cwd + '/c/f/i/m'))
     statSync(cwd + '/c/f/i/l')
     t.end()
   })
   t.test('async', async t => {
     const cwd = t.testdir(fixture)
-    await rimraf('**/f/**/m', { glob: { cwd }})
+    await rimraf('**/f/**/m', { glob: { cwd } })
     t.throws(() => statSync(cwd + '/c/f/i/m'))
     statSync(cwd + '/c/f/i/l')
   })

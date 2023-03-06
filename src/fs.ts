@@ -10,6 +10,7 @@ export {
   rmdirSync,
   rmSync,
   statSync,
+  lstatSync,
   unlinkSync,
 } from 'fs'
 
@@ -66,6 +67,11 @@ const stat = (path: fs.PathLike): Promise<fs.Stats> =>
     fs.stat(path, (er, data) => (er ? rej(er) : res(data)))
   )
 
+const lstat = (path: fs.PathLike): Promise<fs.Stats> =>
+  new Promise((res, rej) =>
+    fs.lstat(path, (er, data) => (er ? rej(er) : res(data)))
+  )
+
 const unlink = (path: fs.PathLike): Promise<void> =>
   new Promise((res, rej) =>
     fs.unlink(path, (er, ...d: any[]) => (er ? rej(er) : res(...d)))
@@ -79,5 +85,6 @@ export const promises = {
   rm,
   rmdir,
   stat,
+  lstat,
   unlink,
 }
