@@ -46,6 +46,7 @@ import { parse, relative, resolve } from 'path'
 const cwd = process.cwd()
 
 import { createInterface, Interface } from 'readline'
+import { Dirent, Stats } from 'fs'
 
 const prompt = async (rl: Interface, q: string) =>
   new Promise<string>(res => rl.question(q, res))
@@ -70,11 +71,11 @@ const interactiveRimraf = async (
     processing = false
   }
   const oneAtATime =
-    (fn: (s: string) => Promise<boolean>) =>
-    async (s: string): Promise<boolean> => {
+    (fn: (s: string, e: Dirent | Stats) => Promise<boolean>) =>
+    async (s: string, e: Dirent | Stats): Promise<boolean> => {
       const p = new Promise<boolean>(res => {
         queue.push(async () => {
-          const result = await fn(s)
+          const result = await fn(s, e)
           res(result)
           return result
         })
@@ -86,30 +87,32 @@ const interactiveRimraf = async (
     input: process.stdin,
     output: process.stdout,
   })
-  opt.filter = oneAtATime(async (path: string): Promise<boolean> => {
-    if (noneRemaining) {
-      return false
-    }
-    while (!allRemaining) {
-      const a = (
-        await prompt(rl, `rm? ${relative(cwd, path)}\n[(Yes)/No/All/Quit] > `)
-      ).trim()
-      if (/^n/i.test(a)) {
+  opt.filter = oneAtATime(
+    async (path: string, ent: Dirent | Stats): Promise<boolean> => {
+      if (noneRemaining) {
         return false
-      } else if (/^a/i.test(a)) {
-        allRemaining = true
-        break
-      } else if (/^q/i.test(a)) {
-        noneRemaining = true
-        return false
-      } else if (a === '' || /^y/i.test(a)) {
-        break
-      } else {
-        continue
       }
+      while (!allRemaining) {
+        const a = (
+          await prompt(rl, `rm? ${relative(cwd, path)}\n[(Yes)/No/All/Quit] > `)
+        ).trim()
+        if (/^n/i.test(a)) {
+          return false
+        } else if (/^a/i.test(a)) {
+          allRemaining = true
+          break
+        } else if (/^q/i.test(a)) {
+          noneRemaining = true
+          return false
+        } else if (a === '' || /^y/i.test(a)) {
+          break
+        } else {
+          continue
+        }
+      }
+      return existingFilter(path, ent)
     }
-    return existingFilter(path)
-  })
+  )
   await impl(paths, opt)
   rl.close()
 }

@@ -119,7 +119,7 @@ const rimrafMoveRemoveDir = async (
       }
     }
     /* c8 ignore stop */
-    if (opt.filter && !(await opt.filter(path))) {
+    if (opt.filter && !(await opt.filter(path, ent))) {
       return false
     }
     await ignoreENOENT(tmpUnlink(path, opt.tmp, unlinkFixEPERM))
@@ -141,7 +141,7 @@ const rimrafMoveRemoveDir = async (
   if (opt.preserveRoot === false && path === parse(path).root) {
     return false
   }
-  if (opt.filter && !(await opt.filter(path))) {
+  if (opt.filter && !(await opt.filter(path, ent))) {
     return false
   }
   await ignoreENOENT(tmpUnlink(path, opt.tmp, rmdir))
@@ -205,7 +205,7 @@ const rimrafMoveRemoveDirSync = (
       }
     }
     /* c8 ignore stop */
-    if (opt.filter && !opt.filter(path)) {
+    if (opt.filter && !opt.filter(path, ent)) {
       return false
     }
     ignoreENOENTSync(() => tmpUnlinkSync(path, tmp, unlinkFixEPERMSync))
@@ -223,7 +223,7 @@ const rimrafMoveRemoveDirSync = (
   if (opt.preserveRoot === false && path === parse(path).root) {
     return false
   }
-  if (opt.filter && !opt.filter(path)) {
+  if (opt.filter && !opt.filter(path, ent)) {
     return false
   }
   ignoreENOENTSync(() => tmpUnlinkSync(path, tmp, rmdirSync))

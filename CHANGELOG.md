@@ -1,3 +1,7 @@
+# 4.4
+
+- Provide Dirent or Stats object as second argument to filter
+
 # 4.3
 
 - Return boolean indicating whether the path was fully removed

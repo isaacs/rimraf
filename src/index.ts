@@ -12,11 +12,13 @@ export interface RimrafAsyncOptions {
   maxBackoff?: number
   signal?: AbortSignal
   glob?: boolean | GlobOptions
-  filter?: ((path: string) => boolean) | ((path: string) => Promise<boolean>)
+  filter?:
+    | ((path: string, ent: Dirent | Stats) => boolean)
+    | ((path: string, ent: Dirent | Stats) => Promise<boolean>)
 }
 
 export interface RimrafSyncOptions extends RimrafAsyncOptions {
-  filter?: (path: string) => boolean
+  filter?: (path: string, ent: Dirent | Stats) => boolean
 }
 
 export type RimrafOptions = RimrafSyncOptions | RimrafAsyncOptions
@@ -44,6 +46,7 @@ export const assertRimrafOptions: (o: any) => void = (
   }
 }
 
+import { Dirent, Stats } from 'fs'
 import { rimrafManual, rimrafManualSync } from './rimraf-manual.js'
 import { rimrafMoveRemove, rimrafMoveRemoveSync } from './rimraf-move-remove.js'
 import { rimrafNative, rimrafNativeSync } from './rimraf-native.js'

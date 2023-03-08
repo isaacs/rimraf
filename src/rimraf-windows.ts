@@ -117,7 +117,7 @@ const rimrafWindowsDir = async (
       }
     }
     /* c8 ignore stop */
-    if (opt.filter && !(await opt.filter(path))) {
+    if (opt.filter && !(await opt.filter(path, ent))) {
       return false
     }
     // is a file
@@ -141,7 +141,7 @@ const rimrafWindowsDir = async (
     if (!removedAll) {
       return false
     }
-    if (opt.filter && !(await opt.filter(path))) {
+    if (opt.filter && !(await opt.filter(path, ent))) {
       return false
     }
     await ignoreENOENT(rimrafWindowsDirMoveRemoveFallback(path, opt))
@@ -169,7 +169,7 @@ const rimrafWindowsDirSync = (
       }
     }
     /* c8 ignore stop */
-    if (opt.filter && !opt.filter(path)) {
+    if (opt.filter && !opt.filter(path, ent)) {
       return false
     }
     // is a file
@@ -193,7 +193,7 @@ const rimrafWindowsDirSync = (
     if (!removedAll) {
       return false
     }
-    if (opt.filter && !opt.filter(path)) {
+    if (opt.filter && !opt.filter(path, ent)) {
       return false
     }
     ignoreENOENTSync(() => {

@@ -528,8 +528,8 @@ t.test(
       const { signal } = ac
       const opt = {
         signal,
-        filter: p => {
-          if (basename(p) === 'g') {
+        filter: (p, st) => {
+          if (basename(p) === 'g' && st.isFile()) {
             ac.abort(new Error('done'))
           }
           return true

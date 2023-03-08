@@ -61,7 +61,7 @@ const rimrafPosixDir = async (
       }
     }
     /* c8 ignore stop */
-    if (opt.filter && !(await opt.filter(path))) {
+    if (opt.filter && !(await opt.filter(path, ent))) {
       return false
     }
     await ignoreENOENT(unlink(path))
@@ -85,7 +85,7 @@ const rimrafPosixDir = async (
     return false
   }
 
-  if (opt.filter && !(await opt.filter(path))) {
+  if (opt.filter && !(await opt.filter(path, ent))) {
     return false
   }
 
@@ -115,7 +115,7 @@ const rimrafPosixDirSync = (
       }
     }
     /* c8 ignore stop */
-    if (opt.filter && !opt.filter(path)) {
+    if (opt.filter && !opt.filter(path, ent)) {
       return false
     }
     ignoreENOENTSync(() => unlinkSync(path))
@@ -134,7 +134,7 @@ const rimrafPosixDirSync = (
     return false
   }
 
-  if (opt.filter && !opt.filter(path)) {
+  if (opt.filter && !opt.filter(path, ent)) {
     return false
   }
 

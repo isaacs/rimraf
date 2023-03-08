@@ -77,12 +77,16 @@ Options:
   `fs.rm` because that implementation does not support abort
   signals.
 
-- `filter` Method that receives a path string as an argument, and
-  returns a boolean indicating whether that path should be
-  deleted. With async rimraf methods, this may return a Promise
-  that resolves to a boolean. (Since Promises are truthy,
-  returning a Promise from a sync filter is the same as just not
-  filtering anything.)
+- `filter` Method that returns a boolean indicating whether that
+  path should be deleted. With async rimraf methods, this may
+  return a Promise that resolves to a boolean. (Since Promises
+  are truthy, returning a Promise from a sync filter is the same
+  as just not filtering anything.)
+
+  The first argument to the filter is the path string.  The
+  second argument is either a `Dirent` or `Stats` object for that
+  path.  (The first path explored will be a `Stats`, the rest
+  will be `Dirent`.)
 
   If a filter method is provided, it will _only_ remove entries
   if the filter returns (or resolves to) a truthy value. Omitting
