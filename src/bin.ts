@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { version } from '../package.json'
-import rimraf from './index-cjs.js'
+import { rimraf } from './index.js'
 import type { RimrafAsyncOptions } from './index.js'
 
 const runHelpForUsage = () =>

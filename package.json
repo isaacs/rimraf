@@ -1,7 +1,7 @@
 {
   "name": "rimraf",
   "version": "4.4.1",
-  "main": "./dist/cjs/src/index-cjs.js",
+  "main": "./dist/cjs/src/index.js",
   "module": "./dist/mjs/index.js",
   "types": "./dist/mjs/index.d.ts",
   "bin": "./dist/cjs/src/bin.js",
@@ -13,7 +13,7 @@
       },
       "require": {
         "types": "./dist/cjs/src/index.d.ts",
-        "default": "./dist/cjs/src/index-cjs.js"
+        "default": "./dist/cjs/src/index.js"
       }
     }
   },
@@ -55,7 +55,7 @@
     "@types/tap": "^15.0.7",
     "c8": "^7.12.0",
     "eslint-config-prettier": "^8.6.0",
-    "mkdirp": "1",
+    "mkdirp": "^3.0.0",
     "prettier": "^2.8.2",
     "tap": "^16.3.4",
     "ts-node": "^10.9.1",
@@ -79,6 +79,6 @@
     "node": ">=14"
   },
   "dependencies": {
-    "glob": "^9.2.0"
+    "glob": "^10.0.0"
   }
 }

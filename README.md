@@ -22,12 +22,8 @@ Install with `npm install rimraf`.
 Hybrid module, load either with `import` or `require()`.
 
 ```js
-// default export is the main rimraf function, or use named imports
-import rimraf from 'rimraf'
-// or
-const rimraf = require('rimraf')
-
-// other strategies exported as well
+// 'rimraf' export is the one you probably want, but other
+// strategies exported as well.
 import { rimraf, rimrafSync, native, nativeSync } from 'rimraf'
 // or
 const { rimraf, rimrafSync, native, nativeSync } = require('rimraf')

@@ -1,3 +1,7 @@
+# 5.0
+
+- No default export, only named exports
+
 # 4.4
 
 - Provide Dirent or Stats object as second argument to filter

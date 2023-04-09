@@ -111,27 +111,22 @@ export const rimrafSync = wrapSync((path, opt) =>
 )
 export const sync = rimrafSync
 
-export const rimraf = Object.assign(
-  wrap((path, opt) =>
-    useNative(opt) ? rimrafNative(path, opt) : rimrafManual(path, opt)
-  ),
-  {
-    // this weirdness because it's easier than explicitly declaring
-    rimraf: manual,
-    sync: rimrafSync,
-    rimrafSync: rimrafSync,
-    manual,
-    manualSync,
-    native,
-    nativeSync,
-    posix,
-    posixSync,
-    windows,
-    windowsSync,
-    moveRemove,
-    moveRemoveSync,
-  }
+const rimraf_ = wrap((path, opt) =>
+  useNative(opt) ? rimrafNative(path, opt) : rimrafManual(path, opt)
 )
+export const rimraf = Object.assign(rimraf_, {
+  rimraf: rimraf_,
+  sync: rimrafSync,
+  rimrafSync: rimrafSync,
+  manual,
+  manualSync,
+  native,
+  nativeSync,
+  posix,
+  posixSync,
+  windows,
+  windowsSync,
+  moveRemove,
+  moveRemoveSync,
+})
 rimraf.rimraf = rimraf
-
-export default rimraf

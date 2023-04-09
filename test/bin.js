@@ -1,4 +1,3 @@
-const { basename } = require('path')
 const t = require('tap')
 const { readdirSync } = require('fs')
 
@@ -14,15 +13,22 @@ t.test('basic arg parsing stuff', t => {
   console.error = (...msg) => ERRS.push(msg)
 
   const CALLS = []
-  const rimraf = async (path, opt) => CALLS.push(['rimraf', path, opt])
-  const bin = t.mock('../dist/cjs/src/bin.js', {
-    '../dist/cjs/src/index.js': Object.assign(rimraf, {
+  const rimraf = Object.assign(
+    async (path, opt) => CALLS.push(['rimraf', path, opt]),
+    {
       native: async (path, opt) => CALLS.push(['native', path, opt]),
       manual: async (path, opt) => CALLS.push(['manual', path, opt]),
       posix: async (path, opt) => CALLS.push(['posix', path, opt]),
       windows: async (path, opt) => CALLS.push(['windows', path, opt]),
       moveRemove: async (path, opt) => CALLS.push(['move-remove', path, opt]),
-    }),
+    }
+  )
+
+  const bin = t.mock('../dist/cjs/src/bin.js', {
+    '../dist/cjs/src/index.js': {
+      rimraf,
+      ...rimraf,
+    },
   }).default
 
   t.afterEach(() => {
@@ -264,7 +270,7 @@ t.test('actually delete something with it', async t => {
   const bin = require.resolve('../dist/cjs/src/bin.js')
   const { spawnSync } = require('child_process')
   const res = spawnSync(process.execPath, [bin, path])
-  const { statSync, readdirSync } = require('fs')
+  const { statSync } = require('fs')
   t.throws(() => statSync(path))
   t.equal(res.status, 0)
 })

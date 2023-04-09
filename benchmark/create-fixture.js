@@ -1,7 +1,7 @@
 const { writeFile: writeFile_ } = require('fs')
 const writeFile = async (path, data) => new Promise((res, rej) =>
   writeFile_(path, data, er => er ? rej(er) : res()))
-const mkdirp = require('mkdirp')
+const { mkdirp } = require('mkdirp')
 const { resolve } = require('path')
 
 const create = async (path, start, end, maxDepth, depth = 0) => {
