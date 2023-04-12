@@ -2,11 +2,18 @@ The [UNIX command](<http://en.wikipedia.org/wiki/Rm_(Unix)>) `rm -rf` for node.
 
 Install with `npm install rimraf`.
 
-## Major Changes from v3 to v4
+## Major Changes
+
+### v4 to v5
+
+- There is no default export anymore. Import the functions directly
+  using, e.g., `import { rimrafSync } from 'rimraf`.
+
+### v3 to v4
 
 - The function returns a `Promise` instead of taking a callback.
-- Globbing requires the `--glob` option to be set. (Removed in
-  4.0 and 4.1, opt-in support added in 4.2.)
+- Globbing requires the `--glob` CLI option or `glob` option property
+  to be set. (Removed in 4.0 and 4.1, opt-in support added in 4.2.)
 - Functions take arrays of paths, as well as a single path.
 - Native implementation used by default when available, except on
   Windows, where this implementation is faster and more reliable.
@@ -73,6 +80,8 @@ Options:
   `fs.rm` because that implementation does not support abort
   signals.
 
+- `glob` Boolean flag to treat path as glob pattern, or an object
+  specifying [`glob` options](https://github.com/isaacs/node-glob).
 - `filter` Method that returns a boolean indicating whether that
   path should be deleted. With async rimraf methods, this may
   return a Promise that resolves to a boolean. (Since Promises
