@@ -80,5 +80,15 @@
   },
   "dependencies": {
     "glob": "^10.2.5"
-  }
+  },
+  "keywords": [
+    "rm",
+    "rm -rf",
+    "rm -fr",
+    "remove",
+    "directory",
+    "cli",
+    "rmdir",
+    "recursive"
+  ]
 }
