@@ -5,6 +5,7 @@ import t, { Test } from 'tap'
 // and that when the cb returns an error, the promised version fails,
 // and when the cb returns data, the promisified version resolves to it.
 import realFS from 'fs'
+import realFSP from 'fs/promises'
 import * as fs from '../src/fs.js'
 import { useNative } from '../src/use-native.js'
 
@@ -12,9 +13,10 @@ type MockCb = (e: Error | null, m?: string) => void
 type MockFsCb = Record<string, (cb: MockCb) => void>
 type MockFsPromise = Record<string, () => Promise<void>>
 
-const mockFs = async (t: Test, mock: MockFsCb) =>
+const mockFs = async (t: Test, fs: MockFsCb = {}, fsp: MockFsPromise = {}) =>
   (await t.mockImport('../src/fs.js', {
-    fs: t.createMock(realFS, mock),
+    fs: t.createMock(realFS, fs),
+    'fs/promises': t.createMock(realFSP, fsp),
   })) as typeof import('../src/fs.js')
 
 const mockFSMethodPass =
@@ -22,17 +24,30 @@ const mockFSMethodPass =
   (...args: unknown[]) => {
     process.nextTick(() => (args.at(-1) as MockCb)(null, method))
   }
+const mockFSPromiseMethodPass =
+  (_method: string) =>
+  () => new Promise<void>((resolve, _reject) => {
+    resolve()
+  })
 const mockFSMethodFail =
-  () =>
+  (_: string) =>
   (...args: unknown[]) => {
     process.nextTick(() => (args.at(-1) as MockCb)(new Error('oops')))
   }
+const mockFSPromiseMethodFail =
+  (_method: string) =>
+  () => new Promise<void>((_resolve, reject) => {
+    reject(new Error('oops'))
+  })
 
 t.type(fs.promises, Object)
 const mockFSPass: MockFsCb = {}
 const mockFSFail: MockFsCb = {}
+const mockFSPromisesFail: MockFsPromise = {}
+const mockFSPromisesPass: MockFsPromise = {}
 
 for (const method of Object.keys(fs.promises)) {
+
   // of course fs.rm is missing when we shouldn't use native :)
   // also, readdirSync is clubbed to always return file types
   if (method !== 'rm' || useNative()) {
@@ -52,7 +67,9 @@ for (const method of Object.keys(fs.promises)) {
 
   // set up our pass/fails for the next tests
   mockFSPass[method] = mockFSMethodPass(method)
-  mockFSFail[method] = mockFSMethodFail()
+  mockFSPromisesPass[method] = mockFSPromiseMethodPass(method)
+  mockFSFail[method] = mockFSMethodFail(method)
+  mockFSPromisesFail[method] = mockFSPromiseMethodFail(method)
 }
 
 // doesn't have any sync versions that aren't promisified
@@ -69,18 +86,17 @@ for (const method of Object.keys(fs)) {
 }
 
 t.test('passing resolves promise', async t => {
-  const fs = await mockFs(t, mockFSPass)
+  const fs = await mockFs(t, mockFSPass, mockFSPromisesPass)
   for (const [m, fn] of Object.entries(
     fs.promises as unknown as MockFsPromise,
   )) {
-    const expected =
-      ['chmod', 'rename', 'rm', 'rmdir', 'unlink'].includes(m) ? undefined : m
-    t.same(await fn(), expected, `got expected value for ${m}`)
+    t.same(await fn(), undefined, `${m} is a Promise<void> method`)
   }
 })
 
 t.test('failing rejects promise', async t => {
-  const fs = await mockFs(t, mockFSFail)
+  const fs = await mockFs(t, mockFSFail, mockFSPromisesFail)
+
   for (const [m, fn] of Object.entries(
     fs.promises as unknown as MockFsPromise,
   )) {
