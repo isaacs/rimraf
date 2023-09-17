@@ -13,17 +13,30 @@ const mockFSMethodPass =
     const cb = args.pop()
     process.nextTick(() => cb(null, method, 1, 2, 3))
   }
+const mockFSPromiseMethodPass =
+  (method: string) =>
+  () => new Promise((resolve, reject) => {
+    resolve(method)
+  })
 const mockFSMethodFail =
   (method: string) =>
   (...args: any[]) => {
     const cb = args.pop()
     process.nextTick(() => cb(new Error('oops'), method, 1, 2, 3))
   }
+const mockFSPromiseMethodFail =
+  (method: string) =>
+  () => new Promise((resolve, reject) => {
+    reject(new Error('oops'))
+  })
 
 import { useNative } from '../dist/cjs/src/use-native.js'
 t.type(fs.promises, Object)
 const mockFSPass: { [k: string]: (...a: any[]) => any } = {}
 const mockFSFail: { [k: string]: (...a: any[]) => any } = {}
+const mockFSPromisesPass: { [k: string]: (...a: any[]) => Promise<any> } = {}
+const mockFSPromisesFail: { [k: string]: (...a: any[]) => Promise<any> } = {}
+
 for (const method of Object.keys(
   fs.promises as { [k: string]: (...a: any[]) => any }
 )) {
@@ -48,7 +61,9 @@ for (const method of Object.keys(
 
   // set up our pass/fails for the next tests
   mockFSPass[method] = mockFSMethodPass(method)
+  mockFSPromisesPass[method] = mockFSPromiseMethodPass(method)
   mockFSFail[method] = mockFSMethodFail(method)
+  mockFSPromisesFail[method] = mockFSPromiseMethodFail(method)
 }
 
 // doesn't have any sync versions that aren't promisified
@@ -65,7 +80,7 @@ for (const method of Object.keys(fs)) {
 }
 
 t.test('passing resolves promise', async t => {
-  const fs = t.mock('../src/fs', { fs: mockFSPass })
+  const fs = t.mock('../src/fs', { fs: mockFSPass, 'fs/promises': mockFSPromisesPass })
   for (const [m, fn] of Object.entries(
     fs.promises as { [k: string]: (...a: any) => Promise<any> }
   )) {
@@ -74,7 +89,8 @@ t.test('passing resolves promise', async t => {
 })
 
 t.test('failing rejects promise', async t => {
-  const fs = t.mock('../src/fs', { fs: mockFSFail })
+  const fs = t.mock('../src/fs', { fs: mockFSFail, 'fs/promises': mockFSPromisesFail })
+
   for (const [m, fn] of Object.entries(
     fs.promises as { [k: string]: (...a: any[]) => Promise<any> }
   )) {
