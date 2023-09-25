@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { realpathSync } from 'fs'
 import { readFile } from 'fs/promises'
 import type { RimrafAsyncOptions } from './index.js'
 import { rimraf } from './index.js'
@@ -262,11 +261,7 @@ main.help = help
 
 export default main
 
-const isMainModule =
-  realpathSync(String(process.argv[1])) ===
-  realpathSync(fileURLToPath(import.meta.url))
-
-if (isMainModule) {
+if (process.env.__TESTING_RIMRAF_BIN__ !== '1') {
   const args = process.argv.slice(2)
   main(...args).then(
     code => process.exit(code),

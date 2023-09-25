@@ -10,9 +10,11 @@ t.test('basic arg parsing stuff', async t => {
   const LOGS: any[] = []
   const ERRS: any[] = []
   const { log: consoleLog, error: consoleError } = console
+  process.env.__TESTING_RIMRAF_BIN__ = '1'
   t.teardown(() => {
     console.log = consoleLog
     console.error = consoleError
+    delete process.env.__TESTING_RIMRAF_BIN__
   })
   console.log = (...msg) => LOGS.push(msg)
   console.error = (...msg) => ERRS.push(msg)
