@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { realpathSync } from 'fs'
 import { readFile } from 'fs/promises'
 import type { RimrafAsyncOptions } from './index.js'
 import { rimraf } from './index.js'
@@ -260,7 +261,10 @@ const main = async (...args: string[]) => {
 main.help = help
 
 export default main
-const isMainModule = process.argv[1] === fileURLToPath(import.meta.url)
+
+const isMainModule =
+  realpathSync(String(process.argv[1])) ===
+  realpathSync(fileURLToPath(import.meta.url))
 
 if (isMainModule) {
   const args = process.argv.slice(2)
