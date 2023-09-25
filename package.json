@@ -79,7 +79,7 @@
     "node": ">=14"
   },
   "dependencies": {
-    "glob": "^10.2.5"
+    "glob": "10.3.6"
   },
   "keywords": [
     "rm",
