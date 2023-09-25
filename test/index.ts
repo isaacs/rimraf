@@ -9,6 +9,8 @@ import {
   rimrafSync
 } from '../src/index.js'
 
+import * as OPTARG from '../dist/esm/opt-arg.js'
+
 t.test('mocky unit tests to select the correct function', async t => {
   // don't mock rimrafManual, so we can test the platform switch
   const CALLS: any[] = []
@@ -29,6 +31,7 @@ t.test('mocky unit tests to select the correct function', async t => {
       return path
     },
     '../dist/esm/opt-arg.js': {
+      ...OPTARG,
       optArg: (opt: RimrafOptions) => {
         CALLS.push(['optArg', opt])
         return opt

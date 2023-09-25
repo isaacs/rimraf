@@ -1,10 +1,48 @@
+import { Dirent, Stats } from 'fs'
 import { GlobOptions } from 'glob'
-import {
-  assertRimrafOptions,
-  RimrafAsyncOptions,
-  RimrafOptions,
-  RimrafSyncOptions,
-} from './index.js'
+
+const typeOrUndef = (val: any, t: string) =>
+  typeof val === 'undefined' || typeof val === t
+
+export const isRimrafOptions = (o: any): o is RimrafOptions =>
+  !!o &&
+  typeof o === 'object' &&
+  typeOrUndef(o.preserveRoot, 'boolean') &&
+  typeOrUndef(o.tmp, 'string') &&
+  typeOrUndef(o.maxRetries, 'number') &&
+  typeOrUndef(o.retryDelay, 'number') &&
+  typeOrUndef(o.backoff, 'number') &&
+  typeOrUndef(o.maxBackoff, 'number') &&
+  (typeOrUndef(o.glob, 'boolean') || (o.glob && typeof o.glob === 'object')) &&
+  typeOrUndef(o.filter, 'function')
+
+export const assertRimrafOptions: (o: any) => void = (
+  o: any
+): asserts o is RimrafOptions => {
+  if (!isRimrafOptions(o)) {
+    throw new Error('invalid rimraf options')
+  }
+}
+
+export interface RimrafAsyncOptions {
+  preserveRoot?: boolean
+  tmp?: string
+  maxRetries?: number
+  retryDelay?: number
+  backoff?: number
+  maxBackoff?: number
+  signal?: AbortSignal
+  glob?: boolean | GlobOptions
+  filter?:
+    | ((path: string, ent: Dirent | Stats) => boolean)
+    | ((path: string, ent: Dirent | Stats) => Promise<boolean>)
+}
+
+export interface RimrafSyncOptions extends RimrafAsyncOptions {
+  filter?: (path: string, ent: Dirent | Stats) => boolean
+}
+
+export type RimrafOptions = RimrafSyncOptions | RimrafAsyncOptions
 
 const optArgT = <T extends RimrafOptions>(
   opt: T

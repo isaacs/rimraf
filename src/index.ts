@@ -1,58 +1,25 @@
-import { optArg, optArgSync } from './opt-arg.js'
+import { glob, globSync } from 'glob'
+import {
+  optArg,
+  optArgSync,
+  RimrafAsyncOptions,
+  RimrafSyncOptions,
+} from './opt-arg.js'
 import pathArg from './path-arg.js'
-
-import { glob, GlobOptions, globSync } from 'glob'
-
-export interface RimrafAsyncOptions {
-  preserveRoot?: boolean
-  tmp?: string
-  maxRetries?: number
-  retryDelay?: number
-  backoff?: number
-  maxBackoff?: number
-  signal?: AbortSignal
-  glob?: boolean | GlobOptions
-  filter?:
-    | ((path: string, ent: Dirent | Stats) => boolean)
-    | ((path: string, ent: Dirent | Stats) => Promise<boolean>)
-}
-
-export interface RimrafSyncOptions extends RimrafAsyncOptions {
-  filter?: (path: string, ent: Dirent | Stats) => boolean
-}
-
-export type RimrafOptions = RimrafSyncOptions | RimrafAsyncOptions
-
-const typeOrUndef = (val: any, t: string) =>
-  typeof val === 'undefined' || typeof val === t
-
-export const isRimrafOptions = (o: any): o is RimrafOptions =>
-  !!o &&
-  typeof o === 'object' &&
-  typeOrUndef(o.preserveRoot, 'boolean') &&
-  typeOrUndef(o.tmp, 'string') &&
-  typeOrUndef(o.maxRetries, 'number') &&
-  typeOrUndef(o.retryDelay, 'number') &&
-  typeOrUndef(o.backoff, 'number') &&
-  typeOrUndef(o.maxBackoff, 'number') &&
-  (typeOrUndef(o.glob, 'boolean') || (o.glob && typeof o.glob === 'object')) &&
-  typeOrUndef(o.filter, 'function')
-
-export const assertRimrafOptions: (o: any) => void = (
-  o: any
-): asserts o is RimrafOptions => {
-  if (!isRimrafOptions(o)) {
-    throw new Error('invalid rimraf options')
-  }
-}
-
-import { Dirent, Stats } from 'fs'
 import { rimrafManual, rimrafManualSync } from './rimraf-manual.js'
 import { rimrafMoveRemove, rimrafMoveRemoveSync } from './rimraf-move-remove.js'
 import { rimrafNative, rimrafNativeSync } from './rimraf-native.js'
 import { rimrafPosix, rimrafPosixSync } from './rimraf-posix.js'
 import { rimrafWindows, rimrafWindowsSync } from './rimraf-windows.js'
 import { useNative, useNativeSync } from './use-native.js'
+
+export {
+  assertRimrafOptions,
+  isRimrafOptions,
+  RimrafAsyncOptions,
+  RimrafOptions,
+  RimrafSyncOptions,
+} from './opt-arg.js'
 
 const wrap =
   (fn: (p: string, o: RimrafAsyncOptions) => Promise<boolean>) =>
