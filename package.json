@@ -1,6 +1,6 @@
 {
   "name": "rimraf",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "bin": "./dist/esm/bin.mjs",
   "exports": {
     "./package.json": "./package.json",
