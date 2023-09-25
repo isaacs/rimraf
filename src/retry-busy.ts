@@ -1,6 +1,6 @@
 // note: max backoff is the maximum that any *single* backoff will do
 
-import { RimrafAsyncOptions, RimrafOptions } from '.'
+import { RimrafAsyncOptions, RimrafOptions } from './index.js'
 
 export const MAXBACKOFF = 200
 export const RATE = 1.2

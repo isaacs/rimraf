@@ -5,7 +5,7 @@
  * Make sure to inspect the output below.  Do not ignore changes!
  */
 'use strict'
-exports[`test/index.js TAP mocky unit tests to select the correct function main function, useNative=false > must match snapshot 1`] = `
+exports[`test/index.ts > TAP > mocky unit tests to select the correct function > main function, useNative=false > must match snapshot 1`] = `
 Array [
   Array [
     "optArg",
@@ -56,7 +56,7 @@ Array [
 ]
 `
 
-exports[`test/index.js TAP mocky unit tests to select the correct function main function, useNative=true > must match snapshot 1`] = `
+exports[`test/index.ts > TAP > mocky unit tests to select the correct function > main function, useNative=true > must match snapshot 1`] = `
 Array [
   Array [
     "optArg",
@@ -107,7 +107,7 @@ Array [
 ]
 `
 
-exports[`test/index.js TAP mocky unit tests to select the correct function manual > must match snapshot 1`] = `
+exports[`test/index.ts > TAP > mocky unit tests to select the correct function > manual > must match snapshot 1`] = `
 Array [
   Array [
     "optArg",
@@ -146,7 +146,7 @@ Array [
 ]
 `
 
-exports[`test/index.js TAP mocky unit tests to select the correct function native > must match snapshot 1`] = `
+exports[`test/index.ts > TAP > mocky unit tests to select the correct function > native > must match snapshot 1`] = `
 Array [
   Array [
     "optArg",
@@ -185,7 +185,7 @@ Array [
 ]
 `
 
-exports[`test/index.js TAP mocky unit tests to select the correct function posix > must match snapshot 1`] = `
+exports[`test/index.ts > TAP > mocky unit tests to select the correct function > posix > must match snapshot 1`] = `
 Array [
   Array [
     "optArg",
@@ -224,7 +224,7 @@ Array [
 ]
 `
 
-exports[`test/index.js TAP mocky unit tests to select the correct function windows > must match snapshot 1`] = `
+exports[`test/index.ts > TAP > mocky unit tests to select the correct function > windows > must match snapshot 1`] = `
 Array [
   Array [
     "optArg",

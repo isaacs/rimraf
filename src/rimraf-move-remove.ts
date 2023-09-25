@@ -27,7 +27,7 @@ import {
 const { lstat, rename, unlink, rmdir, chmod } = fsPromises
 
 import { Dirent, Stats } from 'fs'
-import { RimrafAsyncOptions, RimrafSyncOptions } from '.'
+import { RimrafAsyncOptions, RimrafSyncOptions } from './index.js'
 import { readdirOrError, readdirOrErrorSync } from './readdir-or-error.js'
 
 // crypto.randomBytes is much slower, and Math.random() is enough here

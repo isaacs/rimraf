@@ -1,8 +1,8 @@
-const t = require('tap')
-const {
+import t from 'tap'
+import {
   readdirOrError,
   readdirOrErrorSync,
-} = require('../dist/cjs/src/readdir-or-error.js')
+} from '../dist/esm/readdir-or-error.js'
 
 const path = t.testdir({
   file: 'file',
@@ -15,7 +15,7 @@ const path = t.testdir({
 })
 
 // [path, expected]
-const cases = [
+const cases: [string, string[] | { code: string }][] = [
   ['file', { code: 'ENOTDIR' }],
   ['empty', []],
   ['full', ['x', 'y', 'z']],
@@ -27,6 +27,12 @@ for (const [c, expect] of cases) {
     const resAsync = await readdirOrError(p)
     const resSync = readdirOrErrorSync(p)
     if (Array.isArray(expect)) {
+      if (!Array.isArray(resAsync)) {
+        throw new Error('expected array async result')
+      }
+      if (!Array.isArray(resSync)) {
+        throw new Error('expected array sync result')
+      }
       t.same(
         resAsync.map(e => e.name).sort(),
         expect.sort(),

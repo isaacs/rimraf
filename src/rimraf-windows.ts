@@ -10,7 +10,7 @@
 
 import { Dirent, Stats } from 'fs'
 import { parse, resolve } from 'path'
-import { RimrafAsyncOptions, RimrafSyncOptions } from '.'
+import { RimrafAsyncOptions, RimrafSyncOptions } from './index.js'
 import { fixEPERM, fixEPERMSync } from './fix-eperm.js'
 import { lstatSync, promises, rmdirSync, unlinkSync } from './fs.js'
 import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'

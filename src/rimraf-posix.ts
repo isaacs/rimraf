@@ -12,7 +12,7 @@ import { parse, resolve } from 'path'
 import { readdirOrError, readdirOrErrorSync } from './readdir-or-error.js'
 
 import { Dirent, Stats } from 'fs'
-import { RimrafAsyncOptions, RimrafSyncOptions } from '.'
+import { RimrafAsyncOptions, RimrafSyncOptions } from './index.js'
 import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'
 
 export const rimrafPosix = async (path: string, opt: RimrafAsyncOptions) => {

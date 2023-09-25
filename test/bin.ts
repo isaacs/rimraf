@@ -1,9 +1,14 @@
-const t = require('tap')
-const { readdirSync } = require('fs')
+import { spawn, spawnSync } from 'child_process'
+import { readdirSync, statSync } from 'fs'
+import t from 'tap'
+import { fileURLToPath } from 'url'
+import { RimrafOptions } from '../src/index.js'
 
-t.test('basic arg parsing stuff', t => {
-  const LOGS = []
-  const ERRS = []
+const binModule = fileURLToPath(new URL('../dist/esm/bin.mjs', import.meta.url))
+
+t.test('basic arg parsing stuff', async t => {
+  const LOGS: any[] = []
+  const ERRS: any[] = []
   const { log: consoleLog, error: consoleError } = console
   t.teardown(() => {
     console.log = consoleLog
@@ -12,24 +17,30 @@ t.test('basic arg parsing stuff', t => {
   console.log = (...msg) => LOGS.push(msg)
   console.error = (...msg) => ERRS.push(msg)
 
-  const CALLS = []
+  const CALLS: any[] = []
   const rimraf = Object.assign(
-    async (path, opt) => CALLS.push(['rimraf', path, opt]),
+    async (path: string, opt: RimrafOptions) =>
+      CALLS.push(['rimraf', path, opt]),
     {
-      native: async (path, opt) => CALLS.push(['native', path, opt]),
-      manual: async (path, opt) => CALLS.push(['manual', path, opt]),
-      posix: async (path, opt) => CALLS.push(['posix', path, opt]),
-      windows: async (path, opt) => CALLS.push(['windows', path, opt]),
-      moveRemove: async (path, opt) => CALLS.push(['move-remove', path, opt]),
+      native: async (path: string, opt: RimrafOptions) =>
+        CALLS.push(['native', path, opt]),
+      manual: async (path: string, opt: RimrafOptions) =>
+        CALLS.push(['manual', path, opt]),
+      posix: async (path: string, opt: RimrafOptions) =>
+        CALLS.push(['posix', path, opt]),
+      windows: async (path: string, opt: RimrafOptions) =>
+        CALLS.push(['windows', path, opt]),
+      moveRemove: async (path: string, opt: RimrafOptions) =>
+        CALLS.push(['move-remove', path, opt]),
     }
   )
 
-  const bin = t.mock('../dist/cjs/src/bin.js', {
-    '../dist/cjs/src/index.js': {
+  const { default: bin } = await t.mockImport('../dist/esm/bin.mjs', {
+    '../dist/esm/index.js': {
       rimraf,
       ...rimraf,
     },
-  }).default
+  })
 
   t.afterEach(() => {
     LOGS.length = 0
@@ -84,7 +95,7 @@ t.test('basic arg parsing stuff', t => {
     t.teardown(() => {
       console.log = log
     })
-    const logs = []
+    const logs: any[] = []
     console.log = s => logs.push(s)
     for (const c of CALLS) {
       t.equal(c[0], 'rimraf')
@@ -106,7 +117,7 @@ t.test('basic arg parsing stuff', t => {
     t.teardown(() => {
       console.log = log
     })
-    const logs = []
+    const logs: any[] = []
     console.log = s => logs.push(s)
     for (const c of CALLS) {
       t.equal(c[0], 'rimraf')
@@ -267,10 +278,9 @@ t.test('actually delete something with it', async t => {
     },
   })
 
-  const bin = require.resolve('../dist/cjs/src/bin.js')
-  const { spawnSync } = require('child_process')
-  const res = spawnSync(process.execPath, [bin, path])
-  const { statSync } = require('fs')
+  const res = spawnSync(process.execPath, [binModule, path], {
+    encoding: 'utf8'
+  })
   t.throws(() => statSync(path))
   t.equal(res.status, 0)
 })
@@ -284,15 +294,12 @@ t.test('print failure when impl throws', async t => {
     },
   })
 
-  const bin = require.resolve('../dist/cjs/src/bin.js')
-  const { spawnSync } = require('child_process')
-  const res = spawnSync(process.execPath, [bin, path], {
+  const res = spawnSync(process.execPath, [binModule, path], {
     env: {
       ...process.env,
       __RIMRAF_TESTING_BIN_FAIL__: '1',
     },
   })
-  const { statSync } = require('fs')
   t.equal(statSync(path).isDirectory(), true)
   t.equal(res.status, 1)
   t.match(res.stderr.toString(), /^Error: simulated rimraf failure/)
@@ -314,11 +321,9 @@ t.test('interactive deletes', t => {
 
   // t.jobs = scripts.length * verboseOpt.length
 
-  const { spawn } = require('child_process')
-  const bin = require.resolve('../dist/cjs/src/bin.js')
   const node = process.execPath
 
-  const leftovers = d => {
+  const leftovers = (d: string) => {
     try {
       readdirSync(d)
       return true
@@ -333,12 +338,12 @@ t.test('interactive deletes', t => {
         const script = s.slice()
         t.test(script.join(', '), async t => {
           const d = t.testdir(fixture)
-          const args = [bin, '-i', verbose, d]
+          const args = [binModule, '-i', verbose, d]
           const child = spawn(node, args, {
             stdio: 'pipe',
           })
-          const out = []
-          const err = []
+          const out: string[] = []
+          const err: string[] = []
           const timer = setTimeout(() => {
             t.fail('timed out')
             child.kill('SIGKILL')
@@ -346,7 +351,7 @@ t.test('interactive deletes', t => {
           child.stdout.setEncoding('utf8')
           child.stderr.setEncoding('utf8')
           let last = ''
-          child.stdout.on('data', async c => {
+          child.stdout.on('data', async (c: string) => {
             // await new Promise(r => setTimeout(r, 50))
             out.push(c.trim())
             const s = script.shift()
@@ -359,18 +364,21 @@ t.test('interactive deletes', t => {
               child.stdin.write(last + '\n')
             }
           })
-          child.stderr.on('data', c => {
+          child.stderr.on('data', (c: string) => {
             err.push(c)
           })
-          return new Promise(res => {
-            child.on('close', (code, signal) => {
-              clearTimeout(timer)
-              t.same(err, [], 'should not see any stderr')
-              t.equal(code, 0, 'code')
-              t.equal(signal, null, 'signal')
-              t.matchSnapshot(leftovers(d), 'had any leftover')
-              res()
-            })
+          return new Promise<void>(res => {
+            child.on(
+              'close',
+              (code: number | null, signal: NodeJS.Signals | null) => {
+                clearTimeout(timer)
+                t.same(err, [], 'should not see any stderr')
+                t.equal(code, 0, 'code')
+                t.equal(signal, null, 'signal')
+                t.matchSnapshot(leftovers(d), 'had any leftover')
+                res()
+              }
+            )
           })
         })
       }

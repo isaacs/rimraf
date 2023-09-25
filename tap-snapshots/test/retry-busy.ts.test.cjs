@@ -5,7 +5,7 @@
  * Make sure to inspect the output below.  Do not ignore changes!
  */
 'use strict'
-exports[`test/retry-busy.js TAP > default settings 1`] = `
+exports[`test/retry-busy.ts > TAP > default settings 1`] = `
 Object {
   "codes": Set {
     "EMFILE",

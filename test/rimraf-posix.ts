@@ -7,15 +7,13 @@
 //   process.exit(0)
 // }
 
-const t = require('tap')
-const {
-  rimrafPosix,
-  rimrafPosixSync,
-} = require('../dist/cjs/src/rimraf-posix.js')
-const { parse, relative, basename } = require('path')
-const { statSync } = require('fs')
+import { Dirent, Stats, statSync } from 'fs'
+import * as PATH from 'path'
+import { basename, parse, relative } from 'path'
+import t from 'tap'
+import { rimrafPosix, rimrafPosixSync } from '../dist/esm/rimraf-posix.js'
 
-const fs = require('../dist/cjs/src/fs.js')
+import * as fs from '../dist/esm/fs.js'
 
 const fixture = {
   a: 'a',
@@ -61,104 +59,104 @@ t.test('actually delete some stuff', t => {
 })
 
 t.test('throw unlink errors', async t => {
-  const { rimrafPosix, rimrafPosixSync } = t.mock(
-    '../dist/cjs/src/rimraf-posix.js',
+  const { rimrafPosix, rimrafPosixSync } = (await t.mockImport(
+    '../dist/esm/rimraf-posix.js',
     {
-      '../dist/cjs/src/fs.js': {
+      '../dist/esm/fs.js': {
         ...fs,
-        unlinkSync: path => {
+        unlinkSync: () => {
           throw Object.assign(new Error('cannot unlink'), { code: 'FOO' })
         },
         promises: {
           ...fs.promises,
-          unlink: async path => {
+          unlink: async () => {
             throw Object.assign(new Error('cannot unlink'), { code: 'FOO' })
           },
         },
       },
     }
-  )
+  )) as typeof import('../dist/esm/rimraf-posix.js')
   const path = t.testdir(fixture)
   t.throws(() => rimrafPosixSync(path, {}), { code: 'FOO' })
   t.rejects(rimrafPosix(path, {}), { code: 'FOO' })
 })
 
 t.test('throw rmdir errors', async t => {
-  const { rimrafPosix, rimrafPosixSync } = t.mock(
-    '../dist/cjs/src/rimraf-posix.js',
+  const { rimrafPosix, rimrafPosixSync } = (await t.mockImport(
+    '../dist/esm/rimraf-posix.js',
     {
-      '../dist/cjs/src/fs.js': {
+      '../dist/esm/fs.js': {
         ...fs,
-        rmdirSync: path => {
+        rmdirSync: () => {
           throw Object.assign(new Error('cannot rmdir'), { code: 'FOO' })
         },
         promises: {
           ...fs.promises,
-          rmdir: async path => {
+          rmdir: async () => {
             throw Object.assign(new Error('cannot rmdir'), { code: 'FOO' })
           },
         },
       },
     }
-  )
+  )) as typeof import('../dist/esm/rimraf-posix.js')
   const path = t.testdir(fixture)
   t.throws(() => rimrafPosixSync(path, {}), { code: 'FOO' })
   t.rejects(rimrafPosix(path, {}), { code: 'FOO' })
 })
 
 t.test('throw unexpected readdir errors', async t => {
-  const { rimrafPosix, rimrafPosixSync } = t.mock(
-    '../dist/cjs/src/rimraf-posix.js',
+  const { rimrafPosix, rimrafPosixSync } = (await t.mockImport(
+    '../dist/esm/rimraf-posix.js',
     {
-      '../dist/cjs/src/fs.js': {
+      '../dist/esm/fs.js': {
         ...fs,
-        readdirSync: path => {
+        readdirSync: () => {
           throw Object.assign(new Error('cannot readdir'), { code: 'FOO' })
         },
         promises: {
           ...fs.promises,
-          readdir: async path => {
+          readdir: async () => {
             throw Object.assign(new Error('cannot readdir'), { code: 'FOO' })
           },
         },
       },
     }
-  )
+  )) as typeof import('../dist/esm/rimraf-posix.js')
   const path = t.testdir(fixture)
   t.throws(() => rimrafPosixSync(path, {}), { code: 'FOO' })
   t.rejects(rimrafPosix(path, {}), { code: 'FOO' })
 })
 
 t.test('ignore ENOENTs from unlink/rmdir', async t => {
-  const { rimrafPosix, rimrafPosixSync } = t.mock(
-    '../dist/cjs/src/rimraf-posix.js',
+  const { rimrafPosix, rimrafPosixSync } = (await t.mockImport(
+    '../dist/esm/rimraf-posix.js',
     {
-      '../dist/cjs/src/fs.js': {
+      '../dist/esm/fs.js': {
         ...fs,
         // simulate a case where two rimrafs are happening in parallel,
         // so the deletion happens AFTER the readdir, but before ours.
-        rmdirSync: path => {
+        rmdirSync: (path: string) => {
           fs.rmdirSync(path)
           fs.rmdirSync(path)
         },
-        unlinkSync: path => {
+        unlinkSync: (path: string) => {
           fs.unlinkSync(path)
           fs.unlinkSync(path)
         },
         promises: {
           ...fs.promises,
-          rmdir: async path => {
+          rmdir: async (path: string) => {
             fs.rmdirSync(path)
             return fs.promises.rmdir(path)
           },
-          unlink: async path => {
+          unlink: async (path: string) => {
             fs.unlinkSync(path)
             return fs.promises.unlink(path)
           },
         },
       },
     }
-  )
+  )) as typeof import('../dist/esm/rimraf-posix.js')
   const { statSync } = fs
   t.test('sync', t => {
     const path = t.testdir(fixture)
@@ -176,13 +174,13 @@ t.test('ignore ENOENTs from unlink/rmdir', async t => {
 })
 
 t.test('rimraffing root, do not actually rmdir root', async t => {
-  let ROOT = null
-  const { rimrafPosix, rimrafPosixSync } = t.mock(
-    '../dist/cjs/src/rimraf-posix.js',
+  let ROOT: undefined | string = undefined
+  const { rimrafPosix, rimrafPosixSync } = (await t.mockImport(
+    '../dist/esm/rimraf-posix.js',
     {
       path: {
-        ...require('path'),
-        parse: path => {
+        ...PATH,
+        parse: (path: string) => {
           const p = parse(path)
           if (path === ROOT) {
             p.root = path
@@ -191,7 +189,7 @@ t.test('rimraffing root, do not actually rmdir root', async t => {
         },
       },
     }
-  )
+  )) as typeof import('../dist/esm/rimraf-posix.js')
   t.test('async', async t => {
     ROOT = t.testdir(fixture)
     await rimrafPosix(ROOT, { preserveRoot: false })
@@ -211,10 +209,6 @@ t.test(
   'abort on signal',
   { skip: typeof AbortController === 'undefined' },
   t => {
-    const {
-      rimrafPosix,
-      rimrafPosixSync,
-    } = require('../dist/cjs/src/rimraf-posix.js')
     t.test('sync', t => {
       const d = t.testdir(fixture)
       const ac = new AbortController()
@@ -229,7 +223,7 @@ t.test(
       const { signal } = ac
       const opt = {
         signal,
-        filter: (p, st) => {
+        filter: (p: string, st: Stats | Dirent) => {
           if (basename(p) === 'g' && st.isFile()) {
             ac.abort(new Error('done'))
           }
@@ -260,17 +254,13 @@ t.test(
 
 t.test('filter function', t => {
   t.formatSnapshot = undefined
-  const {
-    rimrafPosix,
-    rimrafPosixSync,
-  } = require('../dist/cjs/src/rimraf-posix.js')
 
   for (const f of ['i', 'j']) {
     t.test(`filter=${f}`, t => {
       t.test('sync', t => {
         const dir = t.testdir(fixture)
-        const saw = []
-        const filter = p => {
+        const saw: string[] = []
+        const filter = (p: string) => {
           saw.push(relative(process.cwd(), p).replace(/\\/g, '/'))
           return basename(p) !== f
         }
@@ -302,8 +292,8 @@ t.test('filter function', t => {
 
       t.test('async', async t => {
         const dir = t.testdir(fixture)
-        const saw = []
-        const filter = p => {
+        const saw: string[] = []
+        const filter = (p: string) => {
           saw.push(relative(process.cwd(), p).replace(/\\/g, '/'))
           return basename(p) !== f
         }
@@ -334,8 +324,8 @@ t.test('filter function', t => {
 
       t.test('async filter', async t => {
         const dir = t.testdir(fixture)
-        const saw = []
-        const filter = async p => {
+        const saw: string[] = []
+        const filter = async (p: string) => {
           saw.push(relative(process.cwd(), p).replace(/\\/g, '/'))
           await new Promise(setImmediate)
           return basename(p) !== f

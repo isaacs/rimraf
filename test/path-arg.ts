@@ -1,20 +1,29 @@
-const t = require('tap')
+import * as PATH from 'path'
+import t from 'tap'
+import { fileURLToPath } from 'url'
+import { inspect } from 'util'
 
 if (!process.env.__TESTING_RIMRAF_PLATFORM__) {
   const fake = process.platform === 'win32' ? 'posix' : 'win32'
-  t.spawn(process.execPath, [__filename], {
-    env: {
-      ...process.env,
-      __TESTING_RIMRAF_PLATFORM__: fake,
-    },
-  })
+  t.spawn(
+    process.execPath,
+    [...process.execArgv, fileURLToPath(import.meta.url)],
+    {
+      name: fake,
+      env: {
+        ...process.env,
+        __TESTING_RIMRAF_PLATFORM__: fake,
+      },
+    }
+  )
 }
 
 const platform = process.env.__TESTING_RIMRAF_PLATFORM__ || process.platform
-const path = require('path')[platform] || require('path')
-const pathArg = t.mock('../dist/cjs/src/path-arg.js', {
+const path = PATH[platform as 'win32' | 'posix'] || PATH
+const { default: pathArg } = (await t.mockImport('../dist/esm/path-arg.js', {
   path,
-}).default
+})) as typeof import('../dist/esm/path-arg.js')
+
 const { resolve } = path
 
 t.equal(pathArg('a/b/c'), resolve('a/b/c'))
@@ -42,11 +51,13 @@ if (platform === 'win32') {
 }
 
 t.throws(() => pathArg('/'), { code: 'ERR_PRESERVE_ROOT' })
-t.throws(() => pathArg('/', { preserveRoot: null }), {
+
+t.throws(() => pathArg('/', { preserveRoot: undefined }), {
   code: 'ERR_PRESERVE_ROOT',
 })
 t.equal(pathArg('/', { preserveRoot: false }), resolve('/'))
 
+//@ts-expect-error
 t.throws(() => pathArg({}), {
   code: 'ERR_INVALID_ARG_TYPE',
   path: {},
@@ -55,6 +66,7 @@ t.throws(() => pathArg({}), {
     'Received an instance of Object',
   name: 'TypeError',
 })
+//@ts-expect-error
 t.throws(() => pathArg([]), {
   code: 'ERR_INVALID_ARG_TYPE',
   path: [],
@@ -63,8 +75,8 @@ t.throws(() => pathArg([]), {
     'Received an instance of Array',
   name: 'TypeError',
 })
-const { inspect } = require('util')
-t.throws(() => pathArg(Object.create(null)), {
+//@ts-expect-error
+t.throws(() => pathArg(Object.create(null) as {}), {
   code: 'ERR_INVALID_ARG_TYPE',
   path: Object.create(null),
   message:
@@ -72,6 +84,7 @@ t.throws(() => pathArg(Object.create(null)), {
     `Received ${inspect(Object.create(null))}`,
   name: 'TypeError',
 })
+//@ts-expect-error
 t.throws(() => pathArg(true), {
   code: 'ERR_INVALID_ARG_TYPE',
   path: true,

@@ -1,19 +1,21 @@
-const t = require('tap')
+import t from 'tap'
+
+import { tmpdir } from 'os'
+import { win32 } from 'path'
 
 t.test('posix platform', async t => {
-  const { tmpdir } = require('os')
-  const { defaultTmp, defaultTmpSync } = t.mock(
-    '../dist/cjs/src/default-tmp.js',
+  const { defaultTmp, defaultTmpSync } = (await t.mockImport(
+    '../dist/esm/default-tmp.js',
     {
-      '../dist/cjs/src/platform.js': 'posix',
+      '../dist/esm/platform.js': 'posix',
     }
-  )
+  )) as typeof import('../dist/esm/default-tmp.js')
   t.equal(defaultTmpSync('anything'), tmpdir())
   t.equal(await defaultTmp('anything').then(t => t), tmpdir())
 })
 
 t.test('windows', async t => {
-  const tempDirCheck = path => {
+  const tempDirCheck = (path: string) => {
     switch (path.toLowerCase()) {
       case 'd:\\temp':
         return { isDirectory: () => true }
@@ -23,22 +25,22 @@ t.test('windows', async t => {
         throw Object.assign(new Error('no ents here'), { code: 'ENOENT' })
     }
   }
-  const { defaultTmp, defaultTmpSync } = t.mock(
-    '../dist/cjs/src/default-tmp.js',
+  const { defaultTmp, defaultTmpSync } = (await t.mockImport(
+    '../dist/esm/default-tmp.js',
     {
       os: {
         tmpdir: () => 'C:\\Windows\\Temp',
       },
-      path: require('path').win32,
-      '../dist/cjs/src/platform.js': 'win32',
-      '../dist/cjs/src/fs.js': {
+      path: win32,
+      '../dist/esm/platform.js': 'win32',
+      '../dist/esm/fs.js': {
         statSync: tempDirCheck,
         promises: {
-          stat: async path => tempDirCheck(path),
+          stat: async (path: string) => tempDirCheck(path),
         },
       },
     }
-  )
+  )) as typeof import('../dist/esm/default-tmp.js')
 
   const expect = {
     'c:\\some\\path': 'C:\\Windows\\Temp',

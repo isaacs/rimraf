@@ -1,6 +1,6 @@
 // this isn't for coverage.  it's basically a smoke test, to ensure that
 // we can delete a lot of files on CI in multiple platforms and node versions.
-const t = require('tap')
+import t from 'tap'
 
 if (/^v10\./.test(process.version)) {
   t.plan(0, 'skip this on node 10, it runs out of memory')
@@ -11,13 +11,13 @@ if (/^v10\./.test(process.version)) {
 // make this more or less aggressive.
 const START = (process.env.RIMRAF_TEST_START_CHAR || 'a').charCodeAt(0)
 const END = (process.env.RIMRAF_TEST_END_CHAR || 'f').charCodeAt(0)
-const DEPTH = +process.env.RIMRAF_TEST_DEPTH || 4
+const DEPTH = +(process.env.RIMRAF_TEST_DEPTH || '') || 4
 
-const { statSync, mkdirSync, readdirSync } = require('../dist/cjs/src/fs.js')
-const { writeFileSync } = require('fs')
-const { resolve, dirname } = require('path')
+import { statSync, mkdirSync, readdirSync } from '../dist/esm/fs.js'
+import { writeFileSync } from 'fs'
+import { resolve, dirname } from 'path'
 
-const create = (path, depth = 0) => {
+const create = (path: string, depth = 0) => {
   mkdirSync(path)
   for (let i = START; i <= END; i++) {
     const c = String.fromCharCode(i)
@@ -30,18 +30,17 @@ const create = (path, depth = 0) => {
   return path
 }
 
-const cases = {
-  manual: require('../').manual,
-}
+import { manual } from '../dist/esm/index.js'
+const cases = { manual }
 
-const base = t.testdir(
-  Object.keys(cases).reduce((o, c) => {
-    o[c] = { sync: {}, async: {} }
-    return o
-  }, {})
-)
+const base = t.testdir(Object.fromEntries(
+  Object.entries(cases).map(([name]) => [name, {
+    sync: {},
+    async: {},
+  }])
+))
 
-const createAllFixtures = t => {
+t.test('create all fixtures', t => {
   for (const name of Object.keys(cases)) {
     for (const type of ['sync', 'async']) {
       const path = `${base}/${name}/${type}/test`
@@ -50,9 +49,7 @@ const createAllFixtures = t => {
     }
   }
   setTimeout(() => t.end(), 3000)
-}
-
-t.test('create all fixtures', createAllFixtures)
+})
 
 t.test('delete all fixtures', t => {
   for (const [name, rimraf] of Object.entries(cases)) {

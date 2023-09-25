@@ -1,14 +1,22 @@
-const t = require('tap')
-const { optArg: oa, optArgSync: oas } = require('../dist/cjs/src/opt-arg.js')
-const opt = { a: 1 }
+import t from 'tap'
+import { optArg as oa, optArgSync as oas } from '../dist/esm/opt-arg.js'
+import { RimrafAsyncOptions, RimrafSyncOptions } from '../src/index.js'
 
-t.same(oa(opt), opt, 'returns equivalent object if provided')
-t.same(oas(opt), oa(opt), 'optArgSync does the same thing')
+const asyncOpt = { a: 1 } as unknown as RimrafAsyncOptions
+const syncOpt = { s: 1 } as unknown as RimrafSyncOptions
+
+t.same(oa(asyncOpt), asyncOpt, 'returns equivalent object if provided')
+t.same(oas(syncOpt), oa(syncOpt), 'optArgSync does the same thing')
 t.same(oa(), {}, 'returns new object otherwise')
+t.same(oas(), {}, 'returns new object otherwise, sync')
 
+//@ts-expect-error
 t.throws(() => oa(true))
+//@ts-expect-error
 t.throws(() => oa(null))
+//@ts-expect-error
 t.throws(() => oa('hello'))
+//@ts-expect-error
 t.throws(() => oa({ maxRetries: 'banana' }))
 
 t.test('every kind of invalid option value', t => {
@@ -36,11 +44,17 @@ t.test('every kind of invalid option value', t => {
               }
               t.throws(() =>
                 oa({
+                  //@ts-expect-error
                   preserveRoot,
+                  //@ts-expect-error
                   maxRetries,
+                  //@ts-expect-error
                   retryDelay,
+                  //@ts-expect-error
                   backoff,
+                  //@ts-expect-error
                   maxBackoff,
+                  //@ts-expect-error
                   tmp,
                 })
               )
@@ -88,16 +102,19 @@ t.test('glob option handling', t => {
   t.same(oa({ glob: true }), {
     glob: { absolute: true, withFileTypes: false },
   })
-  const gws = oa({ signal: { x: 1 }, glob: true })
+  const gws = oa({ signal: { x: 1 } as unknown as AbortSignal, glob: true })
   t.same(gws, {
     signal: { x: 1 },
     glob: { absolute: true, signal: { x: 1 }, withFileTypes: false },
   })
-  t.equal(gws.signal, gws.glob.signal)
+  t.equal(gws.signal, gws.glob?.signal)
   t.same(oa({ glob: { nodir: true } }), {
     glob: { absolute: true, nodir: true, withFileTypes: false },
   })
-  const gwsg = oa({ signal: { x: 1 }, glob: { nodir: true } })
+  const gwsg = oa({
+    signal: { x: 1 } as unknown as AbortSignal,
+    glob: { nodir: true },
+  })
   t.same(gwsg, {
     signal: { x: 1 },
     glob: {
@@ -107,15 +124,21 @@ t.test('glob option handling', t => {
       signal: { x: 1 },
     },
   })
-  t.equal(gwsg.signal, gwsg.glob.signal)
-  t.same(oa({ signal: { x: 1 }, glob: { nodir: true, signal: { y: 1 } } }), {
-    signal: { x: 1 },
-    glob: {
-      absolute: true,
-      nodir: true,
-      signal: { y: 1 },
-      withFileTypes: false,
-    },
-  })
+  t.equal(gwsg.signal, gwsg.glob?.signal)
+  t.same(
+    oa({
+      signal: { x: 1 } as unknown as AbortSignal,
+      glob: { nodir: true, signal: { y: 1 } as unknown as AbortSignal },
+    }),
+    {
+      signal: { x: 1 },
+      glob: {
+        absolute: true,
+        nodir: true,
+        signal: { y: 1 },
+        withFileTypes: false,
+      },
+    }
+  )
   t.end()
 })

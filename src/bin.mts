@@ -1,7 +1,13 @@
 #!/usr/bin/env node
-import { version } from '../package.json'
-import { rimraf } from './index.js'
+import { readFile } from 'fs/promises'
 import type { RimrafAsyncOptions } from './index.js'
+import { rimraf } from './index.js'
+
+const pj = fileURLToPath(new URL('../package.json', import.meta.url))
+const pjDist = fileURLToPath(new URL('../../package.json', import.meta.url))
+const { version } = JSON.parse(
+  await readFile(pjDist, 'utf8').catch(() => readFile(pj, 'utf8'))
+) as { version: string }
 
 const runHelpForUsage = () =>
   console.error('run `rimraf --help` for usage information')
@@ -45,8 +51,9 @@ Implementation-specific options:
 import { parse, relative, resolve } from 'path'
 const cwd = process.cwd()
 
-import { createInterface, Interface } from 'readline'
 import { Dirent, Stats } from 'fs'
+import { createInterface, Interface } from 'readline'
+import { fileURLToPath } from 'url'
 
 const prompt = async (rl: Interface, q: string) =>
   new Promise<string>(res => rl.question(q, res))
@@ -253,12 +260,9 @@ const main = async (...args: string[]) => {
 main.help = help
 
 export default main
+const isMainModule = process.argv[1] === fileURLToPath(import.meta.url)
 
-if (
-  typeof require === 'function' &&
-  typeof module === 'object' &&
-  require.main === module
-) {
+if (isMainModule) {
   const args = process.argv.slice(2)
   main(...args).then(
     code => process.exit(code),

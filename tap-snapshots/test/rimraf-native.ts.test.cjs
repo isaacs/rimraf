@@ -5,7 +5,7 @@
  * Make sure to inspect the output below.  Do not ignore changes!
  */
 'use strict'
-exports[`test/rimraf-native.js TAP calls the right node function > must match snapshot 1`] = `
+exports[`test/rimraf-native.ts > TAP > calls the right node function > must match snapshot 1`] = `
 Array [
   Array [
     "rm",

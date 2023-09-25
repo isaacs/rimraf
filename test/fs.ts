@@ -5,7 +5,7 @@ import t from 'tap'
 // and that when the cb returns an error, the promised version fails,
 // and when the cb returns data, the promisified version resolves to it.
 import realFS from 'fs'
-import * as fs from '../dist/cjs/src/fs.js'
+import * as fs from '../dist/esm/fs.js'
 
 const mockFSMethodPass =
   (method: string) =>
@@ -20,12 +20,13 @@ const mockFSMethodFail =
     process.nextTick(() => cb(new Error('oops'), method, 1, 2, 3))
   }
 
-import { useNative } from '../dist/cjs/src/use-native.js'
+import { useNative } from '../dist/esm/use-native.js'
 t.type(fs.promises, Object)
-const mockFSPass: { [k: string]: (...a: any[]) => any } = {}
-const mockFSFail: { [k: string]: (...a: any[]) => any } = {}
+const mockFSPass: Record<string, (...a: any[]) => any> = {}
+const mockFSFail: Record<string, (...a: any[]) => any> = {}
+
 for (const method of Object.keys(
-  fs.promises as { [k: string]: (...a: any[]) => any }
+  fs.promises as Record<string, (...a: any[]) => any>
 )) {
   // of course fs.rm is missing when we shouldn't use native :)
   // also, readdirSync is clubbed to always return file types
@@ -65,7 +66,9 @@ for (const method of Object.keys(fs)) {
 }
 
 t.test('passing resolves promise', async t => {
-  const fs = t.mock('../src/fs', { fs: mockFSPass })
+  const fs = (await t.mockImport('../src/fs.js', {
+    fs: { ...realFS, ...mockFSPass },
+  })) as typeof import('../src/fs.js')
   for (const [m, fn] of Object.entries(
     fs.promises as { [k: string]: (...a: any) => Promise<any> }
   )) {
@@ -74,7 +77,9 @@ t.test('passing resolves promise', async t => {
 })
 
 t.test('failing rejects promise', async t => {
-  const fs = t.mock('../src/fs', { fs: mockFSFail })
+  const fs = (await t.mockImport('../src/fs.js', {
+    fs: { ...realFS, ...mockFSFail },
+  })) as typeof import('../src/fs.js')
   for (const [m, fn] of Object.entries(
     fs.promises as { [k: string]: (...a: any[]) => Promise<any> }
   )) {
