@@ -1,7 +1,17 @@
 {
   "name": "rimraf",
   "version": "5.0.4",
+  "type": "module",
+  "tshy": {
+    "main": true,
+    "exports": {
+      "./package.json": "./package.json",
+      ".": "./src/index.ts"
+    }
+  },
   "bin": "./dist/esm/bin.mjs",
+  "main": "./dist/commonjs/index.js",
+  "types": "./dist/commonjs/index.d.ts",
   "exports": {
     "./package.json": "./package.json",
     ".": {
@@ -51,7 +61,7 @@
     "mkdirp": "^3.0.1",
     "prettier": "^2.8.2",
     "tap": "^18.1.4",
-    "tshy": "^1.1.1",
+    "tshy": "^1.2.2",
     "typedoc": "^0.25.1",
     "typescript": "^5.2"
   },
@@ -73,12 +83,5 @@
     "cli",
     "rmdir",
     "recursive"
-  ],
-  "type": "module",
-  "tshy": {
-    "exports": {
-      "./package.json": "./package.json",
-      ".": "./src/index.ts"
-    }
-  }
+  ]
 }
