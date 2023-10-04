@@ -1,4 +1,5 @@
-The [UNIX command](<http://en.wikipedia.org/wiki/Rm_(Unix)>) `rm -rf` for node.
+The [UNIX command](<http://en.wikipedia.org/wiki/Rm_(Unix)>) `rm -rf` for node
+in a cross-platform implementation.
 
 Install with `npm install rimraf`.
 
