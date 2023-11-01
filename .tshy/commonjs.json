@@ -6,7 +6,7 @@
     "../src/**/*.tsx"
   ],
   "exclude": [
-    ".../src/**/*.mts"
+    "../src/**/*.mts"
   ],
   "compilerOptions": {
     "outDir": "../.tshy-build-tmp/commonjs"
