@@ -110,7 +110,7 @@ This will attempt to choose the best implementation, based on Node.js
 version and `process.platform`. To force a specific implementation, use
 one of the other functions provided.
 
-### `rimraf.sync(f, [opts])` `rimraf.rimrafSync(f, [opts])`
+### `rimraf.sync(f, [opts])` <br> `rimraf.rimrafSync(f, [opts])`
 
 Synchronous form of `rimraf()`
 
@@ -123,7 +123,7 @@ deletion is extremely parallelizable.
 Uses the built-in `fs.rm` implementation that Node.js provides. This is
 used by default on Node.js versions greater than or equal to `14.14.0`.
 
-### `rimraf.nativeSync(f, [opts])` `rimraf.native.sync(f, [opts])`
+### `rimraf.native.sync(f, [opts])` <br> `rimraf.nativeSync(f, [opts])`
 
 Synchronous form of `rimraf.native`
 
@@ -131,7 +131,7 @@ Synchronous form of `rimraf.native`
 
 Use the JavaScript implementation appropriate for your operating system.
 
-### `rimraf.manualSync(f, [opts])` `rimraf.manualSync(f, opts)`
+### `rimraf.manual.sync(f, [opts])` <br> `rimraf.manualSync(f, opts)`
 
 Synchronous form of `rimraf.manual()`
 
@@ -147,7 +147,7 @@ removes all directories, which should ideally be empty by that
 time. When an `ENOTEMPTY` is raised in the second pass, falls
 back to the `rimraf.moveRemove` strategy as needed.
 
-### `rimraf.windows.sync(path, [opts])` `rimraf.windowsSync(path, [opts])`
+### `rimraf.windows.sync(path, [opts])` <br> `rimraf.windowsSync(path, [opts])`
 
 Synchronous form of `rimraf.windows()`
 
@@ -170,7 +170,7 @@ operation will fail.
 This is the slowest strategy, but most reliable on Windows
 platforms. Used as a last-ditch fallback by `rimraf.windows()`.
 
-### `rimraf.moveRemove.sync(path, [opts])` `rimraf.moveRemoveSync(path, [opts])`
+### `rimraf.moveRemove.sync(path, [opts])` <br> `rimraf.moveRemoveSync(path, [opts])`
 
 Synchronous form of `rimraf.moveRemove()`
 
