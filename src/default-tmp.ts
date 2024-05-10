@@ -25,7 +25,7 @@ const isDirSync = (path: string) => {
 const isDir = (path: string) =>
   stat(path).then(
     st => st.isDirectory(),
-    () => false
+    () => false,
   )
 
 const win32DefaultTmp = async (path: string) => {

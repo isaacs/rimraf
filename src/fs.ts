@@ -25,7 +25,7 @@ export const readdirSync = (path: fs.PathLike): Dirent[] =>
 
 const chmod = (path: fs.PathLike, mode: fs.Mode): Promise<void> =>
   new Promise((res, rej) =>
-    fs.chmod(path, mode, (er, ...d: any[]) => (er ? rej(er) : res(...d)))
+    fs.chmod(path, mode, (er, ...d: any[]) => (er ? rej(er) : res(...d))),
   )
 
 const mkdir = (
@@ -34,47 +34,49 @@ const mkdir = (
     | fs.Mode
     | (fs.MakeDirectoryOptions & { recursive?: boolean | null })
     | undefined
-    | null
+    | null,
 ): Promise<string | undefined> =>
   new Promise((res, rej) =>
-    fs.mkdir(path, options, (er, made) => (er ? rej(er) : res(made)))
+    fs.mkdir(path, options, (er, made) => (er ? rej(er) : res(made))),
   )
 
 const readdir = (path: fs.PathLike): Promise<Dirent[]> =>
   new Promise<Dirent[]>((res, rej) =>
     fs.readdir(path, { withFileTypes: true }, (er, data) =>
-      er ? rej(er) : res(data)
-    )
+      er ? rej(er) : res(data),
+    ),
   )
 
 const rename = (oldPath: fs.PathLike, newPath: fs.PathLike): Promise<void> =>
   new Promise((res, rej) =>
-    fs.rename(oldPath, newPath, (er, ...d: any[]) => (er ? rej(er) : res(...d)))
+    fs.rename(oldPath, newPath, (er, ...d: any[]) =>
+      er ? rej(er) : res(...d),
+    ),
   )
 
 const rm = (path: fs.PathLike, options: fs.RmOptions): Promise<void> =>
   new Promise((res, rej) =>
-    fs.rm(path, options, (er, ...d: any[]) => (er ? rej(er) : res(...d)))
+    fs.rm(path, options, (er, ...d: any[]) => (er ? rej(er) : res(...d))),
   )
 
 const rmdir = (path: fs.PathLike): Promise<void> =>
   new Promise((res, rej) =>
-    fs.rmdir(path, (er, ...d: any[]) => (er ? rej(er) : res(...d)))
+    fs.rmdir(path, (er, ...d: any[]) => (er ? rej(er) : res(...d))),
   )
 
 const stat = (path: fs.PathLike): Promise<fs.Stats> =>
   new Promise((res, rej) =>
-    fs.stat(path, (er, data) => (er ? rej(er) : res(data)))
+    fs.stat(path, (er, data) => (er ? rej(er) : res(data))),
   )
 
 const lstat = (path: fs.PathLike): Promise<fs.Stats> =>
   new Promise((res, rej) =>
-    fs.lstat(path, (er, data) => (er ? rej(er) : res(data)))
+    fs.lstat(path, (er, data) => (er ? rej(er) : res(data))),
   )
 
 const unlink = (path: fs.PathLike): Promise<void> =>
   new Promise((res, rej) =>
-    fs.unlink(path, (er, ...d: any[]) => (er ? rej(er) : res(...d)))
+    fs.unlink(path, (er, ...d: any[]) => (er ? rej(er) : res(...d))),
   )
 
 export const promises = {

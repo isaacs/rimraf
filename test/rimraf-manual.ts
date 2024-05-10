@@ -15,15 +15,15 @@ if (!process.env.__TESTING_RIMRAF_PLATFORM__) {
         ...process.env,
         __TESTING_RIMRAF_PLATFORM__: otherPlatform,
       },
-    }
+    },
   )
 }
 
 const platform = process.env.__TESTING_RIMRAF_PLATFORM__ || process.platform
 
 const [expectManual, expectManualSync] =
-  platform === 'win32'
-    ? [rimrafWindows, rimrafWindowsSync]
-    : [rimrafPosix, rimrafPosixSync]
+  platform === 'win32' ?
+    [rimrafWindows, rimrafWindowsSync]
+  : [rimrafPosix, rimrafPosixSync]
 t.equal(rimrafManual, expectManual, 'got expected implementation')
 t.equal(rimrafManualSync, expectManualSync, 'got expected implementation')

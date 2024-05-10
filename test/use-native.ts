@@ -23,7 +23,7 @@ if (!process.env.__TESTING_RIMRAF_EXPECT_USE_NATIVE__) {
         __TESTING_RIMRAF_EXPECT_USE_NATIVE__: '1',
       },
     },
-    'darwin v18'
+    'darwin v18',
   )
 
   t.spawn(
@@ -37,7 +37,7 @@ if (!process.env.__TESTING_RIMRAF_EXPECT_USE_NATIVE__) {
         __TESTING_RIMRAF_EXPECT_USE_NATIVE__: '0',
       },
     },
-    'win32 v18'
+    'win32 v18',
   )
 
   t.spawn(
@@ -51,7 +51,7 @@ if (!process.env.__TESTING_RIMRAF_EXPECT_USE_NATIVE__) {
         __TESTING_RIMRAF_EXPECT_USE_NATIVE__: '0',
       },
     },
-    'darwin v8'
+    'darwin v8',
   )
 
   t.spawn(
@@ -65,7 +65,7 @@ if (!process.env.__TESTING_RIMRAF_EXPECT_USE_NATIVE__) {
         __TESTING_RIMRAF_EXPECT_USE_NATIVE__: '0',
       },
     },
-    'darwin v14.13.12'
+    'darwin v14.13.12',
   )
 } else {
   const expect = process.env.__TESTING_RIMRAF_EXPECT_USE_NATIVE__ === '1'

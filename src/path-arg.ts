@@ -8,11 +8,9 @@ const pathArg = (path: string, opt: RimrafAsyncOptions = {}) => {
   if (type !== 'string') {
     const ctor = path && type === 'object' && path.constructor
     const received =
-      ctor && ctor.name
-        ? `an instance of ${ctor.name}`
-        : type === 'object'
-        ? inspect(path)
-        : `type ${type} ${path}`
+      ctor && ctor.name ? `an instance of ${ctor.name}`
+      : type === 'object' ? inspect(path)
+      : `type ${type} ${path}`
     const msg =
       'The "path" argument must be of type string. ' + `Received ${received}`
     throw Object.assign(new TypeError(msg), {

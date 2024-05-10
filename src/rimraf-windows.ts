@@ -26,7 +26,7 @@ const rimrafWindowsDirRetrySync = retryBusySync(fixEPERMSync(rmdirSync))
 
 const rimrafWindowsDirMoveRemoveFallback = async (
   path: string,
-  opt: RimrafAsyncOptions
+  opt: RimrafAsyncOptions,
 ): Promise<boolean> => {
   /* c8 ignore start */
   if (opt?.signal?.aborted) {
@@ -47,7 +47,7 @@ const rimrafWindowsDirMoveRemoveFallback = async (
 
 const rimrafWindowsDirMoveRemoveFallbackSync = (
   path: string,
-  opt: RimrafSyncOptions
+  opt: RimrafSyncOptions,
 ): boolean => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason
@@ -97,7 +97,7 @@ const rimrafWindowsDir = async (
   path: string,
   opt: RimrafAsyncOptions,
   ent: Dirent | Stats,
-  state = START
+  state = START,
 ): Promise<boolean> => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason
@@ -128,7 +128,9 @@ const rimrafWindowsDir = async (
   const s = state === START ? CHILD : state
   const removedAll = (
     await Promise.all(
-      entries.map(ent => rimrafWindowsDir(resolve(path, ent.name), opt, ent, s))
+      entries.map(ent =>
+        rimrafWindowsDir(resolve(path, ent.name), opt, ent, s),
+      ),
     )
   ).reduce((a, b) => a && b, true)
 
@@ -153,7 +155,7 @@ const rimrafWindowsDirSync = (
   path: string,
   opt: RimrafSyncOptions,
   ent: Dirent | Stats,
-  state = START
+  state = START,
 ): boolean => {
   const entries = ent.isDirectory() ? readdirOrErrorSync(path) : null
   if (!Array.isArray(entries)) {

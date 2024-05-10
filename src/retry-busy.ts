@@ -12,7 +12,7 @@ export const retryBusy = (fn: (path: string) => Promise<any>) => {
     path: string,
     opt: RimrafAsyncOptions,
     backoff = 1,
-    total = 0
+    total = 0,
   ) => {
     const mbo = opt.maxBackoff || MAXBACKOFF
     const rate = opt.backoff || RATE

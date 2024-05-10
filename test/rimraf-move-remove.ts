@@ -6,8 +6,8 @@ t.formatSnapshot = (calls: string[][]) =>
         .split(process.cwd())
         .join('{CWD}')
         .replace(/\\/g, '/')
-        .replace(/.*\/(\.[a-z]\.)[^/]*$/, '{tmpfile}')
-    )
+        .replace(/.*\/(\.[a-z]\.)[^/]*$/, '{tmpfile}'),
+    ),
   )
 
 import { Stats, statSync } from 'fs'
@@ -69,12 +69,12 @@ t.only('actually delete some stuff', async t => {
     '../dist/esm/rimraf-posix.js',
     {
       '../dist/esm/fs.js': fsMock,
-    }
+    },
   )) as typeof import('../dist/esm/rimraf-posix.js')
 
   const { rimrafMoveRemove, rimrafMoveRemoveSync } = (await t.mockImport(
     '../dist/esm/rimraf-move-remove.js',
-    { '../dist/esm/fs.js': fsMock }
+    { '../dist/esm/fs.js': fsMock },
   )) as typeof import('../dist/esm/rimraf-move-remove.js')
 
   t.test('posix does not work here', t => {
@@ -97,7 +97,7 @@ t.only('actually delete some stuff', async t => {
     t.throws(() => statSync(path), { code: 'ENOENT' }, 'deleted')
     t.doesNotThrow(
       () => rimrafMoveRemoveSync(path, {}),
-      'deleting a second time is OK'
+      'deleting a second time is OK',
     )
     t.end()
   })
@@ -140,7 +140,7 @@ t.only('throw unlink errors', async t => {
           },
         },
       },
-    }
+    },
   )) as typeof import('../dist/esm/rimraf-move-remove.js')
   // nest to clean up the mess
   t.test('sync', t => {
@@ -185,7 +185,7 @@ t.only('ignore ENOENT unlink errors', async t => {
           },
         },
       },
-    }
+    },
   )
   // nest to clean up the mess
   t.test('sync', t => {
@@ -218,7 +218,7 @@ t.test('throw rmdir errors', async t => {
           },
         },
       },
-    }
+    },
   )
   t.test('sync', t => {
     // nest it so that we clean up the mess
@@ -252,7 +252,7 @@ t.test('throw unexpected readdir errors', async t => {
           },
         },
       },
-    }
+    },
   )) as typeof import('../dist/esm/rimraf-move-remove.js')
   t.test('sync', t => {
     // nest to clean up the mess
@@ -278,7 +278,7 @@ t.test('refuse to delete the root dir', async t => {
         ...path,
         dirname: (path: string) => path,
       },
-    }
+    },
   )) as typeof import('../dist/esm/rimraf-move-remove.js')
 
   const d = t.testdir({})
@@ -330,7 +330,7 @@ t.test('handle EPERMs on unlink by trying to chmod 0o666', async t => {
           },
         },
       },
-    }
+    },
   )
 
   t.afterEach(() => (CHMODS.length = 0))
@@ -396,7 +396,7 @@ t.test('handle EPERMs, chmod returns ENOENT', async t => {
           },
         },
       },
-    }
+    },
   )
 
   t.afterEach(() => (CHMODS.length = 0))
@@ -460,7 +460,7 @@ t.test('handle EPERMs, chmod raises something other than ENOENT', async t => {
           },
         },
       },
-    }
+    },
   )) as typeof import('../dist/esm/rimraf-move-remove.js')
 
   t.afterEach(() => (CHMODS.length = 0))
@@ -498,7 +498,7 @@ t.test('rimraffing root, do not actually rmdir root', async t => {
           return p
         },
       },
-    }
+    },
   )) as typeof import('../dist/esm/rimraf-move-remove.js')
   t.test('async', async t => {
     ROOT = t.testdir(fixture)
@@ -521,7 +521,7 @@ t.test(
   async t => {
     const { rimrafMoveRemove, rimrafMoveRemoveSync } = await t.mockImport(
       '../dist/esm/rimraf-move-remove.js',
-      {}
+      {},
     )
     t.test('sync', t => {
       const ac = new AbortController()
@@ -563,7 +563,7 @@ t.test(
       await t.rejects(() => rimrafMoveRemove(d, { signal }))
     })
     t.end()
-  }
+  },
 )
 
 t.test('filter function', async t => {
@@ -579,7 +579,7 @@ t.test('filter function', async t => {
         rimrafMoveRemoveSync(dir, { filter })
         t.matchSnapshot(
           [saw.sort((a, b) => a.localeCompare(b, 'en'))],
-          'paths seen'
+          'paths seen',
         )
         statSync(dir)
         statSync(dir + '/c')
@@ -612,7 +612,7 @@ t.test('filter function', async t => {
         await rimrafMoveRemove(dir, { filter })
         t.matchSnapshot(
           [saw.sort((a, b) => a.localeCompare(b, 'en'))],
-          'paths seen'
+          'paths seen',
         )
         statSync(dir)
         statSync(dir + '/c')
@@ -645,7 +645,7 @@ t.test('filter function', async t => {
         await rimrafMoveRemove(dir, { filter })
         t.matchSnapshot(
           [saw.sort((a, b) => a.localeCompare(b, 'en'))],
-          'paths seen'
+          'paths seen',
         )
         statSync(dir)
         statSync(dir + '/c')

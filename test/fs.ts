@@ -26,7 +26,7 @@ const mockFSPass: Record<string, (...a: any[]) => any> = {}
 const mockFSFail: Record<string, (...a: any[]) => any> = {}
 
 for (const method of Object.keys(
-  fs.promises as Record<string, (...a: any[]) => any>
+  fs.promises as Record<string, (...a: any[]) => any>,
 )) {
   // of course fs.rm is missing when we shouldn't use native :)
   // also, readdirSync is clubbed to always return file types
@@ -34,7 +34,7 @@ for (const method of Object.keys(
     t.type(
       (realFS as { [k: string]: any })[method],
       Function,
-      `real fs.${method} is a function`
+      `real fs.${method} is a function`,
     )
     if (method !== 'readdir') {
       t.equal(
@@ -42,7 +42,7 @@ for (const method of Object.keys(
         (realFS as unknown as { [k: string]: (...a: any[]) => any })[
           `${method}Sync`
         ],
-        `has ${method}Sync`
+        `has ${method}Sync`,
       )
     }
   }
@@ -61,7 +61,7 @@ for (const method of Object.keys(fs)) {
   t.type(
     (fs.promises as { [k: string]: (...a: any[]) => any })[m],
     Function,
-    `fs.promises.${m} is a function`
+    `fs.promises.${m} is a function`,
   )
 }
 
@@ -70,7 +70,7 @@ t.test('passing resolves promise', async t => {
     fs: { ...realFS, ...mockFSPass },
   })) as typeof import('../src/fs.js')
   for (const [m, fn] of Object.entries(
-    fs.promises as { [k: string]: (...a: any) => Promise<any> }
+    fs.promises as { [k: string]: (...a: any) => Promise<any> },
   )) {
     t.same(await fn(), m, `got expected value for ${m}`)
   }
@@ -81,7 +81,7 @@ t.test('failing rejects promise', async t => {
     fs: { ...realFS, ...mockFSFail },
   })) as typeof import('../src/fs.js')
   for (const [m, fn] of Object.entries(
-    fs.promises as { [k: string]: (...a: any[]) => Promise<any> }
+    fs.promises as { [k: string]: (...a: any[]) => Promise<any> },
   )) {
     t.rejects(fn(), { message: 'oops' }, `got expected value for ${m}`)
   }

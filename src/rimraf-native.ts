@@ -4,7 +4,7 @@ const { rm } = promises
 
 export const rimrafNative = async (
   path: string,
-  opt: RimrafAsyncOptions
+  opt: RimrafAsyncOptions,
 ): Promise<boolean> => {
   await rm(path, {
     ...opt,
@@ -16,7 +16,7 @@ export const rimrafNative = async (
 
 export const rimrafNativeSync = (
   path: string,
-  opt: RimrafSyncOptions
+  opt: RimrafSyncOptions,
 ): boolean => {
   rmSync(path, {
     ...opt,

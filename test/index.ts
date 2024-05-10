@@ -1,12 +1,12 @@
 import { statSync } from 'fs'
-import {resolve} from 'path'
+import { resolve } from 'path'
 import t from 'tap'
 import {
+  rimraf,
   RimrafAsyncOptions,
   RimrafOptions,
+  rimrafSync,
   RimrafSyncOptions,
-  rimraf,
-  rimrafSync
 } from '../src/index.js'
 
 import * as OPTARG from '../dist/esm/opt-arg.js'
@@ -69,7 +69,7 @@ t.test('mocky unit tests to select the correct function', async t => {
   process.env.__TESTING_RIMRAF_PLATFORM__ = 'posix'
   const { rimraf } = (await t.mockImport(
     '../dist/esm/index.js',
-    mocks
+    mocks,
   )) as typeof import('../dist/esm/index.js')
 
   t.afterEach(() => (CALLS.length = 0))
@@ -174,7 +174,7 @@ t.test('accept array of paths as first arg', async t => {
   t.equal(await rimraf(['a', 'b', 'c']), true)
   t.equal(
     await rimraf(['i', 'j', 'k'], { x: 'ya' } as unknown as RimrafOptions),
-    true
+    true,
   )
   t.same(ASYNC_CALLS, [
     [resolve('a'), {}],
@@ -190,7 +190,7 @@ t.test('accept array of paths as first arg', async t => {
     rimrafSync(['m', 'n', 'o'], {
       cat: 'chai',
     } as unknown as RimrafSyncOptions),
-    true
+    true,
   )
   t.same(SYNC_CALLS, [
     [resolve('x'), {}],
@@ -203,7 +203,6 @@ t.test('accept array of paths as first arg', async t => {
 })
 
 t.test('deleting globs', async t => {
-
   const fixture = {
     a: 'a',
     b: 'b',

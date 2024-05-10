@@ -16,7 +16,7 @@ t.matchSnapshot(
     MAXRETRIES,
     codes,
   },
-  'default settings'
+  'default settings',
 )
 
 t.test('basic working operation when no errors happen', async t => {

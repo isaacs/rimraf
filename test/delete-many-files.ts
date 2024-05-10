@@ -33,12 +33,17 @@ const create = (path: string, depth = 0) => {
 import { manual } from '../dist/esm/index.js'
 const cases = { manual }
 
-const base = t.testdir(Object.fromEntries(
-  Object.entries(cases).map(([name]) => [name, {
-    sync: {},
-    async: {},
-  }])
-))
+const base = t.testdir(
+  Object.fromEntries(
+    Object.entries(cases).map(([name]) => [
+      name,
+      {
+        sync: {},
+        async: {},
+      },
+    ]),
+  ),
+)
 
 t.test('create all fixtures', t => {
   for (const name of Object.keys(cases)) {

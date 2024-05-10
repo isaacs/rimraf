@@ -45,7 +45,7 @@ t.test('actually delete some stuff', t => {
     t.throws(() => statSync(path), { code: 'ENOENT' }, 'deleted')
     t.doesNotThrow(
       () => rimrafPosixSync(path, {}),
-      'deleting a second time is OK'
+      'deleting a second time is OK',
     )
     t.end()
   })
@@ -74,7 +74,7 @@ t.test('throw unlink errors', async t => {
           },
         },
       },
-    }
+    },
   )) as typeof import('../dist/esm/rimraf-posix.js')
   const path = t.testdir(fixture)
   t.throws(() => rimrafPosixSync(path, {}), { code: 'FOO' })
@@ -97,7 +97,7 @@ t.test('throw rmdir errors', async t => {
           },
         },
       },
-    }
+    },
   )) as typeof import('../dist/esm/rimraf-posix.js')
   const path = t.testdir(fixture)
   t.throws(() => rimrafPosixSync(path, {}), { code: 'FOO' })
@@ -120,7 +120,7 @@ t.test('throw unexpected readdir errors', async t => {
           },
         },
       },
-    }
+    },
   )) as typeof import('../dist/esm/rimraf-posix.js')
   const path = t.testdir(fixture)
   t.throws(() => rimrafPosixSync(path, {}), { code: 'FOO' })
@@ -155,7 +155,7 @@ t.test('ignore ENOENTs from unlink/rmdir', async t => {
           },
         },
       },
-    }
+    },
   )) as typeof import('../dist/esm/rimraf-posix.js')
   const { statSync } = fs
   t.test('sync', t => {
@@ -188,7 +188,7 @@ t.test('rimraffing root, do not actually rmdir root', async t => {
           return p
         },
       },
-    }
+    },
   )) as typeof import('../dist/esm/rimraf-posix.js')
   t.test('async', async t => {
     ROOT = t.testdir(fixture)
@@ -249,7 +249,7 @@ t.test(
       await t.rejects(() => rimrafPosix(d, { signal }))
     })
     t.end()
-  }
+  },
 )
 
 t.test('filter function', t => {
@@ -267,7 +267,7 @@ t.test('filter function', t => {
         rimrafPosixSync(dir, { filter })
         t.matchSnapshot(
           saw.sort((a, b) => a.localeCompare(b, 'en')),
-          'paths seen'
+          'paths seen',
         )
         statSync(dir)
         statSync(dir + '/c')
@@ -300,7 +300,7 @@ t.test('filter function', t => {
         await rimrafPosix(dir, { filter })
         t.matchSnapshot(
           saw.sort((a, b) => a.localeCompare(b, 'en')),
-          'paths seen'
+          'paths seen',
         )
         statSync(dir)
         statSync(dir + '/c')
@@ -333,7 +333,7 @@ t.test('filter function', t => {
         await rimrafPosix(dir, { filter })
         t.matchSnapshot(
           saw.sort((a, b) => a.localeCompare(b, 'en')),
-          'paths seen'
+          'paths seen',
         )
         statSync(dir)
         statSync(dir + '/c')

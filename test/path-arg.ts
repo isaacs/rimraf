@@ -14,7 +14,7 @@ if (!process.env.__TESTING_RIMRAF_PLATFORM__) {
         ...process.env,
         __TESTING_RIMRAF_PLATFORM__: fake,
       },
-    }
+    },
   )
 }
 
@@ -29,7 +29,7 @@ const { resolve } = path
 t.equal(pathArg('a/b/c'), resolve('a/b/c'))
 t.throws(
   () => pathArg('a\0b'),
-  Error('path must be a string without null bytes')
+  Error('path must be a string without null bytes'),
 )
 if (platform === 'win32') {
   const badPaths = [

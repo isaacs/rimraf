@@ -34,7 +34,7 @@ t.test('basic arg parsing stuff', async t => {
         CALLS.push(['windows', path, opt]),
       moveRemove: async (path: string, opt: RimrafOptions) =>
         CALLS.push(['move-remove', path, opt]),
-    }
+    },
   )
 
   const { default: bin } = await t.mockImport('../dist/esm/bin.mjs', {
@@ -281,7 +281,7 @@ t.test('actually delete something with it', async t => {
   })
 
   const res = spawnSync(process.execPath, [binModule, path], {
-    encoding: 'utf8'
+    encoding: 'utf8',
   })
   t.throws(() => statSync(path))
   t.equal(res.status, 0)
@@ -379,7 +379,7 @@ t.test('interactive deletes', t => {
                 t.equal(signal, null, 'signal')
                 t.matchSnapshot(leftovers(d), 'had any leftover')
                 res()
-              }
+              },
             )
           })
         })

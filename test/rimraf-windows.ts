@@ -6,17 +6,17 @@ import * as FS from '../dist/esm/fs.js'
 import { rimrafWindows, rimrafWindowsSync } from '../dist/esm/rimraf-windows.js'
 
 t.formatSnapshot = (calls: string[][]) =>
-  Array.isArray(calls)
-    ? calls.map(args =>
-        args.map(arg =>
-          String(arg)
-            .split(process.cwd())
-            .join('{CWD}')
-            .replace(/\\/g, '/')
-            .replace(/.*\/(\.[a-z]\.)[^/]*$/, '{tmpfile}')
-        )
-      )
-    : calls
+  Array.isArray(calls) ?
+    calls.map(args =>
+      args.map(arg =>
+        String(arg)
+          .split(process.cwd())
+          .join('{CWD}')
+          .replace(/\\/g, '/')
+          .replace(/.*\/(\.[a-z]\.)[^/]*$/, '{tmpfile}'),
+      ),
+    )
+  : calls
 
 const fixture = {
   a: 'a',
@@ -70,12 +70,12 @@ t.test('actually delete some stuff', async t => {
     '../dist/esm/rimraf-posix.js',
     {
       '../dist/esm/fs.js': fsMock,
-    }
+    },
   )) as typeof import('../dist/esm/rimraf-posix.js')
 
   const { rimrafWindows, rimrafWindowsSync } = (await t.mockImport(
     '../dist/esm/rimraf-windows.js',
-    { '../dist/esm/fs.js': fsMock }
+    { '../dist/esm/fs.js': fsMock },
   )) as typeof import('../dist/esm/rimraf-windows.js')
 
   t.test('posix does not work here', t => {
@@ -98,7 +98,7 @@ t.test('actually delete some stuff', async t => {
     t.throws(() => statSync(path), { code: 'ENOENT' }, 'deleted')
     t.doesNotThrow(
       () => rimrafWindowsSync(path, {}),
-      'deleting a second time is OK'
+      'deleting a second time is OK',
     )
     t.end()
   })
@@ -140,7 +140,7 @@ t.test('throw unlink errors', async t => {
           },
         },
       },
-    }
+    },
   )) as typeof import('../dist/esm/rimraf-windows.js')
   // nest to clean up the mess
   t.test('sync', t => {
@@ -184,7 +184,7 @@ t.test('ignore ENOENT unlink errors', async t => {
           },
         },
       },
-    }
+    },
   )) as typeof import('../dist/esm/rimraf-windows.js')
   // nest to clean up the mess
   t.test('sync', t => {
@@ -216,7 +216,7 @@ t.test('throw rmdir errors', async t => {
           },
         },
       },
-    }
+    },
   )) as typeof import('../dist/esm/rimraf-windows.js')
   t.test('sync', t => {
     // nest it so that we clean up the mess
@@ -249,7 +249,7 @@ t.test('throw unexpected readdir errors', async t => {
           },
         },
       },
-    }
+    },
   )) as typeof import('../dist/esm/rimraf-windows.js')
   t.test('sync', t => {
     // nest to clean up the mess
@@ -303,7 +303,7 @@ t.test('handle EPERMs on unlink by trying to chmod 0o666', async t => {
           },
         },
       },
-    }
+    },
   )) as typeof import('../dist/esm/rimraf-windows.js')
 
   t.afterEach(() => (CHMODS.length = 0))
@@ -368,7 +368,7 @@ t.test('handle EPERMs, chmod returns ENOENT', async t => {
           },
         },
       },
-    }
+    },
   )) as typeof import('../dist/esm/rimraf-windows.js')
 
   t.afterEach(() => (CHMODS.length = 0))
@@ -431,7 +431,7 @@ t.test('handle EPERMs, chmod raises something other than ENOENT', async t => {
           },
         },
       },
-    }
+    },
   )) as typeof import('../dist/esm/rimraf-windows.js')
 
   t.afterEach(() => (CHMODS.length = 0))
@@ -468,7 +468,7 @@ t.test('rimraffing root, do not actually rmdir root', async t => {
           return p
         },
       },
-    }
+    },
   )) as typeof import('../dist/esm/rimraf-windows.js')
   t.test('async', async t => {
     ROOT = t.testdir(fixture)
@@ -529,7 +529,7 @@ t.test(
       await t.rejects(() => rimrafWindows(d, { signal }))
     })
     t.end()
-  }
+  },
 )
 
 t.test('filter function', t => {
@@ -545,7 +545,7 @@ t.test('filter function', t => {
         rimrafWindowsSync(dir, { filter })
         t.matchSnapshot(
           [saw.sort((a, b) => a.localeCompare(b, 'en'))],
-          'paths seen'
+          'paths seen',
         )
         statSync(dir)
         statSync(dir + '/c')
@@ -578,7 +578,7 @@ t.test('filter function', t => {
         await rimrafWindows(dir, { filter })
         t.matchSnapshot(
           [saw.sort((a, b) => a.localeCompare(b, 'en'))],
-          'paths seen'
+          'paths seen',
         )
         statSync(dir)
         statSync(dir + '/c')
@@ -611,7 +611,7 @@ t.test('filter function', t => {
         await rimrafWindows(dir, { filter })
         t.matchSnapshot(
           [saw.sort((a, b) => a.localeCompare(b, 'en'))],
-          'paths seen'
+          'paths seen',
         )
         statSync(dir)
         statSync(dir + '/c')

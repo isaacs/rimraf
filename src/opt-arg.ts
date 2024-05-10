@@ -17,7 +17,7 @@ export const isRimrafOptions = (o: any): o is RimrafOptions =>
   typeOrUndef(o.filter, 'function')
 
 export const assertRimrafOptions: (o: any) => void = (
-  o: any
+  o: any,
 ): asserts o is RimrafOptions => {
   if (!isRimrafOptions(o)) {
     throw new Error('invalid rimraf options')
@@ -45,7 +45,7 @@ export interface RimrafSyncOptions extends RimrafAsyncOptions {
 export type RimrafOptions = RimrafSyncOptions | RimrafAsyncOptions
 
 const optArgT = <T extends RimrafOptions>(
-  opt: T
+  opt: T,
 ):
   | (T & {
       glob: GlobOptions & { withFileTypes: false }
@@ -57,16 +57,16 @@ const optArgT = <T extends RimrafOptions>(
     return options as T & { glob: undefined }
   }
   const globOpt =
-    glob === true
-      ? opt.signal
-        ? { signal: opt.signal }
-        : {}
-      : opt.signal
-      ? {
-          signal: opt.signal,
-          ...glob,
-        }
-      : glob
+    glob === true ?
+      opt.signal ?
+        { signal: opt.signal }
+      : {}
+    : opt.signal ?
+      {
+        signal: opt.signal,
+        ...glob,
+      }
+    : glob
   return {
     ...options,
     glob: {

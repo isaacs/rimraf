@@ -8,7 +8,7 @@ t.test('posix platform', async t => {
     '../dist/esm/default-tmp.js',
     {
       '../dist/esm/platform.js': 'posix',
-    }
+    },
   )) as typeof import('../dist/esm/default-tmp.js')
   t.equal(defaultTmpSync('anything'), tmpdir())
   t.equal(await defaultTmp('anything').then(t => t), tmpdir())
@@ -39,7 +39,7 @@ t.test('windows', async t => {
           stat: async (path: string) => tempDirCheck(path),
         },
       },
-    }
+    },
   )) as typeof import('../dist/esm/default-tmp.js')
 
   const expect = {

@@ -16,16 +16,16 @@ import { useNative, useNativeSync } from './use-native.js'
 export {
   assertRimrafOptions,
   isRimrafOptions,
-  RimrafAsyncOptions,
-  RimrafOptions,
-  RimrafSyncOptions,
+  type RimrafAsyncOptions,
+  type RimrafOptions,
+  type RimrafSyncOptions,
 } from './opt-arg.js'
 
 const wrap =
   (fn: (p: string, o: RimrafAsyncOptions) => Promise<boolean>) =>
   async (
     path: string | string[],
-    opt?: RimrafAsyncOptions
+    opt?: RimrafAsyncOptions,
   ): Promise<boolean> => {
     const options = optArg(opt)
     if (options.glob) {
@@ -74,12 +74,14 @@ export const moveRemove = Object.assign(wrap(rimrafMoveRemove), {
 })
 
 export const rimrafSync = wrapSync((path, opt) =>
-  useNativeSync(opt) ? rimrafNativeSync(path, opt) : rimrafManualSync(path, opt)
+  useNativeSync(opt) ?
+    rimrafNativeSync(path, opt)
+  : rimrafManualSync(path, opt),
 )
 export const sync = rimrafSync
 
 const rimraf_ = wrap((path, opt) =>
-  useNative(opt) ? rimrafNative(path, opt) : rimrafManual(path, opt)
+  useNative(opt) ? rimrafNative(path, opt) : rimrafManual(path, opt),
 )
 export const rimraf = Object.assign(rimraf_, {
   rimraf: rimraf_,

@@ -1,3 +1,5 @@
+/.tap
+/.tshy
 /node_modules
 /example
 /.github

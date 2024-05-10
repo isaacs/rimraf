@@ -8,7 +8,7 @@ t.test('fake platform', async t => {
   process.env.__TESTING_RIMRAF_PLATFORM__ = 'not actual platform'
   t.equal(
     (await t.mockImport('../dist/esm/platform.js')).default,
-    'not actual platform'
+    'not actual platform',
   )
   t.end()
 })

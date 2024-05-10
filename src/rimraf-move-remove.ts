@@ -43,7 +43,7 @@ const unlinkFixEPERM = async (path: string) =>
             return
           }
           throw er
-        }
+        },
       )
     } else if (er.code === 'ENOENT') {
       return
@@ -73,7 +73,7 @@ const unlinkFixEPERMSync = (path: string) => {
 
 export const rimrafMoveRemove = async (
   path: string,
-  opt: RimrafAsyncOptions
+  opt: RimrafAsyncOptions,
 ) => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason
@@ -89,7 +89,7 @@ export const rimrafMoveRemove = async (
 const rimrafMoveRemoveDir = async (
   path: string,
   opt: RimrafAsyncOptions,
-  ent: Dirent | Stats
+  ent: Dirent | Stats,
 ): Promise<boolean> => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason
@@ -98,7 +98,7 @@ const rimrafMoveRemoveDir = async (
     return rimrafMoveRemoveDir(
       path,
       { ...opt, tmp: await defaultTmp(path) },
-      ent
+      ent,
     )
   }
   if (path === opt.tmp && parse(path).root !== path) {
@@ -128,7 +128,9 @@ const rimrafMoveRemoveDir = async (
 
   const removedAll = (
     await Promise.all(
-      entries.map(ent => rimrafMoveRemoveDir(resolve(path, ent.name), opt, ent))
+      entries.map(ent =>
+        rimrafMoveRemoveDir(resolve(path, ent.name), opt, ent),
+      ),
     )
   ).reduce((a, b) => a && b, true)
   if (!removedAll) {
@@ -151,7 +153,7 @@ const rimrafMoveRemoveDir = async (
 const tmpUnlink = async (
   path: string,
   tmp: string,
-  rm: (p: string) => Promise<any>
+  rm: (p: string) => Promise<any>,
 ) => {
   const tmpFile = resolve(tmp, uniqueFilename(path))
   await rename(path, tmpFile)
@@ -173,7 +175,7 @@ export const rimrafMoveRemoveSync = (path: string, opt: RimrafSyncOptions) => {
 const rimrafMoveRemoveDirSync = (
   path: string,
   opt: RimrafSyncOptions,
-  ent: Dirent | Stats
+  ent: Dirent | Stats,
 ): boolean => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason
@@ -182,7 +184,7 @@ const rimrafMoveRemoveDirSync = (
     return rimrafMoveRemoveDirSync(
       path,
       { ...opt, tmp: defaultTmpSync(path) },
-      ent
+      ent,
     )
   }
   const tmp: string = opt.tmp
@@ -233,7 +235,7 @@ const rimrafMoveRemoveDirSync = (
 const tmpUnlinkSync = (
   path: string,
   tmp: string,
-  rmSync: (p: string) => void
+  rmSync: (p: string) => void,
 ) => {
   const tmpFile = resolve(tmp, uniqueFilename(path))
   renameSync(path, tmpFile)

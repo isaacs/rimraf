@@ -1,7 +1,10 @@
 import t from 'tap'
 
 t.test('works if it works', async t => {
-  const { fixEPERM, fixEPERMSync } = await t.mockImport('../dist/esm/fix-eperm.js', {}) as typeof import('../dist/esm/fix-eperm.js')
+  const { fixEPERM, fixEPERMSync } = (await t.mockImport(
+    '../dist/esm/fix-eperm.js',
+    {},
+  )) as typeof import('../dist/esm/fix-eperm.js')
   const fixed = fixEPERM(async () => 1)
   await fixed('x').then(n => t.equal(n, 1))
   const fixedSync = fixEPERMSync(() => 1)
@@ -9,7 +12,10 @@ t.test('works if it works', async t => {
 })
 
 t.test('throw non-EPERM just throws', async t => {
-  const { fixEPERM, fixEPERMSync } = await t.mockImport('../dist/esm/fix-eperm.js', {}) as typeof import('../dist/esm/fix-eperm.js')
+  const { fixEPERM, fixEPERMSync } = (await t.mockImport(
+    '../dist/esm/fix-eperm.js',
+    {},
+  )) as typeof import('../dist/esm/fix-eperm.js')
   const fixed = fixEPERM(() => {
     throw new Error('oops')
   })
@@ -22,7 +28,10 @@ t.test('throw non-EPERM just throws', async t => {
 
 t.test('throw ENOENT returns void', async t => {
   const er = Object.assign(new Error('no ents'), { code: 'ENOENT' })
-  const { fixEPERM, fixEPERMSync } = await t.mockImport('../dist/esm/fix-eperm.js', {}) as typeof import('../dist/esm/fix-eperm.js')
+  const { fixEPERM, fixEPERMSync } = (await t.mockImport(
+    '../dist/esm/fix-eperm.js',
+    {},
+  )) as typeof import('../dist/esm/fix-eperm.js')
   const fixed = fixEPERM(() => {
     throw er
   })
@@ -55,12 +64,15 @@ t.test('chmod and try again', async t => {
     t.equal(mode, 0o666)
   }
   const chmod = async (p: string, mode: number) => chmodSync(p, mode)
-  const { fixEPERM, fixEPERMSync } = await t.mockImport('../dist/esm/fix-eperm.js', {
-    '../dist/esm/fs.js': {
-      promises: { chmod },
-      chmodSync,
+  const { fixEPERM, fixEPERMSync } = (await t.mockImport(
+    '../dist/esm/fix-eperm.js',
+    {
+      '../dist/esm/fs.js': {
+        promises: { chmod },
+        chmodSync,
+      },
     },
-  }) as typeof import('../dist/esm/fix-eperm.js')
+  )) as typeof import('../dist/esm/fix-eperm.js')
   const fixed = fixEPERM(asyncMethod)
   const fixedSync = fixEPERMSync(method)
   await fixed('async').then(n => t.equal(n, undefined))
@@ -92,13 +104,16 @@ t.test('chmod ENOENT is fine, abort', async t => {
     t.equal(mode, 0o666)
     throw Object.assign(new Error('no ent'), { code: 'ENOENT' })
   }
-  const chmod = async (p:string, mode:number) => chmodSync(p, mode)
-  const { fixEPERM, fixEPERMSync } = await t.mockImport('../dist/esm/fix-eperm.js', {
-    '../dist/esm/fs.js': {
-      promises: { chmod },
-      chmodSync,
+  const chmod = async (p: string, mode: number) => chmodSync(p, mode)
+  const { fixEPERM, fixEPERMSync } = (await t.mockImport(
+    '../dist/esm/fix-eperm.js',
+    {
+      '../dist/esm/fs.js': {
+        promises: { chmod },
+        chmodSync,
+      },
     },
-  }) as typeof import('../dist/esm/fix-eperm.js')
+  )) as typeof import('../dist/esm/fix-eperm.js')
   const fixed = fixEPERM(asyncMethod)
   const fixedSync = fixEPERMSync(method)
   await fixed('async').then(n => t.equal(n, undefined))
@@ -124,19 +139,22 @@ t.test('chmod other than ENOENT is failure', async t => {
   }
   const asyncMethod = async (p: string) => method(p)
   const chmods = new Set()
-  const chmodSync = (p:string, mode:number) => {
+  const chmodSync = (p: string, mode: number) => {
     t.equal(chmods.has(p), false)
     chmods.add(p)
     t.equal(mode, 0o666)
     throw Object.assign(new Error('ent bro'), { code: 'OHNO' })
   }
-  const chmod = async (p:string, mode:number) => chmodSync(p, mode)
-  const { fixEPERM, fixEPERMSync } = await t.mockImport('../dist/esm/fix-eperm.js', {
-    '../dist/esm/fs.js': {
-      promises: { chmod },
-      chmodSync,
+  const chmod = async (p: string, mode: number) => chmodSync(p, mode)
+  const { fixEPERM, fixEPERMSync } = (await t.mockImport(
+    '../dist/esm/fix-eperm.js',
+    {
+      '../dist/esm/fs.js': {
+        promises: { chmod },
+        chmodSync,
+      },
     },
-  }) as typeof import('../dist/esm/fix-eperm.js')
+  )) as typeof import('../dist/esm/fix-eperm.js')
   const fixed = fixEPERM(asyncMethod)
   const fixedSync = fixEPERMSync(method)
   await t.rejects(fixed('async'), { code: 'EPERM' })

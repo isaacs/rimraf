@@ -88,9 +88,9 @@ Options:
   are truthy, returning a Promise from a sync filter is the same
   as just not filtering anything.)
 
-  The first argument to the filter is the path string.  The
+  The first argument to the filter is the path string. The
   second argument is either a `Dirent` or `Stats` object for that
-  path.  (The first path explored will be a `Stats`, the rest
+  path. (The first path explored will be a `Stats`, the rest
   will be `Dirent`.)
 
   If a filter method is provided, it will _only_ remove entries

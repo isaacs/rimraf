@@ -36,7 +36,7 @@ for (const [c, expect] of cases) {
       t.same(
         resAsync.map(e => e.name).sort(),
         expect.sort(),
-        'got async result'
+        'got async result',
       )
       t.same(resSync.map(e => e.name).sort(), expect.sort(), 'got sync result')
     } else {

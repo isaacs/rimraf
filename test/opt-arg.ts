@@ -56,7 +56,7 @@ t.test('every kind of invalid option value', t => {
                   maxBackoff,
                   //@ts-expect-error
                   tmp,
-                })
+                }),
               )
             }
           }
@@ -87,7 +87,7 @@ t.test('test every allowed combination', t => {
                   backoff,
                   maxBackoff,
                   tmp,
-                })
+                }),
               )
             }
           }
@@ -138,7 +138,7 @@ t.test('glob option handling', t => {
         signal: { y: 1 },
         withFileTypes: false,
       },
-    }
+    },
   )
   t.end()
 })

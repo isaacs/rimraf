@@ -42,7 +42,7 @@ export const rimrafPosixSync = (path: string, opt: RimrafSyncOptions) => {
 const rimrafPosixDir = async (
   path: string,
   opt: RimrafAsyncOptions,
-  ent: Dirent | Stats
+  ent: Dirent | Stats,
 ): Promise<boolean> => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason
@@ -70,7 +70,7 @@ const rimrafPosixDir = async (
 
   const removedAll = (
     await Promise.all(
-      entries.map(ent => rimrafPosixDir(resolve(path, ent.name), opt, ent))
+      entries.map(ent => rimrafPosixDir(resolve(path, ent.name), opt, ent)),
     )
   ).reduce((a, b) => a && b, true)
 
@@ -96,7 +96,7 @@ const rimrafPosixDir = async (
 const rimrafPosixDirSync = (
   path: string,
   opt: RimrafSyncOptions,
-  ent: Dirent | Stats
+  ent: Dirent | Stats,
 ): boolean => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason

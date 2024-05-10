@@ -6,7 +6,7 @@ import { rimraf } from './index.js'
 const pj = fileURLToPath(new URL('../package.json', import.meta.url))
 const pjDist = fileURLToPath(new URL('../../package.json', import.meta.url))
 const { version } = JSON.parse(
-  await readFile(pjDist, 'utf8').catch(() => readFile(pj, 'utf8'))
+  await readFile(pjDist, 'utf8').catch(() => readFile(pj, 'utf8')),
 ) as { version: string }
 
 const runHelpForUsage = () =>
@@ -61,7 +61,7 @@ const prompt = async (rl: Interface, q: string) =>
 const interactiveRimraf = async (
   impl: (path: string | string[], opt?: RimrafAsyncOptions) => Promise<boolean>,
   paths: string[],
-  opt: RimrafAsyncOptions
+  opt: RimrafAsyncOptions,
 ) => {
   const existingFilter = opt.filter || (() => true)
   let allRemaining = false
@@ -118,7 +118,7 @@ const interactiveRimraf = async (
         }
       }
       return existingFilter(path, ent)
-    }
+    },
   )
   await impl(paths, opt)
   rl.close()
@@ -139,7 +139,7 @@ const main = async (...args: string[]) => {
   let dashdash = false
   let impl: (
     path: string | string[],
-    opt?: RimrafAsyncOptions
+    opt?: RimrafAsyncOptions,
   ) => Promise<boolean> = rimraf
 
   let interactive = false
@@ -268,6 +268,6 @@ if (process.env.__TESTING_RIMRAF_BIN__ !== '1') {
     er => {
       console.error(er)
       process.exit(1)
-    }
+    },
   )
 }
