@@ -178,7 +178,7 @@ Synchronous form of `rimraf.moveRemove()`
 ### Command Line Interface
 
 ```
-rimraf version 4.3.0
+rimraf version 6.0.1
 
 Usage: rimraf <path> [<path> ...]
 Deletes all files and folders at "path", recursively.
@@ -186,6 +186,7 @@ Deletes all files and folders at "path", recursively.
 Options:
   --                   Treat all subsequent arguments as paths
   -h --help            Display this usage info
+  --version            Display version
   --preserve-root      Do not remove '/' recursively (default)
   --no-preserve-root   Do not treat '/' specially
   -G --no-glob         Treat arguments as literal paths, not globs (default)

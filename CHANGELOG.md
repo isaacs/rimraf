@@ -1,6 +1,7 @@
 # 6.0
 
 - Drop support for nodes before v20
+- Add `--version` to CLI
 
 # 5.0
 

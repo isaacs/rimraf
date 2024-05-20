@@ -20,6 +20,7 @@ Deletes all files and folders at "path", recursively.
 Options:
   --                   Treat all subsequent arguments as paths
   -h --help            Display this usage info
+  --version            Display version
   --preserve-root      Do not remove '/' recursively (default)
   --no-preserve-root   Do not treat '/' specially
   -G --no-glob         Treat arguments as literal paths, not globs (default)
@@ -158,6 +159,9 @@ const main = async (...args: string[]) => {
     } else if (arg === '-h' || arg === '--help') {
       console.log(help)
       return 0
+    } else if (arg === '--version') {
+      console.log(version)
+      return 0
     } else if (arg === '--interactive' || arg === '-i') {
       interactive = true
       continue
@@ -258,6 +262,7 @@ const main = async (...args: string[]) => {
   return 0
 }
 main.help = help
+main.version = version
 
 export default main
 

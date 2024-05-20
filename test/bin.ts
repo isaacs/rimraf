@@ -50,6 +50,19 @@ t.test('basic arg parsing stuff', async t => {
     CALLS.length = 0
   })
 
+  t.test('binary version', t => {
+    const cases = [['--version'], ['a', 'b', '--version', 'c']]
+    for (const c of cases) {
+      t.test(c.join(' '), async t => {
+        t.equal(await bin(...c), 0)
+        t.same(LOGS, [[bin.version]])
+        t.same(ERRS, [])
+        t.same(CALLS, [])
+      })
+    }
+    t.end()
+  })
+
   t.test('helpful output', t => {
     const cases = [['-h'], ['--help'], ['a', 'b', '--help', 'c']]
     for (const c of cases) {
