@@ -8,7 +8,7 @@ Install with `npm install rimraf`.
 ### v4 to v5
 
 - There is no default export anymore. Import the functions directly
-  using, e.g., `import { rimrafSync } from 'rimraf`.
+  using, e.g., `import { rimrafSync } from 'rimraf'`.
 
 ### v3 to v4
 
@@ -21,9 +21,9 @@ Install with `npm install rimraf`.
 - New implementation on Windows, falling back to "move then
   remove" strategy when exponential backoff for `EBUSY` fails to
   resolve the situation.
-- Simplified implementation on Posix, since the Windows
+- Simplified implementation on POSIX, since the Windows
   affordances are not necessary there.
-- As of 4.3, return/resolve value is boolean instead of undefined
+- As of 4.3, return/resolve value is boolean instead of undefined.
 
 ## API
 
@@ -53,7 +53,7 @@ Options:
 - `preserveRoot`: If set to boolean `false`, then allow the
   recursive removal of the root directory. Otherwise, this is
   not allowed.
-- `tmp`: Windows only. Temp folder to use to place files and
+- `tmp`: Windows only. Temp folder to place files and
   folders for the "move then remove" fallback. Must be on the
   same physical device as the path being deleted. Defaults to
   `os.tmpdir()` when that is on the same drive letter as the path
@@ -75,7 +75,7 @@ Options:
   linear backoff. Default `100`.
 - `signal` Pass in an AbortSignal to cancel the directory
   removal. This is useful when removing large folder structures,
-  if you'd like to limit the amount of time spent.
+  if you'd like to limit the time spent.
 
   Using a `signal` option prevents the use of Node's built-in
   `fs.rm` because that implementation does not support abort
@@ -84,7 +84,7 @@ Options:
 - `glob` Boolean flag to treat path as glob pattern, or an object
   specifying [`glob` options](https://github.com/isaacs/node-glob).
 - `filter` Method that returns a boolean indicating whether that
-  path should be deleted. With async rimraf methods, this may
+  path should be deleted. With async `rimraf` methods, this may
   return a Promise that resolves to a boolean. (Since Promises
   are truthy, returning a Promise from a sync filter is the same
   as just not filtering anything.)
@@ -98,7 +98,7 @@ Options:
   if the filter returns (or resolves to) a truthy value. Omitting
   a directory will still allow its children to be removed, unless
   they are also filtered out, but any parents of a filtered entry
-  will not be removed, since the directory would not be empty in
+  will not be removed, since the directory will not be empty in
   that case.
 
   Using a filter method prevents the use of Node's built-in
@@ -107,7 +107,7 @@ Options:
 Any other options are provided to the native Node.js `fs.rm` implementation
 when that is used.
 
-This will attempt to choose the best implementation, based on Node.js
+This will attempt to choose the best implementation, based on the Node.js
 version and `process.platform`. To force a specific implementation, use
 one of the other functions provided.
 
@@ -161,7 +161,7 @@ Note that, in cases where the operation fails, this _may_ leave
 files lying around in the parent directory with names like
 `.file-basename.txt.0.123412341`. Until the Windows kernel
 provides a way to perform atomic `unlink` and `rmdir` operations,
-this is unfortunately unavoidable.
+this is, unfortunately, unavoidable.
 
 To move files to a different temporary directory other than the
 parent, provide `opts.tmp`. Note that this _must_ be on the same
