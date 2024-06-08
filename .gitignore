@@ -2,6 +2,7 @@
 /.nyc_output
 /coverage
 /dist
+/.tap
 !/typedoc.json
 !/tsconfig-*.json
 !/.prettierignore
