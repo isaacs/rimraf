@@ -262,6 +262,7 @@ const main = async (...args: string[]) => {
   return 0
 }
 main.help = help
+main.version = version
 
 export default main
 
