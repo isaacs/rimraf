@@ -1,3 +1,7 @@
+# 6.0
+
+- Drop support for nodes before v20
+
 # 5.0
 
 - No default export, only named exports

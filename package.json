@@ -58,22 +58,21 @@
     "endOfLine": "lf"
   },
   "devDependencies": {
-    "@types/node": "^20.12.11",
+    "@types/node": "^20.14.10",
     "mkdirp": "^3.0.1",
-    "prettier": "^3.2.5",
-    "tap": "^19.0.1",
-    "tshy": "^1.14.0",
-    "typedoc": "^0.25.13",
-    "typescript": "^5.4.5"
+    "prettier": "^3.3.2",
+    "tap": "^20.0.3",
+    "tshy": "^2.0.1",
+    "typedoc": "^0.26.3"
   },
   "funding": {
     "url": "https://github.com/sponsors/isaacs"
   },
   "engines": {
-    "node": "14 >=14.20 || 16 >=16.20 || >=18"
+    "node": "20 || >=22"
   },
   "dependencies": {
-    "glob": "^10.3.7"
+    "glob": "^11.0.0"
   },
   "keywords": [
     "rm",
@@ -84,5 +83,6 @@
     "cli",
     "rmdir",
     "recursive"
-  ]
+  ],
+  "module": "./dist/esm/index.js"
 }
