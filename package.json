@@ -70,7 +70,7 @@
     "url": "https://github.com/sponsors/isaacs"
   },
   "engines": {
-    "node": ">=18"
+    "node": "14 >=14.20 || 16 >=16.20 || >=18"
   },
   "dependencies": {
     "glob": "^10.3.7"
