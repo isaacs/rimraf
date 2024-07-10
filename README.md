@@ -5,6 +5,11 @@ Install with `npm install rimraf`.
 
 ## Major Changes
 
+### v5 to v6
+
+- Require node `20` or `>=22`
+- Add `--version` to CLI
+
 ### v4 to v5
 
 - There is no default export anymore. Import the functions directly
