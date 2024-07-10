@@ -1,13 +1,10 @@
 #!/usr/bin/env node
-import { readFile } from 'fs/promises'
 import type { RimrafAsyncOptions } from './index.js'
 import { rimraf } from './index.js'
 
-const pj = fileURLToPath(new URL('../package.json', import.meta.url))
-const pjDist = fileURLToPath(new URL('../../package.json', import.meta.url))
-const { version } = JSON.parse(
-  await readFile(pjDist, 'utf8').catch(() => readFile(pj, 'utf8')),
-) as { version: string }
+import { loadPackageJson } from 'package-json-from-dist'
+
+const { version } = loadPackageJson(import.meta.url, '../package.json')
 
 const runHelpForUsage = () =>
   console.error('run `rimraf --help` for usage information')
@@ -54,7 +51,6 @@ const cwd = process.cwd()
 
 import { Dirent, Stats } from 'fs'
 import { createInterface, Interface } from 'readline'
-import { fileURLToPath } from 'url'
 
 const prompt = async (rl: Interface, q: string) =>
   new Promise<string>(res => rl.question(q, res))
