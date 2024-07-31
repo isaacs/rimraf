@@ -1,6 +1,6 @@
 {
   "name": "rimraf",
-  "version": "5.0.9",
+  "version": "5.0.10",
   "publishConfig": {
     "tag": "v5-legacy"
   },
