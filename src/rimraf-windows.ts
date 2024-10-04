@@ -3,8 +3,8 @@
 // 1. EBUSY, ENFILE, EMFILE trigger retries and/or exponential backoff
 // 2. All non-directories are removed first and then all directories are
 //    removed in a second sweep.
-// 3. If we hit ENOTEMPTY in the second sweep, fall back to move-remove on
-//    the that folder.
+// 3. If we hit ENOTEMPTY or EPERM in the second sweep, fall back to
+//    move-remove on the that folder.
 //
 // Note: "move then remove" is 2-10 times slower, and just as unreliable.
 
@@ -37,7 +37,8 @@ const rimrafWindowsDirMoveRemoveFallback = async (
     await rimrafWindowsDirRetry(path, opt)
     return true
   } catch (er) {
-    if (errorCode(er) === 'ENOTEMPTY') {
+    const code = errorCode(er)
+    if (code === 'ENOTEMPTY' || code === 'EPERM') {
       return rimrafMoveRemove(path, opt)
     }
     throw er
@@ -55,7 +56,8 @@ const rimrafWindowsDirMoveRemoveFallbackSync = (
     rimrafWindowsDirRetrySync(path, opt)
     return true
   } catch (er) {
-    if (errorCode(er) === 'ENOTEMPTY') {
+    const code = errorCode(er)
+    if (code === 'ENOTEMPTY' || code === 'EPERM') {
       return rimrafMoveRemoveSync(path, opt)
     }
     throw er
@@ -99,6 +101,10 @@ const rimrafWindowsDir = async (
     /* c8 ignore start */
     if (entries) {
       if (entries.code === 'ENOENT') {
+        return true
+      }
+      if (entries.code === 'EPERM') {
+        await ignoreENOENT(rimrafWindowsDirMoveRemoveFallback(path, opt))
         return true
       }
       if (entries.code !== 'ENOTDIR') {
@@ -153,6 +159,12 @@ const rimrafWindowsDirSync = (
     /* c8 ignore start */
     if (entries) {
       if (entries.code === 'ENOENT') {
+        return true
+      }
+      if (entries.code === 'EPERM') {
+        ignoreENOENTSync(() =>
+          rimrafWindowsDirMoveRemoveFallbackSync(path, opt),
+        )
         return true
       }
       if (entries.code !== 'ENOTDIR') {

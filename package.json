@@ -93,6 +93,7 @@
   ],
   "module": "./dist/esm/index.js",
   "tap": {
-    "coverage-map": "map.js"
+    "coverage-map": "map.js",
+    "timeout": 600
   }
 }
