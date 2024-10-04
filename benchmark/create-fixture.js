@@ -1,10 +1,10 @@
-const { writeFile: writeFile_ } = require('fs')
+import { writeFile as writeFile_ } from 'fs'
 const writeFile = async (path, data) =>
   new Promise((res, rej) =>
     writeFile_(path, data, er => (er ? rej(er) : res())),
   )
-const { mkdirp } = require('mkdirp')
-const { resolve } = require('path')
+import { mkdirp } from 'mkdirp'
+import { resolve } from 'path'
 
 const create = async (path, start, end, maxDepth, depth = 0) => {
   await mkdirp(path)
@@ -19,7 +19,7 @@ const create = async (path, start, end, maxDepth, depth = 0) => {
   return path
 }
 
-module.exports = async ({ start, end, depth, name }) => {
-  const path = resolve(__dirname, 'fixtures', name, 'test')
+export default async ({ start, end, depth, name }) => {
+  const path = resolve(import.meta.dirname, 'fixtures', name, 'test')
   return await create(path, start.charCodeAt(0), end.charCodeAt(0), depth)
 }
