@@ -6,3 +6,4 @@
 !/typedoc.json
 !/tsconfig-*.json
 !/.prettierignore
+/benchmark-*.json
