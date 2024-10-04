@@ -11,7 +11,7 @@ const variance = list => {
 const stddev = list => {
   const v = variance(list)
   if (isNaN(v)) {
-    console.error({list, v})
+    console.error({ list, v })
     throw new Error('wat?')
   }
   return sqrt(variance(list))
@@ -28,8 +28,8 @@ const nums = list => ({
 })
 
 const printEr = er => `${er.code ? er.code + ': ' : ''}${er.message}`
-const failures = list => list.length === 0 ? {}
-  : { failures: list.map(er => printEr(er)).join('\n') }
+const failures = list =>
+  list.length === 0 ? {} : { failures: list.map(er => printEr(er)).join('\n') }
 
 const table = results => {
   const table = {}
@@ -49,7 +49,7 @@ const table = results => {
   }
   // sort by mean time
   return Object.entries(table)
-    .sort(([, {mean:a}], [, {mean:b}]) => a - b)
+    .sort(([, { mean: a }], [, { mean: b }]) => a - b)
     .reduce((set, [key, val]) => {
       set[key] = val
       return set
@@ -62,4 +62,4 @@ const print = results => {
   console.table(table(results))
 }
 
-module.exports = print
+export default print

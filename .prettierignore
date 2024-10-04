@@ -9,4 +9,4 @@
 /tap-snapshots
 /.nyc_output
 /coverage
-/benchmark
+/benchmark/old-rimraf
