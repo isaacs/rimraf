@@ -33,10 +33,12 @@ const systemRmRf = () => {
 }
 
 import { native, posix, windows } from 'rimraf'
-export default {
+const cases = {
   native,
   posix,
   windows,
   old: oldRimraf(),
   system: systemRmRf(),
 }
+export const names = new Set(Object.keys(cases))
+export default cases

@@ -7,3 +7,4 @@
 !/tsconfig-*.json
 !/.prettierignore
 !eslint.config.mjs
+/benchmark-*.json
