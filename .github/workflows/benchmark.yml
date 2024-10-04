@@ -31,8 +31,4 @@ jobs:
         run: npm install
 
       - name: benchmark
-        run: node benchmark/index.js
-        env:
-          RIMRAF_TEST_START_CHAR: a
-          RIMRAF_TEST_END_CHAR: f
-          RIMRAF_TEST_DEPTH: 5
+        run: node benchmark/index.js --start-char=a --end-char=f --depth=5
