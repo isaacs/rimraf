@@ -3,9 +3,9 @@ const END = process.env.RIMRAF_TEST_END_CHAR || 'f'
 const DEPTH = +process.env.RIMRAF_TEST_DEPTH || 5
 const N = +process.env.RIMRAF_TEST_ITERATIONS || 7
 
-const cases = require('./rimrafs.js')
+import cases from './rimrafs.js'
 
-const create = require('./create-fixture.js')
+import create from './create-fixture.js'
 
 const hrToMS = hr => Math.round(hr[0] * 1e9 + hr[1]) / 1e6
 
@@ -102,4 +102,4 @@ const runTest = async type => {
   }))
 }
 
-module.exports = runTest
+export default runTest

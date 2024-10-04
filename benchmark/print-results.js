@@ -62,4 +62,4 @@ const print = results => {
   console.table(table(results))
 }
 
-module.exports = print
+export default print
