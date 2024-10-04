@@ -1,6 +1,8 @@
 const { writeFile: writeFile_ } = require('fs')
-const writeFile = async (path, data) => new Promise((res, rej) =>
-  writeFile_(path, data, er => er ? rej(er) : res()))
+const writeFile = async (path, data) =>
+  new Promise((res, rej) =>
+    writeFile_(path, data, er => (er ? rej(er) : res())),
+  )
 const { mkdirp } = require('mkdirp')
 const { resolve } = require('path')
 
@@ -9,10 +11,9 @@ const create = async (path, start, end, maxDepth, depth = 0) => {
   const promises = []
   for (let i = start; i <= end; i++) {
     const c = String.fromCharCode(i)
-    if (depth < maxDepth && (i-start >= depth))
+    if (depth < maxDepth && i - start >= depth)
       await create(resolve(path, c), start, end, maxDepth, depth + 1)
-    else
-      promises.push(writeFile(resolve(path, c), c))
+    else promises.push(writeFile(resolve(path, c), c))
   }
   await Promise.all(promises)
   return path
