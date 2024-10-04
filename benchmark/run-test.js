@@ -7,12 +7,11 @@ const cases = require('./rimrafs.js')
 
 const create = require('./create-fixture.js')
 
-const hrToMS = hr => Math.round(hr[0]*1e9 + hr[1]) / 1e6
+const hrToMS = hr => Math.round(hr[0] * 1e9 + hr[1]) / 1e6
 
-const runTest = async (type) => {
+const runTest = async type => {
   const rimraf = cases[type]
-  if (!rimraf)
-    throw new Error('unknown rimraf type: ' + type)
+  if (!rimraf) throw new Error('unknown rimraf type: ' + type)
 
   const opt = {
     start: START,
@@ -62,10 +61,12 @@ const runTest = async (type) => {
   const startAsync = process.hrtime()
   for (const path of asyncPaths) {
     const start = process.hrtime()
-    await rimraf(path).then(
-      () => asyncTimes.push(hrToMS(process.hrtime(start))),
-      er => asyncFails.push(er)
-    ).then(() => process.stderr.write('.'))
+    await rimraf(path)
+      .then(
+        () => asyncTimes.push(hrToMS(process.hrtime(start))),
+        er => asyncFails.push(er),
+      )
+      .then(() => process.stderr.write('.'))
   }
   const asyncTotal = hrToMS(process.hrtime(startAsync))
   console.error('done! (%j ms, %j failed)', asyncTotal, asyncFails.length)
@@ -77,10 +78,14 @@ const runTest = async (type) => {
   const paraRuns = []
   for (const path of paraPaths) {
     const start = process.hrtime()
-    paraRuns.push(rimraf(path).then(
-      () => paraTimes.push(hrToMS(process.hrtime(start))),
-      er => paraFails.push(er)
-    ).then(() => process.stderr.write('.')))
+    paraRuns.push(
+      rimraf(path)
+        .then(
+          () => paraTimes.push(hrToMS(process.hrtime(start))),
+          er => paraFails.push(er),
+        )
+        .then(() => process.stderr.write('.')),
+    )
   }
   await Promise.all(paraRuns)
   const paraTotal = hrToMS(process.hrtime(startPara))

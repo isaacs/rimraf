@@ -1,6 +1,6 @@
 // just disable the glob option, and promisify it, for apples-to-apples comp
 const oldRimraf = () => {
-  const {promisify} = require('util')
+  const { promisify } = require('util')
   const oldRimraf = require('./old-rimraf')
   const pOldRimraf = promisify(oldRimraf)
   const rimraf = path => pOldRimraf(path, { disableGlob: true })
@@ -10,15 +10,15 @@ const oldRimraf = () => {
 
 const { spawn, spawnSync } = require('child_process')
 const systemRmRf = () => {
-  const rimraf = path => new Promise((res, rej) => {
-    const proc = spawn('rm', ['-rf', path])
-    proc.on('close', (code, signal) => {
-      if (code || signal)
-        rej(Object.assign(new Error('command failed'), { code, signal }))
-      else
-        res()
+  const rimraf = path =>
+    new Promise((res, rej) => {
+      const proc = spawn('rm', ['-rf', path])
+      proc.on('close', (code, signal) => {
+        if (code || signal)
+          rej(Object.assign(new Error('command failed'), { code, signal }))
+        else res()
+      })
     })
-  })
   rimraf.sync = path => {
     const result = spawnSync('rm', ['-rf', path])
     if (result.status || result.signal) {
@@ -31,10 +31,11 @@ const systemRmRf = () => {
   return rimraf
 }
 
+const { native, posix, windows } = require('rimraf')
 module.exports = {
-  native: require('../').native,
-  posix: require('../').posix,
-  windows: require('../').windows,
+  native,
+  posix,
+  windows,
   old: oldRimraf(),
   system: systemRmRf(),
 }
