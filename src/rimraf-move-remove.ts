@@ -150,10 +150,10 @@ const rimrafMoveRemoveDir = async (
   return true
 }
 
-const tmpUnlink = async (
+const tmpUnlink = async <T>(
   path: string,
   tmp: string,
-  rm: (p: string) => Promise<any>,
+  rm: (p: string) => Promise<T>,
 ) => {
   const tmpFile = resolve(tmp, uniqueFilename(path))
   await rename(path, tmpFile)

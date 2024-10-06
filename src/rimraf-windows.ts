@@ -73,24 +73,20 @@ export const rimrafWindows = async (path: string, opt: RimrafAsyncOptions) => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason
   }
-  try {
-    return await rimrafWindowsDir(path, opt, await lstat(path), START)
-  } catch (er) {
-    if ((er as NodeJS.ErrnoException)?.code === 'ENOENT') return true
-    throw er
-  }
+  const stat = await ignoreENOENT(lstat(path))
+  return stat ?
+      ignoreENOENT(rimrafWindowsDir(path, opt, stat, START), true)
+    : true
 }
 
 export const rimrafWindowsSync = (path: string, opt: RimrafSyncOptions) => {
   if (opt?.signal?.aborted) {
     throw opt.signal.reason
   }
-  try {
-    return rimrafWindowsDirSync(path, opt, lstatSync(path), START)
-  } catch (er) {
-    if ((er as NodeJS.ErrnoException)?.code === 'ENOENT') return true
-    throw er
-  }
+  const stat = ignoreENOENTSync(() => lstatSync(path))
+  return stat ?
+      ignoreENOENTSync(() => rimrafWindowsDirSync(path, opt, stat, START), true)
+    : true
 }
 
 const rimrafWindowsDir = async (
