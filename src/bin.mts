@@ -8,7 +8,7 @@ const { version } = loadPackageJson(import.meta.url, '../package.json')
 const runHelpForUsage = () =>
   console.error('run `rimraf --help` for usage information')
 
-export const help = `rimraf version ${version}
+const help = `rimraf version ${version}
 
 Usage: rimraf <path> [<path> ...]
 Deletes all files and folders at "path", recursively.

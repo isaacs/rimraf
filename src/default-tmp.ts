@@ -11,7 +11,6 @@
 import { tmpdir } from 'os'
 import { parse, resolve } from 'path'
 import { promises, statSync } from './fs.js'
-
 const { stat } = promises
 
 const isDirSync = (path: string) => {

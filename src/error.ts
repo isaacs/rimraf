@@ -1,1 +1,1 @@
-export const errorCode = (er: unknown) => (er as NodeJS.ErrnoException).code
+export const errorCode = (er: unknown) => (er as NodeJS.ErrnoException)?.code
