@@ -19,13 +19,13 @@ const mockFSMethodPass =
   (method: string) =>
   (...args: any[]) => {
     const cb = args.pop()
-    process.nextTick(() => cb(null, method, 1, 2, 3))
+    process.nextTick(() => cb(null, method))
   }
 const mockFSMethodFail =
   (method: string) =>
   (...args: any[]) => {
     const cb = args.pop()
-    process.nextTick(() => cb(new Error('oops'), method, 1, 2, 3))
+    process.nextTick(() => cb(new Error('oops'), method))
   }
 
 t.type(fs.promises, Object)
@@ -67,7 +67,9 @@ for (const method of Object.keys(fs)) {
 t.test('passing resolves promise', async t => {
   const fs = await mockFs(t, mockFSPass)
   for (const [m, fn] of Object.entries(fs.promises as MockFs)) {
-    t.same(await fn(), m, `got expected value for ${m}`)
+    const expected =
+      ['chmod', 'rename', 'rm', 'rmdir', 'unlink'].includes(m) ? undefined : m
+    t.same(await fn(), expected, `got expected value for ${m}`)
   }
 })
 

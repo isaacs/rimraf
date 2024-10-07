@@ -58,7 +58,7 @@ const rimrafPosixDir = async (
     await Promise.all(
       entries.map(ent => rimrafPosixDir(resolve(path, ent.name), opt, ent)),
     )
-  ).reduce((a, b) => a && b, true)
+  ).every(v => v === true)
 
   if (!removedAll) {
     return false

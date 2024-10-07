@@ -11,6 +11,20 @@ import {
 
 import * as OPTARG from '../src/opt-arg.js'
 
+const mockRimraf =
+  (fn: (path: string, opt: RimrafOptions) => void) =>
+  async (path: string, opt: RimrafOptions) => {
+    fn(path, opt)
+    return true
+  }
+
+const mockRimrafSync =
+  (fn: (path: string, opt: RimrafOptions) => void) =>
+  (path: string, opt: RimrafOptions) => {
+    fn(path, opt)
+    return true
+  }
+
 t.test('mocky unit tests to select the correct function', async t => {
   // don't mock rimrafManual, so we can test the platform switch
   const CALLS: any[] = []
@@ -42,28 +56,28 @@ t.test('mocky unit tests to select the correct function', async t => {
       },
     },
     '../src/rimraf-posix.js': {
-      rimrafPosix: async (path: string, opt: RimrafOptions) => {
+      rimrafPosix: mockRimraf((path, opt) => {
         CALLS.push(['rimrafPosix', path, opt])
-      },
-      rimrafPosixSync: async (path: string, opt: RimrafOptions) => {
+      }),
+      rimrafPosixSync: mockRimrafSync((path, opt) => {
         CALLS.push(['rimrafPosixSync', path, opt])
-      },
+      }),
     },
     '../src/rimraf-windows.js': {
-      rimrafWindows: async (path: string, opt: RimrafOptions) => {
+      rimrafWindows: mockRimraf((path, opt) => {
         CALLS.push(['rimrafWindows', path, opt])
-      },
-      rimrafWindowsSync: async (path: string, opt: RimrafOptions) => {
+      }),
+      rimrafWindowsSync: mockRimrafSync((path, opt) => {
         CALLS.push(['rimrafWindowsSync', path, opt])
-      },
+      }),
     },
     '../src/rimraf-native.js': {
-      rimrafNative: async (path: string, opt: RimrafOptions) => {
+      rimrafNative: mockRimraf((path, opt) => {
         CALLS.push(['rimrafNative', path, opt])
-      },
-      rimrafNativeSync: async (path: string, opt: RimrafOptions) => {
+      }),
+      rimrafNativeSync: mockRimrafSync((path, opt) => {
         CALLS.push(['rimrafNativeSync', path, opt])
-      },
+      }),
     },
   }
   t.intercept(process, 'platform', { value: 'posix' })
@@ -168,10 +182,12 @@ t.test('accept array of paths as first arg', async t => {
       useNativeSync: () => true,
     },
     '../src/rimraf-native.js': {
-      rimrafNative: async (path: string, opt: RimrafOptions) =>
-        ASYNC_CALLS.push([path, opt]),
-      rimrafNativeSync: (path: string, opt: RimrafOptions) =>
-        SYNC_CALLS.push([path, opt]),
+      rimrafNative: mockRimraf((path, opt) => {
+        ASYNC_CALLS.push([path, opt])
+      }),
+      rimrafNativeSync: mockRimrafSync((path, opt) => {
+        SYNC_CALLS.push([path, opt])
+      }),
     },
   })) as typeof import('../src/index.js')
   t.equal(await rimraf(['a', 'b', 'c']), true)

@@ -5,7 +5,6 @@ import { rimrafWindows, rimrafWindowsSync } from '../src/rimraf-windows.js'
 for (const platform of ['win32', 'posix']) {
   t.test(platform, async t => {
     t.intercept(process, 'platform', { value: platform })
-
     const { rimrafManual, rimrafManualSync } = (await t.mockImport(
       '../src/rimraf-manual.js',
     )) as typeof import('../src/rimraf-manual.js')

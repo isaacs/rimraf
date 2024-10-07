@@ -82,7 +82,7 @@ const rimrafMoveRemoveDir = async (
         rimrafMoveRemoveDir(resolve(path, ent.name), opt, ent),
       ),
     )
-  ).reduce((a, b) => a && b, true)
+  ).every(v => v === true)
   if (!removedAll) {
     return false
   }

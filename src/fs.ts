@@ -24,9 +24,7 @@ export const readdirSync = (path: fs.PathLike): Dirent[] =>
 // which would be a bit cleaner.
 
 const chmod = (path: fs.PathLike, mode: fs.Mode): Promise<void> =>
-  new Promise((res, rej) =>
-    fs.chmod(path, mode, (er, ...d: any[]) => (er ? rej(er) : res(...d))),
-  )
+  new Promise((res, rej) => fs.chmod(path, mode, er => (er ? rej(er) : res())))
 
 const mkdir = (
   path: fs.PathLike,
@@ -49,20 +47,14 @@ const readdir = (path: fs.PathLike): Promise<Dirent[]> =>
 
 const rename = (oldPath: fs.PathLike, newPath: fs.PathLike): Promise<void> =>
   new Promise((res, rej) =>
-    fs.rename(oldPath, newPath, (er, ...d: any[]) =>
-      er ? rej(er) : res(...d),
-    ),
+    fs.rename(oldPath, newPath, er => (er ? rej(er) : res())),
   )
 
 const rm = (path: fs.PathLike, options: fs.RmOptions): Promise<void> =>
-  new Promise((res, rej) =>
-    fs.rm(path, options, (er, ...d: any[]) => (er ? rej(er) : res(...d))),
-  )
+  new Promise((res, rej) => fs.rm(path, options, er => (er ? rej(er) : res())))
 
 const rmdir = (path: fs.PathLike): Promise<void> =>
-  new Promise((res, rej) =>
-    fs.rmdir(path, (er, ...d: any[]) => (er ? rej(er) : res(...d))),
-  )
+  new Promise((res, rej) => fs.rmdir(path, er => (er ? rej(er) : res())))
 
 const stat = (path: fs.PathLike): Promise<fs.Stats> =>
   new Promise((res, rej) =>
@@ -75,9 +67,7 @@ const lstat = (path: fs.PathLike): Promise<fs.Stats> =>
   )
 
 const unlink = (path: fs.PathLike): Promise<void> =>
-  new Promise((res, rej) =>
-    fs.unlink(path, (er, ...d: any[]) => (er ? rej(er) : res(...d))),
-  )
+  new Promise((res, rej) => fs.unlink(path, er => (er ? rej(er) : res())))
 
 export const promises = {
   chmod,

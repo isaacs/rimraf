@@ -375,7 +375,7 @@ t.test('handle EPERMs, chmod returns ENOENT', async t => {
             CHMODS.push(['chmodSync', ...args])
             try {
               fs.unlinkSync(args[0])
-            } catch (_) {}
+            } catch {}
             //@ts-ignore
             return fs.chmodSync(...args)
           },
@@ -384,7 +384,7 @@ t.test('handle EPERMs, chmod returns ENOENT', async t => {
               CHMODS.push(['chmod', ...args])
               try {
                 fs.unlinkSync(args[0])
-              } catch (_) {}
+              } catch {}
               //@ts-ignore
               return fs.promises.chmod(...args)
             },
@@ -445,7 +445,7 @@ t.test('handle EPERMs, chmod raises something other than ENOENT', async t => {
             CHMODS.push(['chmodSync', ...args])
             try {
               fs.unlinkSync(args[0])
-            } catch (_) {}
+            } catch {}
             throw Object.assign(new Error('cannot chmod'), { code: 'FOO' })
           },
           promises: {
@@ -453,7 +453,7 @@ t.test('handle EPERMs, chmod raises something other than ENOENT', async t => {
               CHMODS.push(['chmod', ...args])
               try {
                 fs.unlinkSync(args[0])
-              } catch (_) {}
+              } catch {}
               throw Object.assign(new Error('cannot chmod'), { code: 'FOO' })
             },
           },

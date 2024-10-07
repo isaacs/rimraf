@@ -27,17 +27,17 @@ const rimrafWindowsDirRetrySync = retryBusySync(fixEPERMSync(rmdirSync))
 
 const rimrafWindowsDirMoveRemoveFallback = async (
   path: string,
-  opt: RimrafAsyncOptions,
+  // already filtered, remove from options so we don't call unnecessarily
+  { filter, ...opt }: RimrafAsyncOptions,
 ): Promise<boolean> => {
   /* c8 ignore next */
   opt?.signal?.throwIfAborted()
-  // already filtered, remove from options so we don't call unnecessarily
-  const { filter, ...options } = opt
   try {
-    return await rimrafWindowsDirRetry(path, options)
+    await rimrafWindowsDirRetry(path, opt)
+    return true
   } catch (er) {
     if (errorCode(er) === 'ENOTEMPTY') {
-      return await rimrafMoveRemove(path, options)
+      return rimrafMoveRemove(path, opt)
     }
     throw er
   }
@@ -45,16 +45,16 @@ const rimrafWindowsDirMoveRemoveFallback = async (
 
 const rimrafWindowsDirMoveRemoveFallbackSync = (
   path: string,
-  opt: RimrafSyncOptions,
+  // already filtered, remove from options so we don't call unnecessarily
+  { filter, ...opt }: RimrafSyncOptions,
 ): boolean => {
   opt?.signal?.throwIfAborted()
-  // already filtered, remove from options so we don't call unnecessarily
-  const { filter, ...options } = opt
   try {
-    return rimrafWindowsDirRetrySync(path, options)
+    rimrafWindowsDirRetrySync(path, opt)
+    return true
   } catch (er) {
     if (errorCode(er) === 'ENOTEMPTY') {
-      return rimrafMoveRemoveSync(path, options)
+      return rimrafMoveRemoveSync(path, opt)
     }
     throw er
   }
@@ -120,7 +120,7 @@ const rimrafWindowsDir = async (
         rimrafWindowsDir(resolve(path, ent.name), opt, ent, s),
       ),
     )
-  ).reduce((a, b) => a && b, true)
+  ).every(v => v === true)
 
   if (state === START) {
     return rimrafWindowsDir(path, opt, ent, FINISH)

@@ -32,11 +32,11 @@ const wrap =
       path = await glob(path, options.glob)
     }
     if (Array.isArray(path)) {
-      return !!(
+      return (
         await Promise.all(path.map(p => fn(pathArg(p, options), options)))
-      ).reduce((a, b) => a && b, true)
+      ).every(v => v === true)
     } else {
-      return !!(await fn(pathArg(path, options), options))
+      return fn(pathArg(path, options), options)
     }
   }
 
@@ -48,11 +48,11 @@ const wrapSync =
       path = globSync(path, options.glob)
     }
     if (Array.isArray(path)) {
-      return !!path
+      return path
         .map(p => fn(pathArg(p, options), options))
-        .reduce((a, b) => a && b, true)
+        .every(v => v === true)
     } else {
-      return !!fn(pathArg(path, options), options)
+      return fn(pathArg(path, options), options)
     }
   }
 
@@ -74,14 +74,14 @@ export const moveRemove = Object.assign(wrap(rimrafMoveRemove), {
 })
 
 export const rimrafSync = wrapSync((path, opt) =>
-  useNativeSync?.(opt) ?
+  useNativeSync(opt) ?
     rimrafNativeSync(path, opt)
   : rimrafManualSync(path, opt),
 )
 export const sync = rimrafSync
 
 const rimraf_ = wrap((path, opt) =>
-  useNative?.(opt) ? rimrafNative(path, opt) : rimrafManual(path, opt),
+  useNative(opt) ? rimrafNative(path, opt) : rimrafManual(path, opt),
 )
 export const rimraf = Object.assign(rimraf_, {
   rimraf: rimraf_,
