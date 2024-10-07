@@ -4,12 +4,10 @@ import { tmpdir } from 'os'
 import { win32 } from 'path'
 
 t.test('posix platform', async t => {
+  t.intercept(process, 'platform', { value: 'posix' })
   const { defaultTmp, defaultTmpSync } = (await t.mockImport(
-    '../dist/esm/default-tmp.js',
-    {
-      '../dist/esm/platform.js': 'posix',
-    },
-  )) as typeof import('../dist/esm/default-tmp.js')
+    '../src/default-tmp.js',
+  )) as typeof import('../src/default-tmp.js')
   t.equal(defaultTmpSync('anything'), tmpdir())
   t.equal(await defaultTmp('anything').then(t => t), tmpdir())
 })
@@ -25,22 +23,22 @@ t.test('windows', async t => {
         throw Object.assign(new Error('no ents here'), { code: 'ENOENT' })
     }
   }
+  t.intercept(process, 'platform', { value: 'win32' })
   const { defaultTmp, defaultTmpSync } = (await t.mockImport(
-    '../dist/esm/default-tmp.js',
+    '../src/default-tmp.js',
     {
       os: {
         tmpdir: () => 'C:\\Windows\\Temp',
       },
       path: win32,
-      '../dist/esm/platform.js': 'win32',
-      '../dist/esm/fs.js': {
+      '../src/fs.js': {
         statSync: tempDirCheck,
         promises: {
           stat: async (path: string) => tempDirCheck(path),
         },
       },
     },
-  )) as typeof import('../dist/esm/default-tmp.js')
+  )) as typeof import('../src/default-tmp.js')
 
   const expect = {
     'c:\\some\\path': 'C:\\Windows\\Temp',

@@ -7,6 +7,11 @@ export const RATE = 1.2
 export const MAXRETRIES = 10
 export const codes = new Set(['EMFILE', 'ENFILE', 'EBUSY'])
 
+const matchError = (er: unknown, path: string) => {
+  const fer = er as NodeJS.ErrnoException
+  return fer?.path === path && fer?.code && codes.has(fer.code)
+}
+
 export const retryBusy = (fn: (path: string) => Promise<any>) => {
   const method = async (
     path: string,
@@ -22,8 +27,7 @@ export const retryBusy = (fn: (path: string) => Promise<any>) => {
       try {
         return await fn(path)
       } catch (er) {
-        const fer = er as NodeJS.ErrnoException
-        if (fer?.path === path && fer?.code && codes.has(fer.code)) {
+        if (matchError(er, path)) {
           backoff = Math.ceil(backoff * rate)
           total = backoff + total
           if (total < mbo) {
@@ -55,13 +59,7 @@ export const retryBusySync = (fn: (path: string) => any) => {
       try {
         return fn(path)
       } catch (er) {
-        const fer = er as NodeJS.ErrnoException
-        if (
-          fer?.path === path &&
-          fer?.code &&
-          codes.has(fer.code) &&
-          retries < max
-        ) {
+        if (matchError(er, path) && retries < max) {
           retries++
           continue
         }

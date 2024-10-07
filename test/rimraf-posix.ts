@@ -1,19 +1,9 @@
-// have to do this *before* loading tap, or else the fact that we
-// load rimraf-posix.js for tap's fixture cleanup will cause it to
-// have some coverage, but not 100%, failing the coverage check.
-// if (process.platform === 'win32') {
-//   console.log('TAP version 13')
-//   console.log('1..0 # this test does not work reliably on windows')
-//   process.exit(0)
-// }
-
 import { Dirent, Stats, statSync } from 'fs'
 import * as PATH from 'path'
 import { basename, parse, relative } from 'path'
 import t from 'tap'
-import { rimrafPosix, rimrafPosixSync } from '../dist/esm/rimraf-posix.js'
-
-import * as fs from '../dist/esm/fs.js'
+import { rimrafPosix, rimrafPosixSync } from '../src/rimraf-posix.js'
+import * as fs from '../src/fs.js'
 
 const fixture = {
   a: 'a',
@@ -60,22 +50,20 @@ t.test('actually delete some stuff', t => {
 
 t.test('throw unlink errors', async t => {
   const { rimrafPosix, rimrafPosixSync } = (await t.mockImport(
-    '../dist/esm/rimraf-posix.js',
+    '../src/rimraf-posix.js',
     {
-      '../dist/esm/fs.js': {
-        ...fs,
+      '../src/fs.js': t.createMock(fs, {
         unlinkSync: () => {
           throw Object.assign(new Error('cannot unlink'), { code: 'FOO' })
         },
         promises: {
-          ...fs.promises,
           unlink: async () => {
             throw Object.assign(new Error('cannot unlink'), { code: 'FOO' })
           },
         },
-      },
+      }),
     },
-  )) as typeof import('../dist/esm/rimraf-posix.js')
+  )) as typeof import('../src/rimraf-posix.js')
   const path = t.testdir(fixture)
   t.throws(() => rimrafPosixSync(path, {}), { code: 'FOO' })
   t.rejects(rimrafPosix(path, {}), { code: 'FOO' })
@@ -83,22 +71,20 @@ t.test('throw unlink errors', async t => {
 
 t.test('throw rmdir errors', async t => {
   const { rimrafPosix, rimrafPosixSync } = (await t.mockImport(
-    '../dist/esm/rimraf-posix.js',
+    '../src/rimraf-posix.js',
     {
-      '../dist/esm/fs.js': {
-        ...fs,
+      '../src/fs.js': t.createMock(fs, {
         rmdirSync: () => {
           throw Object.assign(new Error('cannot rmdir'), { code: 'FOO' })
         },
         promises: {
-          ...fs.promises,
           rmdir: async () => {
             throw Object.assign(new Error('cannot rmdir'), { code: 'FOO' })
           },
         },
-      },
+      }),
     },
-  )) as typeof import('../dist/esm/rimraf-posix.js')
+  )) as typeof import('../src/rimraf-posix.js')
   const path = t.testdir(fixture)
   t.throws(() => rimrafPosixSync(path, {}), { code: 'FOO' })
   t.rejects(rimrafPosix(path, {}), { code: 'FOO' })
@@ -106,22 +92,27 @@ t.test('throw rmdir errors', async t => {
 
 t.test('throw unexpected readdir errors', async t => {
   const { rimrafPosix, rimrafPosixSync } = (await t.mockImport(
-    '../dist/esm/rimraf-posix.js',
+    '../src/rimraf-posix.js',
     {
-      '../dist/esm/fs.js': {
-        ...fs,
-        readdirSync: () => {
-          throw Object.assign(new Error('cannot readdir'), { code: 'FOO' })
+      '../src/readdir-or-error.js': await t.mockImport(
+        '../src/readdir-or-error.js',
+        {
+          '../src/fs.js': t.createMock(fs, {
+            readdirSync: () => {
+              throw Object.assign(new Error('cannot readdir'), { code: 'FOO' })
+            },
+            promises: {
+              readdir: async () => {
+                throw Object.assign(new Error('cannot readdir'), {
+                  code: 'FOO',
+                })
+              },
+            },
+          }),
         },
-        promises: {
-          ...fs.promises,
-          readdir: async () => {
-            throw Object.assign(new Error('cannot readdir'), { code: 'FOO' })
-          },
-        },
-      },
+      ),
     },
-  )) as typeof import('../dist/esm/rimraf-posix.js')
+  )) as typeof import('../src/rimraf-posix.js')
   const path = t.testdir(fixture)
   t.throws(() => rimrafPosixSync(path, {}), { code: 'FOO' })
   t.rejects(rimrafPosix(path, {}), { code: 'FOO' })
@@ -129,10 +120,9 @@ t.test('throw unexpected readdir errors', async t => {
 
 t.test('ignore ENOENTs from unlink/rmdir', async t => {
   const { rimrafPosix, rimrafPosixSync } = (await t.mockImport(
-    '../dist/esm/rimraf-posix.js',
+    '../src/rimraf-posix.js',
     {
-      '../dist/esm/fs.js': {
-        ...fs,
+      '../src/fs.js': t.createMock(fs, {
         // simulate a case where two rimrafs are happening in parallel,
         // so the deletion happens AFTER the readdir, but before ours.
         rmdirSync: (path: string) => {
@@ -144,7 +134,6 @@ t.test('ignore ENOENTs from unlink/rmdir', async t => {
           fs.unlinkSync(path)
         },
         promises: {
-          ...fs.promises,
           rmdir: async (path: string) => {
             fs.rmdirSync(path)
             return fs.promises.rmdir(path)
@@ -154,9 +143,9 @@ t.test('ignore ENOENTs from unlink/rmdir', async t => {
             return fs.promises.unlink(path)
           },
         },
-      },
+      }),
     },
-  )) as typeof import('../dist/esm/rimraf-posix.js')
+  )) as typeof import('../src/rimraf-posix.js')
   const { statSync } = fs
   t.test('sync', t => {
     const path = t.testdir(fixture)
@@ -176,10 +165,9 @@ t.test('ignore ENOENTs from unlink/rmdir', async t => {
 t.test('rimraffing root, do not actually rmdir root', async t => {
   let ROOT: undefined | string = undefined
   const { rimrafPosix, rimrafPosixSync } = (await t.mockImport(
-    '../dist/esm/rimraf-posix.js',
+    '../src/rimraf-posix.js',
     {
-      path: {
-        ...PATH,
+      path: t.createMock(PATH, {
         parse: (path: string) => {
           const p = parse(path)
           if (path === ROOT) {
@@ -187,9 +175,9 @@ t.test('rimraffing root, do not actually rmdir root', async t => {
           }
           return p
         },
-      },
+      }),
     },
-  )) as typeof import('../dist/esm/rimraf-posix.js')
+  )) as typeof import('../src/rimraf-posix.js')
   t.test('async', async t => {
     ROOT = t.testdir(fixture)
     await rimrafPosix(ROOT, { preserveRoot: false })

@@ -1,7 +1,6 @@
 import { parse, resolve } from 'path'
 import { inspect } from 'util'
 import { RimrafAsyncOptions } from './index.js'
-import platform from './platform.js'
 
 const pathArg = (path: string, opt: RimrafAsyncOptions = {}) => {
   const type = typeof path
@@ -39,7 +38,7 @@ const pathArg = (path: string, opt: RimrafAsyncOptions = {}) => {
     })
   }
 
-  if (platform === 'win32') {
+  if (process.platform === 'win32') {
     const badWinChars = /[*|"<>?:]/
     const { root } = parse(path)
     if (badWinChars.test(path.substring(root.length))) {

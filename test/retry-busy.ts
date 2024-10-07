@@ -5,7 +5,7 @@ import {
   RATE,
   retryBusy,
   retryBusySync,
-} from '../dist/esm/retry-busy.js'
+} from '../src/retry-busy.js'
 
 import t from 'tap'
 

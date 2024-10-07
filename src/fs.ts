@@ -1,6 +1,7 @@
 // promisify ourselves, because older nodes don't have fs.promises
 
 import fs, { Dirent } from 'fs'
+import { readdirSync as rdSync } from 'fs'
 
 // sync ones just take the sync version from node
 export {
@@ -14,7 +15,6 @@ export {
   unlinkSync,
 } from 'fs'
 
-import { readdirSync as rdSync } from 'fs'
 export const readdirSync = (path: fs.PathLike): Dirent[] =>
   rdSync(path, { withFileTypes: true })
 

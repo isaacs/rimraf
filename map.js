@@ -1,1 +1,1 @@
-module.exports = test => test.replace(/^test/, 'lib')
+export default test => test.replace(/^test/, 'src')

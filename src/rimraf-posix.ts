@@ -5,38 +5,26 @@
 // SUPER weird breakage happens as a result.
 
 import { lstatSync, promises, rmdirSync, unlinkSync } from './fs.js'
-const { lstat, rmdir, unlink } = promises
-
 import { parse, resolve } from 'path'
-
 import { readdirOrError, readdirOrErrorSync } from './readdir-or-error.js'
-
 import { Dirent, Stats } from 'fs'
 import { RimrafAsyncOptions, RimrafSyncOptions } from './index.js'
 import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'
+const { lstat, rmdir, unlink } = promises
 
 export const rimrafPosix = async (path: string, opt: RimrafAsyncOptions) => {
-  if (opt?.signal?.aborted) {
-    throw opt.signal.reason
-  }
-  try {
-    return await rimrafPosixDir(path, opt, await lstat(path))
-  } catch (er) {
-    if ((er as NodeJS.ErrnoException)?.code === 'ENOENT') return true
-    throw er
-  }
+  opt?.signal?.throwIfAborted()
+  const stat = await ignoreENOENT(lstat(path))
+  return (stat && (await ignoreENOENT(rimrafPosixDir(path, opt, stat)))) ?? true
 }
 
 export const rimrafPosixSync = (path: string, opt: RimrafSyncOptions) => {
-  if (opt?.signal?.aborted) {
-    throw opt.signal.reason
-  }
-  try {
-    return rimrafPosixDirSync(path, opt, lstatSync(path))
-  } catch (er) {
-    if ((er as NodeJS.ErrnoException)?.code === 'ENOENT') return true
-    throw er
-  }
+  opt?.signal?.throwIfAborted()
+  const stat = ignoreENOENTSync(() => lstatSync(path))
+  return (
+    (stat && ignoreENOENTSync(() => rimrafPosixDirSync(path, opt, stat))) ??
+    true
+  )
 }
 
 const rimrafPosixDir = async (
@@ -44,9 +32,7 @@ const rimrafPosixDir = async (
   opt: RimrafAsyncOptions,
   ent: Dirent | Stats,
 ): Promise<boolean> => {
-  if (opt?.signal?.aborted) {
-    throw opt.signal.reason
-  }
+  opt?.signal?.throwIfAborted()
   const entries = ent.isDirectory() ? await readdirOrError(path) : null
   if (!Array.isArray(entries)) {
     // this can only happen if lstat/readdir lied, or if the dir was
@@ -98,9 +84,7 @@ const rimrafPosixDirSync = (
   opt: RimrafSyncOptions,
   ent: Dirent | Stats,
 ): boolean => {
-  if (opt?.signal?.aborted) {
-    throw opt.signal.reason
-  }
+  opt?.signal?.throwIfAborted()
   const entries = ent.isDirectory() ? readdirOrErrorSync(path) : null
   if (!Array.isArray(entries)) {
     // this can only happen if lstat/readdir lied, or if the dir was

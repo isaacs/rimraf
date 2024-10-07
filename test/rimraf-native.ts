@@ -14,11 +14,11 @@ const fs = {
 }
 
 const { rimrafNative, rimrafNativeSync } = (await t.mockImport(
-  '../dist/esm/rimraf-native.js',
+  '../src/rimraf-native.js',
   {
-    '../dist/esm/fs.js': fs,
+    '../src/fs.js': fs,
   },
-)) as typeof import('../dist/esm/rimraf-native.js')
+)) as typeof import('../src/rimraf-native.js')
 
 t.test('calls the right node function', async t => {
   await rimrafNative('path', { x: 'y' } as unknown as RimrafAsyncOptions)

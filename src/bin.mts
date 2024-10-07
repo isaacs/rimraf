@@ -127,10 +127,6 @@ const main = async (...args: string[]) => {
     return true
   }
 
-  if (process.env.__RIMRAF_TESTING_BIN_FAIL__ === '1') {
-    throw new Error('simulated rimraf failure')
-  }
-
   const opt: RimrafAsyncOptions = {}
   const paths: string[] = []
   let dashdash = false

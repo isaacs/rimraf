@@ -1,5 +1,5 @@
 import t from 'tap'
-import { optArg as oa, optArgSync as oas } from '../dist/esm/opt-arg.js'
+import { optArg as oa, optArgSync as oas } from '../src/opt-arg.js'
 import { RimrafAsyncOptions, RimrafSyncOptions } from '../src/index.js'
 
 const asyncOpt = { a: 1 } as unknown as RimrafAsyncOptions

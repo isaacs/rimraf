@@ -1,24 +1,42 @@
-export const ignoreENOENT = async <T, U = undefined>(
-  p: Promise<T>,
-  def?: U,
-): Promise<T | U> =>
+import { errorCode } from './error.js'
+
+export const ignoreENOENT = async <T>(p: Promise<T>) =>
   p.catch(er => {
-    if (er.code !== 'ENOENT') {
-      throw er
+    if (errorCode(er) === 'ENOENT') {
+      return
     }
-    return def as U
+    throw er
   })
 
-export const ignoreENOENTSync = <T, U = undefined>(
-  fn: () => T,
-  def?: U,
-): T | U => {
+export const didIgnoreENOENT = async (p: Promise<unknown>, rethrow?: unknown) =>
+  p
+    .then(() => false)
+    .catch(er => {
+      if (errorCode(er) === 'ENOENT') {
+        return true
+      }
+      throw rethrow ?? er
+    })
+
+export const ignoreENOENTSync = <T>(fn: () => T) => {
   try {
     return fn()
   } catch (er) {
-    if ((er as NodeJS.ErrnoException)?.code !== 'ENOENT') {
-      throw er
+    if (errorCode(er) === 'ENOENT') {
+      return
     }
-    return def as U
+    throw er
+  }
+}
+
+export const didIgnoreENOENTSync = (fn: () => unknown, rethrow?: unknown) => {
+  try {
+    fn()
+    return false
+  } catch (er) {
+    if (errorCode(er) === 'ENOENT') {
+      return true
+    }
+    throw rethrow ?? er
   }
 }

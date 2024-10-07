@@ -1,52 +1,40 @@
 import { spawn, spawnSync } from 'child_process'
 import { readdirSync, statSync } from 'fs'
 import t from 'tap'
-import { fileURLToPath } from 'url'
 import { RimrafOptions } from '../src/index.js'
+import { resolve } from 'path'
 
-const binModule = fileURLToPath(new URL('../dist/esm/bin.mjs', import.meta.url))
+const binModule = resolve(import.meta.dirname, '../dist/esm/bin.mjs')
 
 t.test('basic arg parsing stuff', async t => {
-  const LOGS: any[] = []
-  const ERRS: any[] = []
-  const { log: consoleLog, error: consoleError } = console
-  process.env.__TESTING_RIMRAF_BIN__ = '1'
-  t.teardown(() => {
-    console.log = consoleLog
-    console.error = consoleError
-    delete process.env.__TESTING_RIMRAF_BIN__
-  })
-  console.log = (...msg) => LOGS.push(msg)
-  console.error = (...msg) => ERRS.push(msg)
-
   const CALLS: any[] = []
-  const rimraf = Object.assign(
-    async (path: string, opt: RimrafOptions) =>
-      CALLS.push(['rimraf', path, opt]),
-    {
-      native: async (path: string, opt: RimrafOptions) =>
-        CALLS.push(['native', path, opt]),
-      manual: async (path: string, opt: RimrafOptions) =>
-        CALLS.push(['manual', path, opt]),
-      posix: async (path: string, opt: RimrafOptions) =>
-        CALLS.push(['posix', path, opt]),
-      windows: async (path: string, opt: RimrafOptions) =>
-        CALLS.push(['windows', path, opt]),
-      moveRemove: async (path: string, opt: RimrafOptions) =>
-        CALLS.push(['move-remove', path, opt]),
-    },
-  )
+  const impls = new Map([
+    ['rimraf', 'rimraf'],
+    ['native', 'native'],
+    ['manual', 'manual'],
+    ['posix', 'posix'],
+    ['windows', 'windows'],
+    ['moveRemove', 'move-remove'],
+  ])
 
-  const { default: bin } = await t.mockImport('../dist/esm/bin.mjs', {
-    '../dist/esm/index.js': {
-      rimraf,
-      ...rimraf,
+  const { rimraf, ...mocks } = [...impls.entries()].reduce<
+    Record<string, (path: string, opt: RimrafOptions) => Promise<number>>
+  >((acc, [k, v]) => {
+    acc[k] = async (path, opt) => CALLS.push([v, path, opt])
+    return acc
+  }, {})
+
+  t.intercept(process, 'env', {
+    value: { ...process.env, __TESTING_RIMRAF_BIN__: '1' },
+  })
+  const { default: bin } = await t.mockImport('../src/bin.mjs', {
+    '../src/index.js': {
+      rimraf: Object.assign(rimraf!, mocks),
+      ...mocks,
     },
   })
 
   t.afterEach(() => {
-    LOGS.length = 0
-    ERRS.length = 0
     CALLS.length = 0
   })
 
@@ -54,9 +42,11 @@ t.test('basic arg parsing stuff', async t => {
     const cases = [['--version'], ['a', 'b', '--version', 'c']]
     for (const c of cases) {
       t.test(c.join(' '), async t => {
+        const logs = t.capture(console, 'log').args
+        const errs = t.capture(console, 'error').args
         t.equal(await bin(...c), 0)
-        t.same(LOGS, [[bin.version]])
-        t.same(ERRS, [])
+        t.same(logs(), [[bin.version]])
+        t.same(errs(), [])
         t.same(CALLS, [])
       })
     }
@@ -67,9 +57,11 @@ t.test('basic arg parsing stuff', async t => {
     const cases = [['-h'], ['--help'], ['a', 'b', '--help', 'c']]
     for (const c of cases) {
       t.test(c.join(' '), async t => {
+        const logs = t.capture(console, 'log').args
+        const errs = t.capture(console, 'error').args
         t.equal(await bin(...c), 0)
-        t.same(LOGS, [[bin.help]])
-        t.same(ERRS, [])
+        t.same(logs(), [[bin.help]])
+        t.same(errs(), [])
         t.same(CALLS, [])
       })
     }
@@ -77,21 +69,25 @@ t.test('basic arg parsing stuff', async t => {
   })
 
   t.test('no paths', async t => {
+    const logs = t.capture(console, 'log').args
+    const errs = t.capture(console, 'error').args
     t.equal(await bin(), 1)
-    t.same(LOGS, [])
-    t.same(ERRS, [
+    t.same(logs(), [])
+    t.same(errs(), [
       ['rimraf: must provide a path to remove'],
       ['run `rimraf --help` for usage information'],
     ])
   })
 
   t.test('unnecessary -rf', async t => {
+    const logs = t.capture(console, 'log').args
+    const errs = t.capture(console, 'error').args
     t.equal(await bin('-rf', 'foo'), 0)
     t.equal(await bin('-fr', 'foo'), 0)
     t.equal(await bin('foo', '-rf'), 0)
     t.equal(await bin('foo', '-fr'), 0)
-    t.same(LOGS, [])
-    t.same(ERRS, [])
+    t.same(logs(), [])
+    t.same(errs(), [])
     t.same(CALLS, [
       ['rimraf', ['foo'], {}],
       ['rimraf', ['foo'], {}],
@@ -101,56 +97,49 @@ t.test('basic arg parsing stuff', async t => {
   })
 
   t.test('verbose', async t => {
+    const logs = t.capture(console, 'log').args
+    const errs = t.capture(console, 'error').args
     t.equal(await bin('-v', 'foo'), 0)
     t.equal(await bin('--verbose', 'foo'), 0)
     t.equal(await bin('-v', '-V', '--verbose', 'foo'), 0)
-    t.same(LOGS, [])
-    t.same(ERRS, [])
-    const { log } = console
-    t.teardown(() => {
-      console.log = log
-    })
-    const logs: any[] = []
-    console.log = s => logs.push(s)
+    t.same(logs(), [])
+    t.same(errs(), [])
     for (const c of CALLS) {
       t.equal(c[0], 'rimraf')
       t.same(c[1], ['foo'])
       t.type(c[2].filter, 'function')
       t.equal(c[2].filter('x'), true)
-      t.same(logs, ['x'])
-      logs.length = 0
+      t.same(logs(), [['x']])
     }
   })
 
   t.test('silent', async t => {
+    const logs = t.capture(console, 'log').args
+    const errs = t.capture(console, 'error').args
     t.equal(await bin('-V', 'foo'), 0)
     t.equal(await bin('--no-verbose', 'foo'), 0)
     t.equal(await bin('-V', '-v', '--no-verbose', 'foo'), 0)
-    t.same(LOGS, [])
-    t.same(ERRS, [])
-    const { log } = console
-    t.teardown(() => {
-      console.log = log
-    })
-    const logs: any[] = []
-    console.log = s => logs.push(s)
+    t.same(logs(), [])
+    t.same(errs(), [])
     for (const c of CALLS) {
       t.equal(c[0], 'rimraf')
       t.same(c[1], ['foo'])
       t.type(c[2].filter, 'undefined')
-      t.same(logs, [])
+      t.same(logs(), [])
     }
   })
 
   t.test('glob true', async t => {
+    const logs = t.capture(console, 'log').args
+    const errs = t.capture(console, 'error').args
     t.equal(await bin('-g', 'foo'), 0)
     t.equal(await bin('--glob', 'foo'), 0)
     t.equal(await bin('-G', '-g', 'foo'), 0)
     t.equal(await bin('-g', '-G', 'foo'), 0)
     t.equal(await bin('-G', 'foo'), 0)
     t.equal(await bin('--no-glob', 'foo'), 0)
-    t.same(LOGS, [])
-    t.same(ERRS, [])
+    t.same(logs(), [])
+    t.same(errs(), [])
     t.same(CALLS, [
       ['rimraf', ['foo'], { glob: true }],
       ['rimraf', ['foo'], { glob: true }],
@@ -162,72 +151,92 @@ t.test('basic arg parsing stuff', async t => {
   })
 
   t.test('dashdash', async t => {
+    const logs = t.capture(console, 'log').args
+    const errs = t.capture(console, 'error').args
     t.equal(await bin('--', '-h'), 0)
-    t.same(LOGS, [])
-    t.same(ERRS, [])
+    t.same(logs(), [])
+    t.same(errs(), [])
     t.same(CALLS, [['rimraf', ['-h'], {}]])
   })
 
   t.test('no preserve root', async t => {
+    const logs = t.capture(console, 'log').args
+    const errs = t.capture(console, 'error').args
     t.equal(await bin('--no-preserve-root', 'foo'), 0)
-    t.same(LOGS, [])
-    t.same(ERRS, [])
+    t.same(logs(), [])
+    t.same(errs(), [])
     t.same(CALLS, [['rimraf', ['foo'], { preserveRoot: false }]])
   })
   t.test('yes preserve root', async t => {
+    const logs = t.capture(console, 'log').args
+    const errs = t.capture(console, 'error').args
     t.equal(await bin('--preserve-root', 'foo'), 0)
-    t.same(LOGS, [])
-    t.same(ERRS, [])
+    t.same(logs(), [])
+    t.same(errs(), [])
     t.same(CALLS, [['rimraf', ['foo'], { preserveRoot: true }]])
   })
   t.test('yes preserve root, remove root', async t => {
+    const logs = t.capture(console, 'log').args
+    const errs = t.capture(console, 'error').args
     t.equal(await bin('/'), 1)
-    t.same(LOGS, [])
-    t.same(ERRS, [
+    t.same(logs(), [])
+    t.same(errs(), [
       [`rimraf: it is dangerous to operate recursively on '/'`],
       ['use --no-preserve-root to override this failsafe'],
     ])
     t.same(CALLS, [])
   })
   t.test('no preserve root, remove root', async t => {
+    const logs = t.capture(console, 'log').args
+    const errs = t.capture(console, 'error').args
     t.equal(await bin('/', '--no-preserve-root'), 0)
-    t.same(LOGS, [])
-    t.same(ERRS, [])
+    t.same(logs(), [])
+    t.same(errs(), [])
     t.same(CALLS, [['rimraf', ['/'], { preserveRoot: false }]])
   })
 
   t.test('--tmp=<path>', async t => {
+    const logs = t.capture(console, 'log').args
+    const errs = t.capture(console, 'error').args
     t.equal(await bin('--tmp=some-path', 'foo'), 0)
-    t.same(LOGS, [])
-    t.same(ERRS, [])
+    t.same(logs(), [])
+    t.same(errs(), [])
     t.same(CALLS, [['rimraf', ['foo'], { tmp: 'some-path' }]])
   })
 
   t.test('--tmp=<path>', async t => {
+    const logs = t.capture(console, 'log').args
+    const errs = t.capture(console, 'error').args
     t.equal(await bin('--backoff=1.3', 'foo'), 0)
-    t.same(LOGS, [])
-    t.same(ERRS, [])
+    t.same(logs(), [])
+    t.same(errs(), [])
     t.same(CALLS, [['rimraf', ['foo'], { backoff: 1.3 }]])
   })
 
   t.test('--max-retries=n', async t => {
+    const logs = t.capture(console, 'log').args
+    const errs = t.capture(console, 'error').args
     t.equal(await bin('--max-retries=100', 'foo'), 0)
-    t.same(LOGS, [])
-    t.same(ERRS, [])
+    t.same(logs(), [])
+    t.same(errs(), [])
     t.same(CALLS, [['rimraf', ['foo'], { maxRetries: 100 }]])
   })
 
   t.test('--retry-delay=n', async t => {
+    const logs = t.capture(console, 'log').args
+    const errs = t.capture(console, 'error').args
     t.equal(await bin('--retry-delay=100', 'foo'), 0)
-    t.same(LOGS, [])
-    t.same(ERRS, [])
+    t.same(logs(), [])
+    t.same(errs(), [])
     t.same(CALLS, [['rimraf', ['foo'], { retryDelay: 100 }]])
   })
 
   t.test('--uknown-option', async t => {
+    const logs = t.capture(console, 'log').args
+    const errs = t.capture(console, 'error').args
     t.equal(await bin('--unknown-option=100', 'foo'), 1)
-    t.same(LOGS, [])
-    t.same(ERRS, [
+    t.same(logs(), [])
+    t.same(errs(), [
       ['unknown option: --unknown-option=100'],
       ['run `rimraf --help` for usage information'],
     ])
@@ -235,9 +244,11 @@ t.test('basic arg parsing stuff', async t => {
   })
 
   t.test('--impl=asdf', async t => {
+    const logs = t.capture(console, 'log').args
+    const errs = t.capture(console, 'error').args
     t.equal(await bin('--impl=asdf', 'foo'), 1)
-    t.same(LOGS, [])
-    t.same(ERRS, [
+    t.same(logs(), [])
+    t.same(errs(), [
       ['unknown implementation: asdf'],
       ['run `rimraf --help` for usage information'],
     ])
@@ -245,38 +256,32 @@ t.test('basic arg parsing stuff', async t => {
   })
 
   t.test('native cannot do filters', async t => {
+    const logs = t.capture(console, 'log').args
+    const errs = t.capture(console, 'error').args
     t.equal(await bin('--impl=native', '-v', 'foo'), 1)
-    t.same(ERRS, [
+    t.same(errs(), [
       ['native implementation does not support -v or -i'],
       ['run `rimraf --help` for usage information'],
     ])
-    ERRS.length = 0
     t.equal(await bin('--impl=native', '-i', 'foo'), 1)
-    t.same(ERRS, [
+    t.same(errs(), [
       ['native implementation does not support -v or -i'],
       ['run `rimraf --help` for usage information'],
     ])
-    ERRS.length = 0
     t.same(CALLS, [])
-    t.same(LOGS, [])
+    t.same(logs(), [])
     // ok to turn it on and back off though
     t.equal(await bin('--impl=native', '-i', '-I', 'foo'), 0)
     t.same(CALLS, [['native', ['foo'], {}]])
   })
 
-  const impls = [
-    'rimraf',
-    'native',
-    'manual',
-    'posix',
-    'windows',
-    'move-remove',
-  ]
-  for (const impl of impls) {
+  for (const impl of impls.values()) {
     t.test(`--impl=${impl}`, async t => {
+      const logs = t.capture(console, 'log').args
+      const errs = t.capture(console, 'error').args
       t.equal(await bin('foo', `--impl=${impl}`), 0)
-      t.same(LOGS, [])
-      t.same(ERRS, [])
+      t.same(logs(), [])
+      t.same(errs(), [])
       t.same(CALLS, [[impl, ['foo'], {}]])
     })
   }
@@ -308,16 +313,24 @@ t.test('print failure when impl throws', async t => {
       },
     },
   })
-
-  const res = spawnSync(process.execPath, [binModule, path], {
-    env: {
-      ...process.env,
-      __RIMRAF_TESTING_BIN_FAIL__: '1',
+  let exited = false
+  const err = new Error('simulated rimraf failure')
+  const logs = t.capture(console, 'log').args
+  const errs = t.capture(console, 'error').args
+  t.intercept(process, 'argv', { value: [process.execPath, binModule, path] })
+  t.intercept(process, 'exit', { value: () => (exited = true) })
+  await t.mockImport('../src/bin.mjs', {
+    '../src/index.js': {
+      rimraf: async () => {
+        throw err
+      },
     },
   })
+
+  t.strictSame(logs(), [])
+  t.strictSame(errs(), [[err]])
+  t.ok(exited)
   t.equal(statSync(path).isDirectory(), true)
-  t.equal(res.status, 1)
-  t.match(res.stderr.toString(), /^Error: simulated rimraf failure/)
 })
 
 t.test('interactive deletes', t => {
@@ -334,15 +347,13 @@ t.test('interactive deletes', t => {
   }
   const verboseOpt = ['-v', '-V']
 
-  // t.jobs = scripts.length * verboseOpt.length
-
   const node = process.execPath
 
   const leftovers = (d: string) => {
     try {
       readdirSync(d)
       return true
-    } catch (_) {
+    } catch {
       return false
     }
   }
@@ -367,7 +378,6 @@ t.test('interactive deletes', t => {
           child.stderr.setEncoding('utf8')
           let last = ''
           child.stdout.on('data', async (c: string) => {
-            // await new Promise(r => setTimeout(r, 50))
             out.push(c.trim())
             const s = script.shift()
             if (s !== undefined) {

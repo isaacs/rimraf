@@ -1,53 +1,44 @@
+import { errorCode } from './error.js'
 import { chmodSync, promises } from './fs.js'
+import {
+  ignoreENOENT,
+  didIgnoreENOENT,
+  ignoreENOENTSync,
+  didIgnoreENOENTSync,
+} from './ignore-enoent.js'
 const { chmod } = promises
 
 export const fixEPERM =
-  <T>(fn: (path: string) => Promise<T>) =>
+  (fn: (path: string) => Promise<unknown>) =>
   async (path: string): Promise<void> => {
     try {
-      return void (await fn(path))
+      await ignoreENOENT(fn(path))
+      return
     } catch (er) {
-      const fer = er as NodeJS.ErrnoException
-      if (fer?.code === 'ENOENT') {
-        return
-      }
-      if (fer?.code === 'EPERM') {
-        try {
-          await chmod(path, 0o666)
-        } catch (er2) {
-          const fer2 = er2 as NodeJS.ErrnoException
-          if (fer2?.code === 'ENOENT') {
-            return
-          }
-          throw er
+      if (errorCode(er) === 'EPERM') {
+        if (await didIgnoreENOENT(chmod(path, 0o666), er)) {
+          return
         }
-        return void (await fn(path))
+        await fn(path)
+        return
       }
       throw er
     }
   }
 
 export const fixEPERMSync =
-  <T>(fn: (path: string) => T) =>
+  (fn: (path: string) => unknown) =>
   (path: string): void => {
     try {
-      return void fn(path)
+      ignoreENOENTSync(() => fn(path))
+      return
     } catch (er) {
-      const fer = er as NodeJS.ErrnoException
-      if (fer?.code === 'ENOENT') {
-        return
-      }
-      if (fer?.code === 'EPERM') {
-        try {
-          chmodSync(path, 0o666)
-        } catch (er2) {
-          const fer2 = er2 as NodeJS.ErrnoException
-          if (fer2?.code === 'ENOENT') {
-            return
-          }
-          throw er
+      if (errorCode(er) === 'EPERM') {
+        if (didIgnoreENOENTSync(() => chmodSync(path, 0o666), er)) {
+          return
         }
-        return void fn(path)
+        fn(path)
+        return
       }
       throw er
     }

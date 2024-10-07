@@ -2,8 +2,8 @@ import { Dirent, PathLike, Stats, statSync } from 'fs'
 import * as PATH from 'path'
 import { basename, parse, relative } from 'path'
 import t from 'tap'
-import * as FS from '../dist/esm/fs.js'
-import { rimrafWindows, rimrafWindowsSync } from '../dist/esm/rimraf-windows.js'
+import * as FS from '../src/fs.js'
+import { rimrafWindows, rimrafWindowsSync } from '../src/rimraf-windows.js'
 
 t.formatSnapshot = (calls: string[][]) =>
   Array.isArray(calls) ?
@@ -67,16 +67,14 @@ t.test('actually delete some stuff', async t => {
   })
 
   const { rimrafPosix, rimrafPosixSync } = (await t.mockImport(
-    '../dist/esm/rimraf-posix.js',
-    {
-      '../dist/esm/fs.js': fsMock,
-    },
-  )) as typeof import('../dist/esm/rimraf-posix.js')
+    '../src/rimraf-posix.js',
+    { '../src/fs.js': fsMock },
+  )) as typeof import('../src/rimraf-posix.js')
 
   const { rimrafWindows, rimrafWindowsSync } = (await t.mockImport(
-    '../dist/esm/rimraf-windows.js',
-    { '../dist/esm/fs.js': fsMock },
-  )) as typeof import('../dist/esm/rimraf-windows.js')
+    '../src/rimraf-windows.js',
+    { '../src/fs.js': fsMock },
+  )) as typeof import('../src/rimraf-windows.js')
 
   t.test('posix does not work here', t => {
     t.test('sync', t => {
@@ -118,10 +116,9 @@ t.test('throw unlink errors', async t => {
   let threwAsync = false
   let threwSync = false
   const { rimrafWindows, rimrafWindowsSync } = (await t.mockImport(
-    '../dist/esm/rimraf-windows.js',
+    '../src/rimraf-windows.js',
     {
-      '../dist/esm/fs.js': {
-        ...FS,
+      '../src/fs.js': t.createMock(FS, {
         unlinkSync: (path: string) => {
           if (threwSync) {
             return FS.unlinkSync(path)
@@ -130,7 +127,6 @@ t.test('throw unlink errors', async t => {
           throw Object.assign(new Error('cannot unlink'), { code: 'FOO' })
         },
         promises: {
-          ...FS.promises,
           unlink: async (path: string) => {
             if (threwAsync) {
               return FS.promises.unlink(path)
@@ -139,9 +135,9 @@ t.test('throw unlink errors', async t => {
             throw Object.assign(new Error('cannot unlink'), { code: 'FOO' })
           },
         },
-      },
+      }),
     },
-  )) as typeof import('../dist/esm/rimraf-windows.js')
+  )) as typeof import('../src/rimraf-windows.js')
   // nest to clean up the mess
   t.test('sync', t => {
     const path = t.testdir({ test: fixture }) + '/test'
@@ -160,10 +156,9 @@ t.test('ignore ENOENT unlink errors', async t => {
   const threwAsync = false
   let threwSync = false
   const { rimrafWindows, rimrafWindowsSync } = (await t.mockImport(
-    '../dist/esm/rimraf-windows.js',
+    '../src/rimraf-windows.js',
     {
-      '../dist/esm/fs.js': {
-        ...FS,
+      '../src/fs.js': t.createMock(FS, {
         unlinkSync: (path: string) => {
           FS.unlinkSync(path)
           if (threwSync) {
@@ -173,7 +168,6 @@ t.test('ignore ENOENT unlink errors', async t => {
           FS.unlinkSync(path)
         },
         promises: {
-          ...FS.promises,
           unlink: async (path: string) => {
             FS.unlinkSync(path)
             if (threwAsync) {
@@ -183,9 +177,9 @@ t.test('ignore ENOENT unlink errors', async t => {
             FS.unlinkSync(path)
           },
         },
-      },
+      }),
     },
-  )) as typeof import('../dist/esm/rimraf-windows.js')
+  )) as typeof import('../src/rimraf-windows.js')
   // nest to clean up the mess
   t.test('sync', t => {
     const path = t.testdir({ test: fixture }) + '/test'
@@ -202,9 +196,9 @@ t.test('ignore ENOENT unlink errors', async t => {
 
 t.test('throw rmdir errors', async t => {
   const { rimrafWindows, rimrafWindowsSync } = (await t.mockImport(
-    '../dist/esm/rimraf-windows.js',
+    '../src/rimraf-windows.js',
     {
-      '../dist/esm/fs.js': {
+      '../src/fs.js': {
         ...FS,
         rmdirSync: () => {
           throw Object.assign(new Error('cannot rmdir'), { code: 'FOO' })
@@ -217,7 +211,7 @@ t.test('throw rmdir errors', async t => {
         },
       },
     },
-  )) as typeof import('../dist/esm/rimraf-windows.js')
+  )) as typeof import('../src/rimraf-windows.js')
   t.test('sync', t => {
     // nest it so that we clean up the mess
     const path = t.testdir({ test: fixture }) + '/test'
@@ -235,22 +229,27 @@ t.test('throw rmdir errors', async t => {
 
 t.test('throw unexpected readdir errors', async t => {
   const { rimrafWindows, rimrafWindowsSync } = (await t.mockImport(
-    '../dist/esm/rimraf-windows.js',
+    '../src/rimraf-windows.js',
     {
-      '../dist/esm/fs.js': {
-        ...FS,
-        readdirSync: () => {
-          throw Object.assign(new Error('cannot readdir'), { code: 'FOO' })
+      '../src/readdir-or-error.js': await t.mockImport(
+        '../src/readdir-or-error.js',
+        {
+          '../src/fs.js': t.createMock(FS, {
+            readdirSync: () => {
+              throw Object.assign(new Error('cannot readdir'), { code: 'FOO' })
+            },
+            promises: {
+              readdir: async () => {
+                throw Object.assign(new Error('cannot readdir'), {
+                  code: 'FOO',
+                })
+              },
+            },
+          }),
         },
-        promises: {
-          ...FS.promises,
-          readdir: async () => {
-            throw Object.assign(new Error('cannot readdir'), { code: 'FOO' })
-          },
-        },
-      },
+      ),
     },
-  )) as typeof import('../dist/esm/rimraf-windows.js')
+  )) as typeof import('../src/rimraf-windows.js')
   t.test('sync', t => {
     // nest to clean up the mess
     const path = t.testdir({ test: fixture }) + '/test'
@@ -271,15 +270,25 @@ t.test('handle EPERMs on unlink by trying to chmod 0o666', async t => {
   let threwAsync = false
   let threwSync = false
   const { rimrafWindows, rimrafWindowsSync } = (await t.mockImport(
-    '../dist/esm/rimraf-windows.js',
+    '../src/rimraf-windows.js',
     {
-      '../dist/esm/fs.js': {
-        ...FS,
-        chmodSync: (...args: any[]) => {
-          CHMODS.push(['chmodSync', ...args])
-          //@ts-ignore
-          return FS.chmodSync(...args)
-        },
+      '../src/fix-eperm.js': await t.mockImport('../src/fix-eperm.js', {
+        '../src/fs.js': t.createMock(FS, {
+          chmodSync: (...args: any[]) => {
+            CHMODS.push(['chmodSync', ...args])
+            //@ts-ignore
+            return FS.chmodSync(...args)
+          },
+          promises: {
+            chmod: async (...args: any[]) => {
+              CHMODS.push(['chmod', ...args])
+              //@ts-ignore
+              return FS.promises.chmod(...args)
+            },
+          },
+        }),
+      }),
+      '../src/fs.js': t.createMock(FS, {
         unlinkSync: (path: string) => {
           if (threwSync) {
             return FS.unlinkSync(path)
@@ -288,7 +297,6 @@ t.test('handle EPERMs on unlink by trying to chmod 0o666', async t => {
           throw Object.assign(new Error('cannot unlink'), { code: 'EPERM' })
         },
         promises: {
-          ...FS.promises,
           unlink: async (path: String) => {
             if (threwAsync) {
               return FS.promises.unlink(path as PathLike)
@@ -296,15 +304,10 @@ t.test('handle EPERMs on unlink by trying to chmod 0o666', async t => {
             threwAsync = true
             throw Object.assign(new Error('cannot unlink'), { code: 'EPERM' })
           },
-          chmod: async (...args: any[]) => {
-            CHMODS.push(['chmod', ...args])
-            //@ts-ignore
-            return FS.promises.chmod(...args)
-          },
         },
-      },
+      }),
     },
-  )) as typeof import('../dist/esm/rimraf-windows.js')
+  )) as typeof import('../src/rimraf-windows.js')
 
   t.afterEach(() => (CHMODS.length = 0))
 
@@ -330,18 +333,31 @@ t.test('handle EPERMs, chmod returns ENOENT', async t => {
   let threwAsync = false
   let threwSync = false
   const { rimrafWindows, rimrafWindowsSync } = (await t.mockImport(
-    '../dist/esm/rimraf-windows.js',
+    '../src/rimraf-windows.js',
     {
-      '../dist/esm/fs.js': {
-        ...FS,
-        chmodSync: (...args: any[]) => {
-          CHMODS.push(['chmodSync', ...args])
-          try {
-            FS.unlinkSync(args[0])
-          } catch (_) {}
-          //@ts-ignore
-          return FS.chmodSync(...args)
-        },
+      '../src/fix-eperm.js': await t.mockImport('../src/fix-eperm.js', {
+        '../src/fs.js': t.createMock(FS, {
+          chmodSync: (...args: any[]) => {
+            CHMODS.push(['chmodSync', ...args])
+            try {
+              FS.unlinkSync(args[0])
+            } catch (_) {}
+            //@ts-ignore
+            return FS.chmodSync(...args)
+          },
+          promises: {
+            chmod: async (...args: any[]) => {
+              CHMODS.push(['chmod', ...args])
+              try {
+                FS.unlinkSync(args[0])
+              } catch (_) {}
+              //@ts-ignore
+              return FS.promises.chmod(...args)
+            },
+          },
+        }),
+      }),
+      '../src/fs.js': t.createMock(FS, {
         unlinkSync: (path: string) => {
           if (threwSync) {
             return FS.unlinkSync(path)
@@ -350,7 +366,6 @@ t.test('handle EPERMs, chmod returns ENOENT', async t => {
           throw Object.assign(new Error('cannot unlink'), { code: 'EPERM' })
         },
         promises: {
-          ...FS.promises,
           unlink: async (path: string) => {
             if (threwAsync) {
               return FS.promises.unlink(path)
@@ -358,18 +373,10 @@ t.test('handle EPERMs, chmod returns ENOENT', async t => {
             threwAsync = true
             throw Object.assign(new Error('cannot unlink'), { code: 'EPERM' })
           },
-          chmod: async (...args: any[]) => {
-            CHMODS.push(['chmod', ...args])
-            try {
-              FS.unlinkSync(args[0])
-            } catch (_) {}
-            //@ts-ignore
-            return FS.promises.chmod(...args)
-          },
         },
-      },
+      }),
     },
-  )) as typeof import('../dist/esm/rimraf-windows.js')
+  )) as typeof import('../src/rimraf-windows.js')
 
   t.afterEach(() => (CHMODS.length = 0))
 
@@ -395,17 +402,29 @@ t.test('handle EPERMs, chmod raises something other than ENOENT', async t => {
   let threwAsync = false
   let threwSync = false
   const { rimrafWindows, rimrafWindowsSync } = (await t.mockImport(
-    '../dist/esm/rimraf-windows.js',
+    '../src/rimraf-windows.js',
     {
-      '../dist/esm/fs.js': {
-        ...FS,
-        chmodSync: (...args: any[]) => {
-          CHMODS.push(['chmodSync', ...args])
-          try {
-            FS.unlinkSync(args[0])
-          } catch (_) {}
-          throw Object.assign(new Error('cannot chmod'), { code: 'FOO' })
-        },
+      '../src/fix-eperm.js': await t.mockImport('../src/fix-eperm.js', {
+        '../src/fs.js': t.createMock(FS, {
+          chmodSync: (...args: any[]) => {
+            CHMODS.push(['chmodSync', ...args])
+            try {
+              FS.unlinkSync(args[0])
+            } catch (_) {}
+            throw Object.assign(new Error('cannot chmod'), { code: 'FOO' })
+          },
+          promises: {
+            chmod: async (...args: any[]) => {
+              CHMODS.push(['chmod', ...args])
+              try {
+                FS.unlinkSync(args[0])
+              } catch (_) {}
+              throw Object.assign(new Error('cannot chmod'), { code: 'FOO' })
+            },
+          },
+        }),
+      }),
+      '../src/fs.js': t.createMock(FS, {
         unlinkSync: (path: string) => {
           if (threwSync) {
             return FS.unlinkSync(path)
@@ -414,7 +433,6 @@ t.test('handle EPERMs, chmod raises something other than ENOENT', async t => {
           throw Object.assign(new Error('cannot unlink'), { code: 'EPERM' })
         },
         promises: {
-          ...FS.promises,
           unlink: async (path: string) => {
             if (threwAsync) {
               return FS.promises.unlink(path)
@@ -422,17 +440,10 @@ t.test('handle EPERMs, chmod raises something other than ENOENT', async t => {
             threwAsync = true
             throw Object.assign(new Error('cannot unlink'), { code: 'EPERM' })
           },
-          chmod: async (...args: any[]) => {
-            CHMODS.push(['chmod', ...args])
-            try {
-              FS.unlinkSync(args[0])
-            } catch (_) {}
-            throw Object.assign(new Error('cannot chmod'), { code: 'FOO' })
-          },
         },
-      },
+      }),
     },
-  )) as typeof import('../dist/esm/rimraf-windows.js')
+  )) as typeof import('../src/rimraf-windows.js')
 
   t.afterEach(() => (CHMODS.length = 0))
 
@@ -456,7 +467,7 @@ t.test('handle EPERMs, chmod raises something other than ENOENT', async t => {
 t.test('rimraffing root, do not actually rmdir root', async t => {
   let ROOT: string | undefined = undefined
   const { rimrafWindows, rimrafWindowsSync } = (await t.mockImport(
-    '../dist/esm/rimraf-windows.js',
+    '../src/rimraf-windows.js',
     {
       path: {
         ...PATH,
@@ -469,7 +480,7 @@ t.test('rimraffing root, do not actually rmdir root', async t => {
         },
       },
     },
-  )) as typeof import('../dist/esm/rimraf-windows.js')
+  )) as typeof import('../src/rimraf-windows.js')
   t.test('async', async t => {
     ROOT = t.testdir(fixture)
     await rimrafWindows(ROOT, { preserveRoot: false })

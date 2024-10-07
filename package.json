@@ -61,8 +61,8 @@
     "@types/node": "^20.14.10",
     "mkdirp": "^3.0.1",
     "prettier": "^3.3.2",
-    "tap": "^20.0.3",
-    "tshy": "^2.0.1",
+    "tap": "^21.0.1",
+    "tshy": "^3.0.2",
     "typedoc": "^0.26.3"
   },
   "funding": {
@@ -85,5 +85,8 @@
     "rmdir",
     "recursive"
   ],
-  "module": "./dist/esm/index.js"
+  "module": "./dist/esm/index.js",
+  "tap": {
+    "coverage-map": "map.js"
+  }
 }

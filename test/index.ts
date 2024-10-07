@@ -9,14 +9,14 @@ import {
   RimrafSyncOptions,
 } from '../src/index.js'
 
-import * as OPTARG from '../dist/esm/opt-arg.js'
+import * as OPTARG from '../src/opt-arg.js'
 
 t.test('mocky unit tests to select the correct function', async t => {
   // don't mock rimrafManual, so we can test the platform switch
   const CALLS: any[] = []
   let USE_NATIVE = true
   const mocks = {
-    '../dist/esm/use-native.js': {
+    '../src/use-native.js': {
       useNative: (opt: RimrafOptions) => {
         CALLS.push(['useNative', opt])
         return USE_NATIVE
@@ -26,11 +26,11 @@ t.test('mocky unit tests to select the correct function', async t => {
         return USE_NATIVE
       },
     },
-    '../dist/esm/path-arg.js': (path: string) => {
+    '../src/path-arg.js': (path: string) => {
       CALLS.push(['pathArg', path])
       return path
     },
-    '../dist/esm/opt-arg.js': {
+    '../src/opt-arg.js': {
       ...OPTARG,
       optArg: (opt: RimrafOptions) => {
         CALLS.push(['optArg', opt])
@@ -41,7 +41,7 @@ t.test('mocky unit tests to select the correct function', async t => {
         return opt
       },
     },
-    '../dist/esm/rimraf-posix.js': {
+    '../src/rimraf-posix.js': {
       rimrafPosix: async (path: string, opt: RimrafOptions) => {
         CALLS.push(['rimrafPosix', path, opt])
       },
@@ -49,7 +49,7 @@ t.test('mocky unit tests to select the correct function', async t => {
         CALLS.push(['rimrafPosixSync', path, opt])
       },
     },
-    '../dist/esm/rimraf-windows.js': {
+    '../src/rimraf-windows.js': {
       rimrafWindows: async (path: string, opt: RimrafOptions) => {
         CALLS.push(['rimrafWindows', path, opt])
       },
@@ -57,7 +57,7 @@ t.test('mocky unit tests to select the correct function', async t => {
         CALLS.push(['rimrafWindowsSync', path, opt])
       },
     },
-    '../dist/esm/rimraf-native.js': {
+    '../src/rimraf-native.js': {
       rimrafNative: async (path: string, opt: RimrafOptions) => {
         CALLS.push(['rimrafNative', path, opt])
       },
@@ -66,11 +66,14 @@ t.test('mocky unit tests to select the correct function', async t => {
       },
     },
   }
-  process.env.__TESTING_RIMRAF_PLATFORM__ = 'posix'
-  const { rimraf } = (await t.mockImport(
-    '../dist/esm/index.js',
-    mocks,
-  )) as typeof import('../dist/esm/index.js')
+  t.intercept(process, 'platform', { value: 'posix' })
+  const { rimraf } = (await t.mockImport('../src/index.js', {
+    ...mocks,
+    '../src/rimraf-manual.js': await t.mockImport(
+      '../src/rimraf-manual.js',
+      mocks,
+    ),
+  })) as typeof import('../src/index.js')
 
   t.afterEach(() => (CALLS.length = 0))
   for (const useNative of [true, false]) {
@@ -159,18 +162,18 @@ t.test('actually delete some stuff', t => {
 t.test('accept array of paths as first arg', async t => {
   const ASYNC_CALLS: any[] = []
   const SYNC_CALLS: any[] = []
-  const { rimraf, rimrafSync } = (await t.mockImport('../dist/esm/index.js', {
-    '../dist/esm/use-native.js': {
+  const { rimraf, rimrafSync } = (await t.mockImport('../src/index.js', {
+    '../src/use-native.js': {
       useNative: () => true,
       useNativeSync: () => true,
     },
-    '../dist/esm/rimraf-native.js': {
+    '../src/rimraf-native.js': {
       rimrafNative: async (path: string, opt: RimrafOptions) =>
         ASYNC_CALLS.push([path, opt]),
       rimrafNativeSync: (path: string, opt: RimrafOptions) =>
         SYNC_CALLS.push([path, opt]),
     },
-  })) as typeof import('../dist/esm/index.js')
+  })) as typeof import('../src/index.js')
   t.equal(await rimraf(['a', 'b', 'c']), true)
   t.equal(
     await rimraf(['i', 'j', 'k'], { x: 'ya' } as unknown as RimrafOptions),
