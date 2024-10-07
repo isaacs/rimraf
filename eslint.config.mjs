@@ -4,10 +4,11 @@ import tseslint from 'typescript-eslint'
 export default tseslint.config(
   {
     ignores: [
-      'tap-snapshots/**',
-      'dist/**',
+      '.tap/',
+      'tap-snapshots/',
+      'dist/',
+      'benchmark/',
       'eslint.config.mjs',
-      'benchmark/**',
       'map.js',
     ],
   },
