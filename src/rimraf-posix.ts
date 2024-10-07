@@ -14,15 +14,17 @@ const { lstat, rmdir, unlink } = promises
 
 export const rimrafPosix = async (path: string, opt: RimrafAsyncOptions) => {
   opt?.signal?.throwIfAborted()
-  const stat = await ignoreENOENT(lstat(path))
-  return (stat && (await ignoreENOENT(rimrafPosixDir(path, opt, stat)))) ?? true
+  return (
+    (await ignoreENOENT(
+      lstat(path).then(stat => rimrafPosixDir(path, opt, stat)),
+    )) ?? true
+  )
 }
 
 export const rimrafPosixSync = (path: string, opt: RimrafSyncOptions) => {
   opt?.signal?.throwIfAborted()
-  const stat = ignoreENOENTSync(() => lstatSync(path))
   return (
-    (stat && ignoreENOENTSync(() => rimrafPosixDirSync(path, opt, stat))) ??
+    ignoreENOENTSync(() => rimrafPosixDirSync(path, opt, lstatSync(path))) ??
     true
   )
 }

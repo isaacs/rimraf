@@ -32,9 +32,10 @@ export const rimrafMoveRemove = async (
   opt: RimrafAsyncOptions,
 ) => {
   opt?.signal?.throwIfAborted()
-  const stat = await ignoreENOENT(lstat(path))
   return (
-    (stat && (await ignoreENOENT(rimrafMoveRemoveDir(path, opt, stat)))) ?? true
+    (await ignoreENOENT(
+      lstat(path).then(stat => rimrafMoveRemoveDir(path, opt, stat)),
+    )) ?? true
   )
 }
 
@@ -112,11 +113,10 @@ const tmpUnlink = async <T>(
 
 export const rimrafMoveRemoveSync = (path: string, opt: RimrafSyncOptions) => {
   opt?.signal?.throwIfAborted()
-  const stat = ignoreENOENTSync(() => lstatSync(path))
   return (
-    (stat &&
-      ignoreENOENTSync(() => rimrafMoveRemoveDirSync(path, opt, stat))) ??
-    true
+    ignoreENOENTSync(() =>
+      rimrafMoveRemoveDirSync(path, opt, lstatSync(path)),
+    ) ?? true
   )
 }
 

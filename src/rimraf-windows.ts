@@ -66,20 +66,19 @@ const FINISH = Symbol('finish')
 
 export const rimrafWindows = async (path: string, opt: RimrafAsyncOptions) => {
   opt?.signal?.throwIfAborted()
-  const stat = await ignoreENOENT(lstat(path))
   return (
-    (stat && (await ignoreENOENT(rimrafWindowsDir(path, opt, stat, START)))) ??
-    true
+    (await ignoreENOENT(
+      lstat(path).then(stat => rimrafWindowsDir(path, opt, stat, START)),
+    )) ?? true
   )
 }
 
 export const rimrafWindowsSync = (path: string, opt: RimrafSyncOptions) => {
   opt?.signal?.throwIfAborted()
-  const stat = ignoreENOENTSync(() => lstatSync(path))
   return (
-    (stat &&
-      ignoreENOENTSync(() => rimrafWindowsDirSync(path, opt, stat, START))) ??
-    true
+    ignoreENOENTSync(() =>
+      rimrafWindowsDirSync(path, opt, lstatSync(path), START),
+    ) ?? true
   )
 }
 
