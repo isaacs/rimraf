@@ -1,15 +1,11 @@
 import t from 'tap'
 
-for (const [platform, version, expect] of [
-  ['darwin', 'v18.0.0', true],
-  ['win32', 'v18.0.0', false],
-  ['win32', 'v8.9.10', false],
-  ['win32', 'v14.13.12', false],
-  ['win32', 'v', false],
+for (const [platform, expect] of [
+  ['darwin', true],
+  ['win32', false],
 ] as const) {
-  t.test(`${platform} ${version}`, async t => {
+  t.test(platform, async t => {
     t.intercept(process, 'platform', { value: platform })
-    t.intercept(process, 'version', { value: version })
     const { useNative, useNativeSync } = await t.mockImport(
       '../src/use-native.js',
     )
