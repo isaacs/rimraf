@@ -1,11 +1,12 @@
 import t from 'tap'
 
 for (const [platform, version, expect] of [
-  ['darwin', 'v18.0.0', true] as const,
-  ['win32', 'v18.0.0', false] as const,
-  ['win32', 'v8.9.10', false] as const,
-  ['win32', 'v14.13.12', false] as const,
-]) {
+  ['darwin', 'v18.0.0', true],
+  ['win32', 'v18.0.0', false],
+  ['win32', 'v8.9.10', false],
+  ['win32', 'v14.13.12', false],
+  ['win32', 'v', false],
+] as const) {
   t.test(`${platform} ${version}`, async t => {
     t.intercept(process, 'platform', { value: platform })
     t.intercept(process, 'version', { value: version })

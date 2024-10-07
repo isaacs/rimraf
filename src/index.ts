@@ -74,14 +74,14 @@ export const moveRemove = Object.assign(wrap(rimrafMoveRemove), {
 })
 
 export const rimrafSync = wrapSync((path, opt) =>
-  useNativeSync(opt) ?
+  useNativeSync?.(opt) ?
     rimrafNativeSync(path, opt)
   : rimrafManualSync(path, opt),
 )
 export const sync = rimrafSync
 
 const rimraf_ = wrap((path, opt) =>
-  useNative(opt) ? rimrafNative(path, opt) : rimrafManual(path, opt),
+  useNative?.(opt) ? rimrafNative(path, opt) : rimrafManual(path, opt),
 )
 export const rimraf = Object.assign(rimraf_, {
   rimraf: rimraf_,

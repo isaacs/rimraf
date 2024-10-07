@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import type { RimrafAsyncOptions } from './index.js'
 import { rimraf } from './index.js'
-
 import { loadPackageJson } from 'package-json-from-dist'
 
 const { version } = loadPackageJson(import.meta.url, '../package.json')
@@ -253,18 +252,11 @@ const main = async (...args: string[]) => {
 
   return 0
 }
-main.help = help
-main.version = version
 
-export default main
-
-if (process.env.__TESTING_RIMRAF_BIN__ !== '1') {
-  const args = process.argv.slice(2)
-  main(...args).then(
-    code => process.exit(code),
-    er => {
-      console.error(er)
-      process.exit(1)
-    },
-  )
-}
+main(...process.argv.slice(2)).then(
+  code => process.exit(code),
+  er => {
+    console.error(er)
+    process.exit(1)
+  },
+)
