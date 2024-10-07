@@ -469,8 +469,7 @@ t.test('rimraffing root, do not actually rmdir root', async t => {
   const { rimrafWindows, rimrafWindowsSync } = (await t.mockImport(
     '../src/rimraf-windows.js',
     {
-      path: {
-        ...PATH,
+      path: t.createMock(PATH, {
         parse: (path: string) => {
           const p = parse(path)
           if (path === ROOT) {
@@ -478,7 +477,7 @@ t.test('rimraffing root, do not actually rmdir root', async t => {
           }
           return p
         },
-      },
+      }),
     },
   )) as typeof import('../src/rimraf-windows.js')
   t.test('async', async t => {

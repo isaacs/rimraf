@@ -3,7 +3,6 @@ import t from 'tap'
 t.test('works if it works', async t => {
   const { fixEPERM, fixEPERMSync } = (await t.mockImport(
     '../src/fix-eperm.js',
-    {},
   )) as typeof import('../src/fix-eperm.js')
   let res: null | number = null
   await fixEPERM(async () => (res = 1))('x')
@@ -15,7 +14,6 @@ t.test('works if it works', async t => {
 t.test('throw non-EPERM just throws', async t => {
   const { fixEPERM, fixEPERMSync } = (await t.mockImport(
     '../src/fix-eperm.js',
-    {},
   )) as typeof import('../src/fix-eperm.js')
   const fixed = fixEPERM(() => {
     throw new Error('oops')
@@ -31,7 +29,6 @@ t.test('throw ENOENT returns void', async t => {
   const er = Object.assign(new Error('no ents'), { code: 'ENOENT' })
   const { fixEPERM, fixEPERMSync } = (await t.mockImport(
     '../src/fix-eperm.js',
-    {},
   )) as typeof import('../src/fix-eperm.js')
   const fixed = fixEPERM(async () => {
     throw er

@@ -67,9 +67,7 @@ t.test('actually delete some stuff', async t => {
 
   const { rimrafPosix, rimrafPosixSync } = (await t.mockImport(
     '../src/rimraf-posix.js',
-    {
-      '../src/fs.js': fsMock,
-    },
+    { '../src/fs.js': fsMock },
   )) as typeof import('../src/rimraf-posix.js')
 
   const { rimrafMoveRemove, rimrafMoveRemoveSync } = (await t.mockImport(
@@ -120,8 +118,7 @@ t.test('throw unlink errors', async t => {
   const { rimrafMoveRemove, rimrafMoveRemoveSync } = (await t.mockImport(
     '../src/rimraf-move-remove.js',
     {
-      '../src/fs.js': {
-        ...fs,
+      '../src/fs.js': t.createMock(fs, {
         unlinkSync: (path: string) => {
           if (threwSync) {
             return fs.unlinkSync(path)
@@ -130,7 +127,6 @@ t.test('throw unlink errors', async t => {
           throw Object.assign(new Error('cannot unlink'), { code: 'FOO' })
         },
         promises: {
-          ...fs.promises,
           unlink: async (path: string) => {
             if (threwAsync) {
               return fs.promises.unlink(path)
@@ -139,7 +135,7 @@ t.test('throw unlink errors', async t => {
             throw Object.assign(new Error('cannot unlink'), { code: 'FOO' })
           },
         },
-      },
+      }),
     },
   )) as typeof import('../src/rimraf-move-remove.js')
   // nest to clean up the mess
@@ -163,8 +159,7 @@ t.test('ignore ENOENT unlink errors', async t => {
   const { rimrafMoveRemove, rimrafMoveRemoveSync } = await t.mockImport(
     '../src/rimraf-move-remove.js',
     {
-      '../src/fs.js': {
-        ...fs,
+      '../src/fs.js': t.createMock(fs, {
         unlinkSync: (path: string) => {
           fs.unlinkSync(path)
           if (threwSync) {
@@ -174,7 +169,6 @@ t.test('ignore ENOENT unlink errors', async t => {
           fs.unlinkSync(path)
         },
         promises: {
-          ...fs.promises,
           unlink: async (path: string) => {
             fs.unlinkSync(path)
             if (threwAsync) {
@@ -184,7 +178,7 @@ t.test('ignore ENOENT unlink errors', async t => {
             fs.unlinkSync(path)
           },
         },
-      },
+      }),
     },
   )
   // nest to clean up the mess
@@ -206,18 +200,16 @@ t.test('throw rmdir errors', async t => {
   const { rimrafMoveRemove, rimrafMoveRemoveSync } = await t.mockImport(
     '../src/rimraf-move-remove.js',
     {
-      '../src/fs.js': {
-        ...fs,
+      '../src/fs.js': t.createMock(fs, {
         rmdirSync: (_: string) => {
           throw Object.assign(new Error('cannot rmdir'), { code: 'FOO' })
         },
         promises: {
-          ...fs.promises,
           rmdir: async (_: string) => {
             throw Object.assign(new Error('cannot rmdir'), { code: 'FOO' })
           },
         },
-      },
+      }),
     },
   )
   t.test('sync', t => {
@@ -279,10 +271,9 @@ t.test('refuse to delete the root dir', async t => {
   const { rimrafMoveRemove, rimrafMoveRemoveSync } = (await t.mockImport(
     '../src/rimraf-move-remove.js',
     {
-      path: {
-        ...path,
+      path: t.createMock(path, {
         dirname: (path: string) => path,
-      },
+      }),
     },
   )) as typeof import('../src/rimraf-move-remove.js')
 
@@ -505,8 +496,7 @@ t.test('rimraffing root, do not actually rmdir root', async t => {
   const { rimrafMoveRemove, rimrafMoveRemoveSync } = (await t.mockImport(
     '../src/rimraf-move-remove.js',
     {
-      path: {
-        ...PATH,
+      path: t.createMock(PATH, {
         parse: (path: string) => {
           const p = parse(path)
           if (path === ROOT) {
@@ -514,7 +504,7 @@ t.test('rimraffing root, do not actually rmdir root', async t => {
           }
           return p
         },
-      },
+      }),
     },
   )) as typeof import('../src/rimraf-move-remove.js')
   t.test('async', async t => {
@@ -538,7 +528,6 @@ t.test(
   async t => {
     const { rimrafMoveRemove, rimrafMoveRemoveSync } = await t.mockImport(
       '../src/rimraf-move-remove.js',
-      {},
     )
     t.test('sync', t => {
       const ac = new AbortController()

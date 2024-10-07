@@ -5,8 +5,17 @@ import { RimrafOptions } from '../src/index.js'
 import { resolve } from 'path'
 import { loadPackageJson } from 'package-json-from-dist'
 
-const binModule = resolve(import.meta.dirname, '../dist/esm/bin.mjs')
 const { version } = loadPackageJson(import.meta.url, '../package.json')
+
+const binDist = resolve(import.meta.dirname, '../dist/esm/bin.mjs')
+const spawnSyncBin = (args: string[]) =>
+  spawnSync(process.execPath, [binDist, ...args], { encoding: 'utf8' })
+const spawnBin = (args: string[]) => {
+  const child = spawn(process.execPath, [binDist, ...args], { stdio: 'pipe' })
+  child.stdout.setEncoding('utf8')
+  child.stderr.setEncoding('utf8')
+  return child
+}
 
 const mockBin = async (
   argv: string[],
@@ -19,7 +28,6 @@ const mockBin = async (
   })
 
 t.test('basic arg parsing stuff', async t => {
-  const CALLS: any[] = []
   const impls = new Map([
     ['rimraf', 'rimraf'],
     ['native', 'native'],
@@ -28,16 +36,16 @@ t.test('basic arg parsing stuff', async t => {
     ['windows', 'windows'],
     ['moveRemove', 'move-remove'],
   ])
+  const CALLS: any[] = []
+  t.afterEach(() => (CALLS.length = 0))
   const { rimraf, ...mocks } = [...impls.entries()].reduce<
     Record<string, (path: string, opt: RimrafOptions) => Promise<number>>
   >((acc, [k, v]) => {
     acc[k] = async (path, opt) => CALLS.push([v, path, opt])
     return acc
   }, {})
-
   const logs = t.capture(console, 'log').args
   const errs = t.capture(console, 'error').args
-
   const bin = (...argv: string[]) =>
     mockBin(argv, {
       '../src/index.js': {
@@ -45,10 +53,6 @@ t.test('basic arg parsing stuff', async t => {
         ...mocks,
       },
     })
-
-  t.afterEach(() => {
-    CALLS.length = 0
-  })
 
   t.test('binary version', t => {
     const cases = [['--version'], ['a', 'b', '--version', 'c']]
@@ -272,10 +276,7 @@ t.test('actually delete something with it', async t => {
       },
     },
   })
-
-  const res = spawnSync(process.execPath, [binModule, path], {
-    encoding: 'utf8',
-  })
+  const res = spawnSyncBin([path])
   t.throws(() => statSync(path))
   t.equal(res.status, 0)
 })
@@ -318,8 +319,6 @@ t.test('interactive deletes', t => {
   }
   const verboseOpt = ['-v', '-V']
 
-  const node = process.execPath
-
   const leftovers = (d: string) => {
     try {
       readdirSync(d)
@@ -335,18 +334,13 @@ t.test('interactive deletes', t => {
         const script = s.slice()
         t.test(script.join(', '), async t => {
           const d = t.testdir(fixture)
-          const args = [binModule, '-i', verbose, d]
-          const child = spawn(node, args, {
-            stdio: 'pipe',
-          })
+          const child = spawnBin(['-i', verbose, d])
           const out: string[] = []
           const err: string[] = []
           const timer = setTimeout(() => {
             t.fail('timed out')
             child.kill('SIGKILL')
           }, 10000)
-          child.stdout.setEncoding('utf8')
-          child.stderr.setEncoding('utf8')
           let last = ''
           child.stdout.on('data', async (c: string) => {
             out.push(c.trim())
