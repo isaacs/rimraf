@@ -2,16 +2,12 @@
 
 import { setTimeout } from 'timers/promises'
 import { RimrafAsyncOptions, RimrafOptions } from './index.js'
+import { isFsError } from './error.js'
 
 export const MAXBACKOFF = 200
 export const RATE = 1.2
 export const MAXRETRIES = 10
 export const codes = new Set(['EMFILE', 'ENFILE', 'EBUSY'])
-
-const matchError = (er: unknown, path: string) => {
-  const fer = er as NodeJS.ErrnoException
-  return fer?.path === path && fer?.code && codes.has(fer.code)
-}
 
 export const retryBusy = <T>(fn: (path: string) => Promise<T>) => {
   const method = async (
@@ -28,7 +24,7 @@ export const retryBusy = <T>(fn: (path: string) => Promise<T>) => {
       try {
         return await fn(path)
       } catch (er) {
-        if (matchError(er, path)) {
+        if (isFsError(er) && er.path === path && codes.has(er.code)) {
           backoff = Math.ceil(backoff * rate)
           total = backoff + total
           if (total < mbo) {
@@ -57,7 +53,12 @@ export const retryBusySync = <T>(fn: (path: string) => T) => {
       try {
         return fn(path)
       } catch (er) {
-        if (matchError(er, path) && retries < max) {
+        if (
+          isFsError(er) &&
+          er.path === path &&
+          codes.has(er.code) &&
+          retries < max
+        ) {
           retries++
           continue
         }

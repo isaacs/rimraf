@@ -1,23 +1,25 @@
 import { Dirent, Stats } from 'fs'
 import { GlobOptions } from 'glob'
 
-const typeOrUndef = (val: any, t: string) =>
+const typeOrUndef = (val: unknown, t: string) =>
   typeof val === 'undefined' || typeof val === t
 
-export const isRimrafOptions = (o: any): o is RimrafOptions =>
-  !!o &&
-  typeof o === 'object' &&
+const isRecord = (o: unknown): o is Record<string, unknown> =>
+  !!o && typeof o === 'object'
+
+export const isRimrafOptions = (o: unknown): o is RimrafOptions =>
+  isRecord(o) &&
   typeOrUndef(o.preserveRoot, 'boolean') &&
   typeOrUndef(o.tmp, 'string') &&
   typeOrUndef(o.maxRetries, 'number') &&
   typeOrUndef(o.retryDelay, 'number') &&
   typeOrUndef(o.backoff, 'number') &&
   typeOrUndef(o.maxBackoff, 'number') &&
-  (typeOrUndef(o.glob, 'boolean') || (o.glob && typeof o.glob === 'object')) &&
+  (typeOrUndef(o.glob, 'boolean') || isRecord(o.glob)) &&
   typeOrUndef(o.filter, 'function')
 
-export const assertRimrafOptions: (o: any) => void = (
-  o: any,
+export const assertRimrafOptions: (o: unknown) => void = (
+  o: unknown,
 ): asserts o is RimrafOptions => {
   if (!isRimrafOptions(o)) {
     throw new Error('invalid rimraf options')

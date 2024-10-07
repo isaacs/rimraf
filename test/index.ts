@@ -27,7 +27,10 @@ const mockRimrafSync =
 
 t.test('mocky unit tests to select the correct function', async t => {
   // don't mock rimrafManual, so we can test the platform switch
-  const CALLS: any[] = []
+  const CALLS: (
+    | [string, string, RimrafOptions]
+    | [string, string | RimrafOptions]
+  )[] = []
   let USE_NATIVE = true
   const mocks = {
     '../src/use-native.js': {
@@ -83,18 +86,18 @@ t.test('mocky unit tests to select the correct function', async t => {
   t.intercept(process, 'platform', { value: 'posix' })
   const { rimraf } = (await t.mockImport('../src/index.js', {
     ...mocks,
-    '../src/rimraf-manual.js': await t.mockImport(
+    '../src/rimraf-manual.js': (await t.mockImport(
       '../src/rimraf-manual.js',
       mocks,
-    ),
+    )) as typeof import('../src/rimraf-manual.js'),
   })) as typeof import('../src/index.js')
 
   t.afterEach(() => (CALLS.length = 0))
   for (const useNative of [true, false]) {
     t.test(`main function, useNative=${useNative}`, t => {
       USE_NATIVE = useNative
-      rimraf('path', { a: 1 } as unknown as RimrafAsyncOptions)
-      rimraf.sync('path', { a: 2 } as unknown as RimrafSyncOptions)
+      void rimraf('path', { a: 1 } as RimrafAsyncOptions)
+      rimraf.sync('path', { a: 2 } as RimrafSyncOptions)
       t.equal(rimraf.rimraf, rimraf)
       t.equal(rimraf.rimrafSync, rimraf.sync)
       t.matchSnapshot(CALLS)
@@ -103,32 +106,32 @@ t.test('mocky unit tests to select the correct function', async t => {
   }
 
   t.test('manual', t => {
-    rimraf.manual('path', { a: 3 } as unknown as RimrafAsyncOptions)
-    rimraf.manual.sync('path', { a: 4 } as unknown as RimrafSyncOptions)
+    void rimraf.manual('path', { a: 3 } as RimrafAsyncOptions)
+    rimraf.manual.sync('path', { a: 4 } as RimrafSyncOptions)
     t.equal(rimraf.manualSync, rimraf.manual.sync)
     t.matchSnapshot(CALLS)
     t.end()
   })
 
   t.test('native', t => {
-    rimraf.native('path', { a: 5 } as unknown as RimrafAsyncOptions)
-    rimraf.native.sync('path', { a: 6 } as unknown as RimrafSyncOptions)
+    void rimraf.native('path', { a: 5 } as RimrafAsyncOptions)
+    rimraf.native.sync('path', { a: 6 } as RimrafSyncOptions)
     t.equal(rimraf.nativeSync, rimraf.native.sync)
     t.matchSnapshot(CALLS)
     t.end()
   })
 
   t.test('posix', t => {
-    rimraf.posix('path', { a: 7 } as unknown as RimrafAsyncOptions)
-    rimraf.posix.sync('path', { a: 8 } as unknown as RimrafSyncOptions)
+    void rimraf.posix('path', { a: 7 } as RimrafAsyncOptions)
+    rimraf.posix.sync('path', { a: 8 } as RimrafSyncOptions)
     t.equal(rimraf.posixSync, rimraf.posix.sync)
     t.matchSnapshot(CALLS)
     t.end()
   })
 
   t.test('windows', t => {
-    rimraf.windows('path', { a: 9 } as unknown as RimrafAsyncOptions)
-    rimraf.windows.sync('path', { a: 10 } as unknown as RimrafSyncOptions)
+    void rimraf.windows('path', { a: 9 } as RimrafAsyncOptions)
+    rimraf.windows.sync('path', { a: 10 } as RimrafSyncOptions)
     t.equal(rimraf.windowsSync, rimraf.windows.sync)
     t.matchSnapshot(CALLS)
     t.end()
@@ -174,8 +177,8 @@ t.test('actually delete some stuff', t => {
 })
 
 t.test('accept array of paths as first arg', async t => {
-  const ASYNC_CALLS: any[] = []
-  const SYNC_CALLS: any[] = []
+  const ASYNC_CALLS: [string, RimrafOptions][] = []
+  const SYNC_CALLS: [string, RimrafOptions][] = []
   const { rimraf, rimrafSync } = (await t.mockImport('../src/index.js', {
     '../src/use-native.js': {
       useNative: () => true,
@@ -191,10 +194,7 @@ t.test('accept array of paths as first arg', async t => {
     },
   })) as typeof import('../src/index.js')
   t.equal(await rimraf(['a', 'b', 'c']), true)
-  t.equal(
-    await rimraf(['i', 'j', 'k'], { x: 'ya' } as unknown as RimrafOptions),
-    true,
-  )
+  t.equal(await rimraf(['i', 'j', 'k'], { x: 'ya' } as RimrafOptions), true)
   t.same(ASYNC_CALLS, [
     [resolve('a'), {}],
     [resolve('b'), {}],
@@ -208,7 +208,7 @@ t.test('accept array of paths as first arg', async t => {
   t.equal(
     rimrafSync(['m', 'n', 'o'], {
       cat: 'chai',
-    } as unknown as RimrafSyncOptions),
+    } as RimrafSyncOptions),
     true,
   )
   t.same(SYNC_CALLS, [

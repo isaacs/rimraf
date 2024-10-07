@@ -94,7 +94,7 @@ t.test('throw unexpected readdir errors', async t => {
   const { rimrafPosix, rimrafPosixSync } = (await t.mockImport(
     '../src/rimraf-posix.js',
     {
-      '../src/readdir-or-error.js': await t.mockImport(
+      '../src/readdir-or-error.js': (await t.mockImport(
         '../src/readdir-or-error.js',
         {
           '../src/fs.js': t.createMock(fs, {
@@ -110,7 +110,7 @@ t.test('throw unexpected readdir errors', async t => {
             },
           }),
         },
-      ),
+      )) as typeof import('../src/readdir-or-error.js'),
     },
   )) as typeof import('../src/rimraf-posix.js')
   const path = t.testdir(fixture)

@@ -9,6 +9,7 @@
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "noUncheckedIndexedAccess": true,
+    "useUnknownInCatchVariables": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,

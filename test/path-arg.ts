@@ -10,9 +10,7 @@ for (const platform of ['win32', 'posix'] as const) {
       path,
     })) as typeof import('../src/path-arg.js')
 
-    const { resolve } = path
-
-    t.equal(pathArg('a/b/c'), resolve('a/b/c'))
+    t.equal(pathArg('a/b/c'), path.resolve('a/b/c'))
     t.throws(
       () => pathArg('a\0b'),
       Error('path must be a string without null bytes'),
@@ -41,7 +39,7 @@ for (const platform of ['win32', 'posix'] as const) {
     t.throws(() => pathArg('/', { preserveRoot: undefined }), {
       code: 'ERR_PRESERVE_ROOT',
     })
-    t.equal(pathArg('/', { preserveRoot: false }), resolve('/'))
+    t.equal(pathArg('/', { preserveRoot: false }), path.resolve('/'))
 
     //@ts-expect-error
     t.throws(() => pathArg({}), {
@@ -62,9 +60,9 @@ for (const platform of ['win32', 'posix'] as const) {
       name: 'TypeError',
     })
     //@ts-expect-error
-    t.throws(() => pathArg(Object.create(null) as {}), {
+    t.throws(() => pathArg(Object.create(null) as object), {
       code: 'ERR_INVALID_ARG_TYPE',
-      path: Object.create(null),
+      path: Object.create(null) as object,
       message:
         'The "path" argument must be of type string. ' +
         `Received ${inspect(Object.create(null))}`,

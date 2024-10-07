@@ -1,7 +1,8 @@
 import t from 'tap'
-import { chmodSync, Stats, statSync } from 'fs'
+import { Dirent, Mode, Stats, statSync } from 'fs'
 import * as PATH from 'path'
 import { basename, parse, relative } from 'path'
+import * as FS from '../src/fs.js'
 import {
   rimrafMoveRemove,
   rimrafMoveRemoveSync,
@@ -41,8 +42,18 @@ const fixture = {
 }
 
 t.test('actually delete some stuff', async t => {
-  const fs = await import('../src/fs.js')
-  const fsMock: Record<string, any> = { ...fs, promises: { ...fs.promises } }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  type MockFs = (...args: any[]) => Promise<any>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  type MockFsSync = (...args: any[]) => any
+  const fsMock: {
+    [k in Exclude<keyof typeof FS, 'promises'>]: MockFsSync
+  } & {
+    promises: Record<keyof typeof FS.promises, MockFs>
+  } = {
+    ...FS,
+    promises: { ...(FS.promises as Record<keyof typeof FS.promises, MockFs>) },
+  }
 
   // simulate annoying windows semantics, where an unlink or rmdir
   // may take an arbitrary amount of time.  we only delay unlinks,
@@ -50,12 +61,12 @@ t.test('actually delete some stuff', async t => {
   const {
     statSync,
     promises: { unlink },
-  } = fs
+  } = FS
 
   const danglers: Promise<void>[] = []
   const unlinkLater = (path: string) => {
     const p = new Promise<void>(res => {
-      setTimeout(() => unlink(path).then(res, res))
+      setTimeout(() => void unlink(path).then(res, res))
     })
     danglers.push(p)
   }
@@ -156,7 +167,7 @@ t.test('ignore ENOENT unlink errors', async t => {
   const fs = await import('../src/fs.js')
   const threwAsync = false
   let threwSync = false
-  const { rimrafMoveRemove, rimrafMoveRemoveSync } = await t.mockImport(
+  const { rimrafMoveRemove, rimrafMoveRemoveSync } = (await t.mockImport(
     '../src/rimraf-move-remove.js',
     {
       '../src/fs.js': t.createMock(fs, {
@@ -180,11 +191,14 @@ t.test('ignore ENOENT unlink errors', async t => {
         },
       }),
     },
-  )
+  )) as typeof import('../src/rimraf-move-remove.js')
   // nest to clean up the mess
   t.test('sync', t => {
     const path = t.testdir({ test: fixture }) + '/test'
-    t.doesNotThrow(() => rimrafMoveRemoveSync(path, {}), 'enoent no problems')
+    t.doesNotThrow(
+      () => void rimrafMoveRemoveSync(path, {}),
+      'enoent no problems',
+    )
     t.end()
   })
   t.test('async', t => {
@@ -197,21 +211,21 @@ t.test('ignore ENOENT unlink errors', async t => {
 
 t.test('throw rmdir errors', async t => {
   const fs = await import('../src/fs.js')
-  const { rimrafMoveRemove, rimrafMoveRemoveSync } = await t.mockImport(
+  const { rimrafMoveRemove, rimrafMoveRemoveSync } = (await t.mockImport(
     '../src/rimraf-move-remove.js',
     {
       '../src/fs.js': t.createMock(fs, {
-        rmdirSync: (_: string) => {
+        rmdirSync: () => {
           throw Object.assign(new Error('cannot rmdir'), { code: 'FOO' })
         },
         promises: {
-          rmdir: async (_: string) => {
+          rmdir: async () => {
             throw Object.assign(new Error('cannot rmdir'), { code: 'FOO' })
           },
         },
       }),
     },
-  )
+  )) as typeof import('../src/rimraf-move-remove.js')
   t.test('sync', t => {
     // nest it so that we clean up the mess
     const path = t.testdir({ test: fixture }) + '/test'
@@ -232,7 +246,7 @@ t.test('throw unexpected readdir errors', async t => {
   const { rimrafMoveRemove, rimrafMoveRemoveSync } = (await t.mockImport(
     '../src/rimraf-move-remove.js',
     {
-      '../src/readdir-or-error.js': await t.mockImport(
+      '../src/readdir-or-error.js': (await t.mockImport(
         '../src/readdir-or-error.js',
         {
           '../src/fs.js': t.createMock(fs, {
@@ -248,7 +262,7 @@ t.test('throw unexpected readdir errors', async t => {
             },
           }),
         },
-      ),
+      )) as typeof import('../src/readdir-or-error.js'),
     },
   )) as typeof import('../src/rimraf-move-remove.js')
   t.test('sync', t => {
@@ -290,28 +304,26 @@ t.test('refuse to delete the root dir', async t => {
 
 t.test('handle EPERMs on unlink by trying to chmod 0o666', async t => {
   const fs = await import('../src/fs.js')
-  const CHMODS: any[] = []
+  const CHMODS: unknown[] = []
   let threwAsync = false
   let threwSync = false
   const { rimrafMoveRemove, rimrafMoveRemoveSync } = (await t.mockImport(
     '../src/rimraf-move-remove.js',
     {
-      '../src/fix-eperm.js': await t.mockImport('../src/fix-eperm.js', {
+      '../src/fix-eperm.js': (await t.mockImport('../src/fix-eperm.js', {
         '../src/fs.js': t.createMock(fs, {
-          chmodSync: (...args: any[]) => {
-            CHMODS.push(['chmodSync', ...args])
-            //@ts-ignore
-            return fs.chmodSync(...args)
+          chmodSync: (path: string, mode: Mode) => {
+            CHMODS.push(['chmodSync', path, mode])
+            return fs.chmodSync(path, mode)
           },
           promises: {
-            chmod: async (...args: any[]) => {
-              CHMODS.push(['chmod', ...args])
-              //@ts-ignore
-              return fs.promises.chmod(...args)
+            chmod: async (path: string, mode: Mode) => {
+              CHMODS.push(['chmod', path, mode])
+              return fs.promises.chmod(path, mode)
             },
           },
         }),
-      }),
+      })) as typeof import('../src/fix-eperm.js'),
       '../src/fs.js': t.createMock(fs, {
         unlinkSync: (path: string) => {
           if (threwSync) {
@@ -354,34 +366,32 @@ t.test('handle EPERMs on unlink by trying to chmod 0o666', async t => {
 
 t.test('handle EPERMs, chmod returns ENOENT', async t => {
   const fs = await import('../src/fs.js')
-  const CHMODS: any[] = []
+  const CHMODS: unknown[] = []
   let threwAsync = false
   let threwSync = false
   const { rimrafMoveRemove, rimrafMoveRemoveSync } = (await t.mockImport(
     '../src/rimraf-move-remove.js',
     {
-      '../src/fix-eperm.js': await t.mockImport('../src/fix-eperm.js', {
+      '../src/fix-eperm.js': (await t.mockImport('../src/fix-eperm.js', {
         '../src/fs.js': t.createMock(fs, {
-          chmodSync: (...args: any[]) => {
-            CHMODS.push(['chmodSync', ...args])
+          chmodSync: (path: string, mode: Mode) => {
+            CHMODS.push(['chmodSync', path, mode])
             try {
-              fs.unlinkSync(args[0])
+              fs.unlinkSync(path)
             } catch {}
-            //@ts-ignore
-            return fs.chmodSync(...args)
+            return fs.chmodSync(path, mode)
           },
           promises: {
-            chmod: async (...args: any) => {
-              CHMODS.push(['chmod', ...args])
+            chmod: async (path: string, mode: Mode) => {
+              CHMODS.push(['chmod', path, mode])
               try {
-                fs.unlinkSync(args[0])
+                fs.unlinkSync(path)
               } catch {}
-              //@ts-ignore
-              return fs.promises.chmod(...args)
+              return fs.promises.chmod(path, mode)
             },
           },
         }),
-      }),
+      })) as typeof import('../src/fix-eperm.js'),
       '../src/fs.js': t.createMock(fs, {
         unlinkSync: (path: string) => {
           if (threwSync) {
@@ -424,32 +434,32 @@ t.test('handle EPERMs, chmod returns ENOENT', async t => {
 
 t.test('handle EPERMs, chmod raises something other than ENOENT', async t => {
   const fs = await import('../src/fs.js')
-  const CHMODS: any[] = []
+  const CHMODS: unknown[] = []
   let threwAsync = false
   let threwSync = false
   const { rimrafMoveRemove, rimrafMoveRemoveSync } = (await t.mockImport(
     '../src/rimraf-move-remove.js',
     {
-      '../src/fix-eperm.js': await t.mockImport('../src/fix-eperm.js', {
+      '../src/fix-eperm.js': (await t.mockImport('../src/fix-eperm.js', {
         '../src/fs.js': t.createMock(fs, {
-          chmodSync: (...args: any[]) => {
-            CHMODS.push(['chmodSync', ...args])
+          chmodSync: (path: string, mode: Mode) => {
+            CHMODS.push(['chmodSync', path, mode])
             try {
-              fs.unlinkSync(args[0])
+              fs.unlinkSync(path)
             } catch {}
             throw Object.assign(new Error('cannot chmod'), { code: 'FOO' })
           },
           promises: {
-            chmod: async (...args: any[]) => {
-              CHMODS.push(['chmod', ...args])
+            chmod: async (path: string, mode: Mode) => {
+              CHMODS.push(['chmod', path, mode])
               try {
-                fs.unlinkSync(args[0])
+                fs.unlinkSync(path)
               } catch {}
               throw Object.assign(new Error('cannot chmod'), { code: 'FOO' })
             },
           },
         }),
-      }),
+      })) as typeof import('../src/fix-eperm.js'),
       '../src/fs.js': t.createMock(fs, {
         unlinkSync: (path: string) => {
           if (threwSync) {
@@ -526,9 +536,9 @@ t.test(
   'abort if the signal says to',
   { skip: typeof AbortController === 'undefined' },
   async t => {
-    const { rimrafMoveRemove, rimrafMoveRemoveSync } = await t.mockImport(
+    const { rimrafMoveRemove, rimrafMoveRemoveSync } = (await t.mockImport(
       '../src/rimraf-move-remove.js',
-    )
+    )) as typeof import('../src/rimraf-move-remove.js')
     t.test('sync', t => {
       const ac = new AbortController()
       const { signal } = ac
@@ -543,7 +553,7 @@ t.test(
       const { signal } = ac
       const opt = {
         signal,
-        filter: (p: string, st: Stats) => {
+        filter: (p: string, st: Stats | Dirent) => {
           if (basename(p) === 'g' && st.isFile()) {
             ac.abort(new Error('done'))
           }

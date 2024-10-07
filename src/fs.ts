@@ -31,7 +31,6 @@ const mkdir = (
   options?:
     | fs.Mode
     | (fs.MakeDirectoryOptions & { recursive?: boolean | null })
-    | undefined
     | null,
 ): Promise<string | undefined> =>
   new Promise((res, rej) =>

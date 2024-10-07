@@ -3,7 +3,9 @@ import type { RimrafAsyncOptions } from './index.js'
 import { rimraf } from './index.js'
 import { loadPackageJson } from 'package-json-from-dist'
 
-const { version } = loadPackageJson(import.meta.url, '../package.json')
+const { version } = loadPackageJson(import.meta.url, '../package.json') as {
+  version: string
+}
 
 const runHelpForUsage = () =>
   console.error('run `rimraf --help` for usage information')
@@ -83,7 +85,7 @@ const interactiveRimraf = async (
           return result
         })
       })
-      processQueue()
+      void processQueue()
       return p
     }
   const rl = createInterface({

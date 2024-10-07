@@ -22,17 +22,33 @@ false
 `
 
 exports[`test/bin.ts > TAP > interactive deletes > -v > no, n, N, N, Q > had any leftover 1`] = `
-true
+Array [
+  "a",
+  "b",
+  "c",
+]
 `
 
 exports[`test/bin.ts > TAP > interactive deletes > -V > no, n, N, N, Q > had any leftover 1`] = `
-true
+Array [
+  "a",
+  "b",
+  "c",
+]
 `
 
 exports[`test/bin.ts > TAP > interactive deletes > -v > y, YOLO, no, quit > had any leftover 1`] = `
-true
+Array [
+  "a",
+  "b",
+  "c",
+]
 `
 
 exports[`test/bin.ts > TAP > interactive deletes > -V > y, YOLO, no, quit > had any leftover 1`] = `
-true
+Array [
+  "a",
+  "b",
+  "c",
+]
 `

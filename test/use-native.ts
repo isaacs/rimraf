@@ -6,9 +6,9 @@ for (const [platform, expect] of [
 ] as const) {
   t.test(platform, async t => {
     t.intercept(process, 'platform', { value: platform })
-    const { useNative, useNativeSync } = await t.mockImport(
+    const { useNative, useNativeSync } = (await t.mockImport(
       '../src/use-native.js',
-    )
+    )) as typeof import('../src/use-native.js')
     if (expect) {
       // always need manual if a signal is passed in
       const { signal } = new AbortController()

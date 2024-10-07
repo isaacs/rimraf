@@ -1,30 +1,51 @@
 import { spawn, spawnSync } from 'child_process'
-import { readdirSync, statSync } from 'fs'
+import { Dirent, readdirSync, statSync } from 'fs'
 import t from 'tap'
 import { RimrafOptions } from '../src/index.js'
-import { resolve } from 'path'
+import { basename, join, resolve } from 'path'
 import { loadPackageJson } from 'package-json-from-dist'
 
-const { version } = loadPackageJson(import.meta.url, '../package.json')
+const { version } = loadPackageJson(import.meta.url, '../package.json') as {
+  version: string
+}
 
-const binDist = resolve(import.meta.dirname, '../dist/esm/bin.mjs')
+// Have to use the dist file otherwise coverage doesn't work
+// Could be a tap bug or misconfiguration?
+const SRC_DIR = '../dist/esm'
+
+const binDist = join(SRC_DIR, 'bin.mjs')
 const spawnSyncBin = (args: string[]) =>
-  spawnSync(process.execPath, [binDist, ...args], { encoding: 'utf8' })
+  spawnSync(
+    process.execPath,
+    [resolve(import.meta.dirname, binDist), ...args],
+    {
+      encoding: 'utf8',
+      timeout: 10_000,
+    },
+  )
 const spawnBin = (args: string[]) => {
-  const child = spawn(process.execPath, [binDist, ...args], { stdio: 'pipe' })
+  const child = spawn(
+    process.execPath,
+    [resolve(import.meta.dirname, binDist), ...args],
+    {
+      stdio: 'pipe',
+      signal: AbortSignal.timeout(10_000),
+    },
+  )
   child.stdout.setEncoding('utf8')
   child.stderr.setEncoding('utf8')
   return child
 }
-
 const mockBin = async (
   argv: string[],
-  mocks: Record<string, any>,
+  mocks: Record<string, unknown>,
 ): Promise<number> =>
   new Promise(res => {
-    t.intercept(process, 'argv', { value: [, , ...argv] })
+    t.intercept(process, 'argv', {
+      value: [process.execPath, basename(binDist), ...argv],
+    })
     t.intercept(process, 'exit', { value: (code: number) => res(code) })
-    t.mockImport('../src/bin.mjs', mocks)
+    void t.mockImport(binDist, mocks)
   })
 
 t.test('basic arg parsing stuff', async t => {
@@ -36,7 +57,8 @@ t.test('basic arg parsing stuff', async t => {
     ['windows', 'windows'],
     ['moveRemove', 'move-remove'],
   ])
-  const CALLS: any[] = []
+
+  const CALLS: [string, string, RimrafOptions][] = []
   t.afterEach(() => (CALLS.length = 0))
   const { rimraf, ...mocks } = [...impls.entries()].reduce<
     Record<string, (path: string, opt: RimrafOptions) => Promise<number>>
@@ -48,7 +70,7 @@ t.test('basic arg parsing stuff', async t => {
   const errs = t.capture(console, 'error').args
   const bin = (...argv: string[]) =>
     mockBin(argv, {
-      '../src/index.js': {
+      [join(SRC_DIR, 'index.js')]: {
         rimraf: Object.assign(rimraf!, mocks),
         ...mocks,
       },
@@ -116,7 +138,8 @@ t.test('basic arg parsing stuff', async t => {
       t.equal(c[0], 'rimraf')
       t.same(c[1], ['foo'])
       t.type(c[2].filter, 'function')
-      t.equal(c[2].filter('x'), true)
+      t.equal(c[2].filter?.('x', new Dirent()), true)
+
       t.strictSame(logs(), [['x']])
     }
   })
@@ -131,6 +154,7 @@ t.test('basic arg parsing stuff', async t => {
       t.equal(c[0], 'rimraf')
       t.same(c[1], ['foo'])
       t.type(c[2].filter, 'undefined')
+
       t.strictSame(logs(), [])
     }
   })
@@ -293,7 +317,7 @@ t.test('print failure when impl throws', async t => {
   const logs = t.capture(console, 'log').args
   const errs = t.capture(console, 'error').args
   const code = await mockBin([path], {
-    '../src/index.js': {
+    [join(SRC_DIR, 'index.js')]: {
       rimraf: async () => {
         throw err
       },
@@ -321,8 +345,7 @@ t.test('interactive deletes', t => {
 
   const leftovers = (d: string) => {
     try {
-      readdirSync(d)
-      return true
+      return readdirSync(d)
     } catch {
       return false
     }
@@ -337,16 +360,11 @@ t.test('interactive deletes', t => {
           const child = spawnBin(['-i', verbose, d])
           const out: string[] = []
           const err: string[] = []
-          const timer = setTimeout(() => {
-            t.fail('timed out')
-            child.kill('SIGKILL')
-          }, 10000)
-          let last = ''
-          child.stdout.on('data', async (c: string) => {
+          const last = ''
+          child.stdout.on('data', (c: string) => {
             out.push(c.trim())
             const s = script.shift()
             if (s !== undefined) {
-              last === s
               out.push(s.trim())
               child.stdin.write(s + '\n')
             } else {
@@ -354,14 +372,11 @@ t.test('interactive deletes', t => {
               child.stdin.write(last + '\n')
             }
           })
-          child.stderr.on('data', (c: string) => {
-            err.push(c)
-          })
+          child.stderr.on('data', (c: string) => err.push(c))
           return new Promise<void>(res => {
             child.on(
               'close',
               (code: number | null, signal: NodeJS.Signals | null) => {
-                clearTimeout(timer)
                 t.same(err, [], 'should not see any stderr')
                 t.equal(code, 0, 'code')
                 t.equal(signal, null, 'signal')

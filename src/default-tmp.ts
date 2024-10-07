@@ -16,7 +16,7 @@ const { stat } = promises
 const isDirSync = (path: string) => {
   try {
     return statSync(path).isDirectory()
-  } catch (er) {
+  } catch {
     return false
   }
 }
@@ -59,6 +59,7 @@ const win32DefaultTmpSync = (path: string) => {
   return root
 }
 
+// eslint-disable-next-line @typescript-eslint/require-await
 const posixDefaultTmp = async () => tmpdir()
 const posixDefaultTmpSync = () => tmpdir()
 

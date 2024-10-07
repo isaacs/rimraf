@@ -4,6 +4,7 @@ import { RimrafAsyncOptions, RimrafSyncOptions } from '../src/index.js'
 
 const asyncOpt = { a: 1 } as unknown as RimrafAsyncOptions
 const syncOpt = { s: 1 } as unknown as RimrafSyncOptions
+const signal = { x: 1 } as unknown as AbortSignal
 
 t.same(oa(asyncOpt), asyncOpt, 'returns equivalent object if provided')
 t.same(oas(syncOpt), oa(syncOpt), 'optArgSync does the same thing')
@@ -102,7 +103,7 @@ t.test('glob option handling', t => {
   t.same(oa({ glob: true }), {
     glob: { absolute: true, withFileTypes: false },
   })
-  const gws = oa({ signal: { x: 1 } as unknown as AbortSignal, glob: true })
+  const gws = oa({ signal, glob: true })
   t.same(gws, {
     signal: { x: 1 },
     glob: { absolute: true, signal: { x: 1 }, withFileTypes: false },
@@ -112,7 +113,7 @@ t.test('glob option handling', t => {
     glob: { absolute: true, nodir: true, withFileTypes: false },
   })
   const gwsg = oa({
-    signal: { x: 1 } as unknown as AbortSignal,
+    signal,
     glob: { nodir: true },
   })
   t.same(gwsg, {
@@ -127,15 +128,15 @@ t.test('glob option handling', t => {
   t.equal(gwsg.signal, gwsg.glob?.signal)
   t.same(
     oa({
-      signal: { x: 1 } as unknown as AbortSignal,
-      glob: { nodir: true, signal: { y: 1 } as unknown as AbortSignal },
+      signal,
+      glob: { nodir: true, signal },
     }),
     {
       signal: { x: 1 },
       glob: {
         absolute: true,
         nodir: true,
-        signal: { y: 1 },
+        signal: { x: 1 },
         withFileTypes: false,
       },
     },

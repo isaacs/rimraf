@@ -42,6 +42,7 @@
     "test": "tap",
     "snap": "tap",
     "format": "prettier --write . --log-level warn",
+    "lint": "eslint",
     "benchmark": "node benchmark/index.js",
     "typedoc": "typedoc --tsconfig .tshy/esm.json ./src/*.ts"
   },
@@ -58,12 +59,16 @@
     "endOfLine": "lf"
   },
   "devDependencies": {
+    "@eslint/js": "^9.12.0",
+    "@types/eslint__js": "^8.42.3",
     "@types/node": "^20.14.10",
+    "eslint": "^9.12.0",
     "mkdirp": "^3.0.1",
     "prettier": "^3.3.2",
     "tap": "^20.0.3",
     "tshy": "^2.0.1",
-    "typedoc": "^0.26.3"
+    "typedoc": "^0.26.3",
+    "typescript-eslint": "^8.8.1"
   },
   "funding": {
     "url": "https://github.com/sponsors/isaacs"

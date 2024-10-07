@@ -28,6 +28,7 @@ const rimrafWindowsDirRetrySync = retryBusySync(fixEPERMSync(rmdirSync))
 const rimrafWindowsDirMoveRemoveFallback = async (
   path: string,
   // already filtered, remove from options so we don't call unnecessarily
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   { filter, ...opt }: RimrafAsyncOptions,
 ): Promise<boolean> => {
   /* c8 ignore next */
@@ -46,6 +47,7 @@ const rimrafWindowsDirMoveRemoveFallback = async (
 const rimrafWindowsDirMoveRemoveFallbackSync = (
   path: string,
   // already filtered, remove from options so we don't call unnecessarily
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   { filter, ...opt }: RimrafSyncOptions,
 ): boolean => {
   opt?.signal?.throwIfAborted()
