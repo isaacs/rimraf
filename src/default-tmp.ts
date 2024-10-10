@@ -11,13 +11,12 @@
 import { tmpdir } from 'os'
 import { parse, resolve } from 'path'
 import { promises, statSync } from './fs.js'
-import platform from './platform.js'
 const { stat } = promises
 
 const isDirSync = (path: string) => {
   try {
     return statSync(path).isDirectory()
-  } catch (er) {
+  } catch {
     return false
   }
 }
@@ -60,10 +59,11 @@ const win32DefaultTmpSync = (path: string) => {
   return root
 }
 
+// eslint-disable-next-line @typescript-eslint/require-await
 const posixDefaultTmp = async () => tmpdir()
 const posixDefaultTmpSync = () => tmpdir()
 
 export const defaultTmp =
-  platform === 'win32' ? win32DefaultTmp : posixDefaultTmp
+  process.platform === 'win32' ? win32DefaultTmp : posixDefaultTmp
 export const defaultTmpSync =
-  platform === 'win32' ? win32DefaultTmpSync : posixDefaultTmpSync
+  process.platform === 'win32' ? win32DefaultTmpSync : posixDefaultTmpSync
