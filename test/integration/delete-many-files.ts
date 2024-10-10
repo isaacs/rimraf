@@ -1,21 +1,18 @@
 // this isn't for coverage.  it's basically a smoke test, to ensure that
 // we can delete a lot of files on CI in multiple platforms and node versions.
 import t from 'tap'
-
-if (/^v10\./.test(process.version)) {
-  t.plan(0, 'skip this on node 10, it runs out of memory')
-  process.exit(0)
-}
+import { statSync, mkdirSync, readdirSync } from '../../src/fs.js'
+import { writeFileSync } from 'fs'
+import { resolve, dirname } from 'path'
+import { manual } from '../../src/index.js'
+import { setTimeout } from 'timers/promises'
+const cases = { manual }
 
 // run with RIMRAF_TEST_START_CHAR/_END_CHAR/_DEPTH environs to
 // make this more or less aggressive.
 const START = (process.env.RIMRAF_TEST_START_CHAR || 'a').charCodeAt(0)
 const END = (process.env.RIMRAF_TEST_END_CHAR || 'f').charCodeAt(0)
 const DEPTH = +(process.env.RIMRAF_TEST_DEPTH || '') || 4
-
-import { statSync, mkdirSync, readdirSync } from '../dist/esm/fs.js'
-import { writeFileSync } from 'fs'
-import { resolve, dirname } from 'path'
 
 const create = (path: string, depth = 0) => {
   mkdirSync(path)
@@ -30,9 +27,6 @@ const create = (path: string, depth = 0) => {
   return path
 }
 
-import { manual } from '../dist/esm/index.js'
-const cases = { manual }
-
 const base = t.testdir(
   Object.fromEntries(
     Object.entries(cases).map(([name]) => [
@@ -45,7 +39,7 @@ const base = t.testdir(
   ),
 )
 
-t.test('create all fixtures', t => {
+t.test('create all fixtures', async t => {
   for (const name of Object.keys(cases)) {
     for (const type of ['sync', 'async']) {
       const path = `${base}/${name}/${type}/test`
@@ -53,7 +47,7 @@ t.test('create all fixtures', t => {
       t.equal(statSync(path).isDirectory(), true, `${name}/${type} created`)
     }
   }
-  setTimeout(() => t.end(), 3000)
+  await setTimeout(3000)
 })
 
 t.test('delete all fixtures', t => {
