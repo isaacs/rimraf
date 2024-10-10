@@ -2,12 +2,13 @@
 // or the error that readdir() raised if not.
 import { promises, readdirSync } from './fs.js'
 const { readdir } = promises
+
 export const readdirOrError = (path: string) =>
-  readdir(path).catch(er => er as NodeJS.ErrnoException)
+  readdir(path).catch(er => er as Error)
 export const readdirOrErrorSync = (path: string) => {
   try {
     return readdirSync(path)
   } catch (er) {
-    return er as NodeJS.ErrnoException
+    return er as Error
   }
 }

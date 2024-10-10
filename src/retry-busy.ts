@@ -1,13 +1,15 @@
 // note: max backoff is the maximum that any *single* backoff will do
 
+import { setTimeout } from 'timers/promises'
 import { RimrafAsyncOptions, RimrafOptions } from './index.js'
+import { isFsError } from './error.js'
 
 export const MAXBACKOFF = 200
 export const RATE = 1.2
 export const MAXRETRIES = 10
 export const codes = new Set(['EMFILE', 'ENFILE', 'EBUSY'])
 
-export const retryBusy = (fn: (path: string) => Promise<any>) => {
+export const retryBusy = <T>(fn: (path: string) => Promise<T>) => {
   const method = async (
     path: string,
     opt: RimrafAsyncOptions,
@@ -22,16 +24,12 @@ export const retryBusy = (fn: (path: string) => Promise<any>) => {
       try {
         return await fn(path)
       } catch (er) {
-        const fer = er as NodeJS.ErrnoException
-        if (fer?.path === path && fer?.code && codes.has(fer.code)) {
+        if (isFsError(er) && er.path === path && codes.has(er.code)) {
           backoff = Math.ceil(backoff * rate)
           total = backoff + total
           if (total < mbo) {
-            return new Promise((res, rej) => {
-              setTimeout(() => {
-                method(path, opt, backoff, total).then(res, rej)
-              }, backoff)
-            })
+            await setTimeout(backoff)
+            return method(path, opt, backoff, total)
           }
           if (retries < max) {
             retries++
@@ -47,7 +45,7 @@ export const retryBusy = (fn: (path: string) => Promise<any>) => {
 }
 
 // just retries, no async so no backoff
-export const retryBusySync = (fn: (path: string) => any) => {
+export const retryBusySync = <T>(fn: (path: string) => T) => {
   const method = (path: string, opt: RimrafOptions) => {
     const max = opt.maxRetries || MAXRETRIES
     let retries = 0
@@ -55,11 +53,10 @@ export const retryBusySync = (fn: (path: string) => any) => {
       try {
         return fn(path)
       } catch (er) {
-        const fer = er as NodeJS.ErrnoException
         if (
-          fer?.path === path &&
-          fer?.code &&
-          codes.has(fer.code) &&
+          isFsError(er) &&
+          er.path === path &&
+          codes.has(er.code) &&
           retries < max
         ) {
           retries++

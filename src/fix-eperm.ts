@@ -1,51 +1,41 @@
+import { errorCode } from './error.js'
 import { chmodSync, promises } from './fs.js'
+import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'
 const { chmod } = promises
 
 export const fixEPERM =
-  (fn: (path: string) => Promise<any>) => async (path: string) => {
+  (fn: (path: string) => Promise<unknown>) =>
+  async (path: string): Promise<void> => {
     try {
-      return await fn(path)
+      return void (await ignoreENOENT(fn(path)))
     } catch (er) {
-      const fer = er as NodeJS.ErrnoException
-      if (fer?.code === 'ENOENT') {
-        return
-      }
-      if (fer?.code === 'EPERM') {
-        try {
-          await chmod(path, 0o666)
-        } catch (er2) {
-          const fer2 = er2 as NodeJS.ErrnoException
-          if (fer2?.code === 'ENOENT') {
-            return
-          }
-          throw er
+      if (errorCode(er) === 'EPERM') {
+        if (
+          !(await ignoreENOENT(
+            chmod(path, 0o666).then(() => true),
+            er,
+          ))
+        ) {
+          return
         }
-        return await fn(path)
+        return void (await fn(path))
       }
       throw er
     }
   }
 
-export const fixEPERMSync = (fn: (path: string) => any) => (path: string) => {
-  try {
-    return fn(path)
-  } catch (er) {
-    const fer = er as NodeJS.ErrnoException
-    if (fer?.code === 'ENOENT') {
-      return
-    }
-    if (fer?.code === 'EPERM') {
-      try {
-        chmodSync(path, 0o666)
-      } catch (er2) {
-        const fer2 = er2 as NodeJS.ErrnoException
-        if (fer2?.code === 'ENOENT') {
+export const fixEPERMSync =
+  (fn: (path: string) => unknown) =>
+  (path: string): void => {
+    try {
+      return void ignoreENOENTSync(() => fn(path))
+    } catch (er) {
+      if (errorCode(er) === 'EPERM') {
+        if (!ignoreENOENTSync(() => (chmodSync(path, 0o666), true), er)) {
           return
         }
-        throw er
+        return void fn(path)
       }
-      return fn(path)
+      throw er
     }
-    throw er
   }
-}

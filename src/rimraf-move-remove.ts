@@ -13,77 +13,31 @@
 
 import { basename, parse, resolve } from 'path'
 import { defaultTmp, defaultTmpSync } from './default-tmp.js'
-
 import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'
-
-import {
-  chmodSync,
-  lstatSync,
-  promises as fsPromises,
-  renameSync,
-  rmdirSync,
-  unlinkSync,
-} from './fs.js'
-const { lstat, rename, unlink, rmdir, chmod } = fsPromises
-
+import { lstatSync, promises, renameSync, rmdirSync, unlinkSync } from './fs.js'
 import { Dirent, Stats } from 'fs'
 import { RimrafAsyncOptions, RimrafSyncOptions } from './index.js'
 import { readdirOrError, readdirOrErrorSync } from './readdir-or-error.js'
+import { fixEPERM, fixEPERMSync } from './fix-eperm.js'
+import { errorCode } from './error.js'
+const { lstat, rename, unlink, rmdir } = promises
 
 // crypto.randomBytes is much slower, and Math.random() is enough here
 const uniqueFilename = (path: string) => `.${basename(path)}.${Math.random()}`
 
-const unlinkFixEPERM = async (path: string) =>
-  unlink(path).catch((er: Error & { code?: string }) => {
-    if (er.code === 'EPERM') {
-      return chmod(path, 0o666).then(
-        () => unlink(path),
-        er2 => {
-          if (er2.code === 'ENOENT') {
-            return
-          }
-          throw er
-        },
-      )
-    } else if (er.code === 'ENOENT') {
-      return
-    }
-    throw er
-  })
-
-const unlinkFixEPERMSync = (path: string) => {
-  try {
-    unlinkSync(path)
-  } catch (er) {
-    if ((er as NodeJS.ErrnoException)?.code === 'EPERM') {
-      try {
-        return chmodSync(path, 0o666)
-      } catch (er2) {
-        if ((er2 as NodeJS.ErrnoException)?.code === 'ENOENT') {
-          return
-        }
-        throw er
-      }
-    } else if ((er as NodeJS.ErrnoException)?.code === 'ENOENT') {
-      return
-    }
-    throw er
-  }
-}
+const unlinkFixEPERM = fixEPERM(unlink)
+const unlinkFixEPERMSync = fixEPERMSync(unlinkSync)
 
 export const rimrafMoveRemove = async (
   path: string,
   opt: RimrafAsyncOptions,
 ) => {
-  if (opt?.signal?.aborted) {
-    throw opt.signal.reason
-  }
-  try {
-    return await rimrafMoveRemoveDir(path, opt, await lstat(path))
-  } catch (er) {
-    if ((er as NodeJS.ErrnoException)?.code === 'ENOENT') return true
-    throw er
-  }
+  opt?.signal?.throwIfAborted()
+  return (
+    (await ignoreENOENT(
+      lstat(path).then(stat => rimrafMoveRemoveDir(path, opt, stat)),
+    )) ?? true
+  )
 }
 
 const rimrafMoveRemoveDir = async (
@@ -91,9 +45,7 @@ const rimrafMoveRemoveDir = async (
   opt: RimrafAsyncOptions,
   ent: Dirent | Stats,
 ): Promise<boolean> => {
-  if (opt?.signal?.aborted) {
-    throw opt.signal.reason
-  }
+  opt?.signal?.throwIfAborted()
   if (!opt.tmp) {
     return rimrafMoveRemoveDir(
       path,
@@ -111,10 +63,10 @@ const rimrafMoveRemoveDir = async (
     // swapped out with a file at just the right moment.
     /* c8 ignore start */
     if (entries) {
-      if (entries.code === 'ENOENT') {
+      if (errorCode(entries) === 'ENOENT') {
         return true
       }
-      if (entries.code !== 'ENOTDIR') {
+      if (errorCode(entries) !== 'ENOTDIR') {
         throw entries
       }
     }
@@ -132,7 +84,7 @@ const rimrafMoveRemoveDir = async (
         rimrafMoveRemoveDir(resolve(path, ent.name), opt, ent),
       ),
     )
-  ).reduce((a, b) => a && b, true)
+  ).every(v => v === true)
   if (!removedAll) {
     return false
   }
@@ -150,10 +102,10 @@ const rimrafMoveRemoveDir = async (
   return true
 }
 
-const tmpUnlink = async (
+const tmpUnlink = async <T>(
   path: string,
   tmp: string,
-  rm: (p: string) => Promise<any>,
+  rm: (p: string) => Promise<T>,
 ) => {
   const tmpFile = resolve(tmp, uniqueFilename(path))
   await rename(path, tmpFile)
@@ -161,15 +113,12 @@ const tmpUnlink = async (
 }
 
 export const rimrafMoveRemoveSync = (path: string, opt: RimrafSyncOptions) => {
-  if (opt?.signal?.aborted) {
-    throw opt.signal.reason
-  }
-  try {
-    return rimrafMoveRemoveDirSync(path, opt, lstatSync(path))
-  } catch (er) {
-    if ((er as NodeJS.ErrnoException)?.code === 'ENOENT') return true
-    throw er
-  }
+  opt?.signal?.throwIfAborted()
+  return (
+    ignoreENOENTSync(() =>
+      rimrafMoveRemoveDirSync(path, opt, lstatSync(path)),
+    ) ?? true
+  )
 }
 
 const rimrafMoveRemoveDirSync = (
@@ -177,9 +126,7 @@ const rimrafMoveRemoveDirSync = (
   opt: RimrafSyncOptions,
   ent: Dirent | Stats,
 ): boolean => {
-  if (opt?.signal?.aborted) {
-    throw opt.signal.reason
-  }
+  opt?.signal?.throwIfAborted()
   if (!opt.tmp) {
     return rimrafMoveRemoveDirSync(
       path,
@@ -199,10 +146,10 @@ const rimrafMoveRemoveDirSync = (
     // swapped out with a file at just the right moment.
     /* c8 ignore start */
     if (entries) {
-      if (entries.code === 'ENOENT') {
+      if (errorCode(entries) === 'ENOENT') {
         return true
       }
-      if (entries.code !== 'ENOTDIR') {
+      if (errorCode(entries) !== 'ENOTDIR') {
         throw entries
       }
     }

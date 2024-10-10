@@ -1,8 +1,5 @@
 import t from 'tap'
-import {
-  readdirOrError,
-  readdirOrErrorSync,
-} from '../dist/esm/readdir-or-error.js'
+import { readdirOrError, readdirOrErrorSync } from '../src/readdir-or-error.js'
 
 const path = t.testdir({
   file: 'file',

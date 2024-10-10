@@ -5,7 +5,7 @@ import {
   RATE,
   retryBusy,
   retryBusySync,
-} from '../dist/esm/retry-busy.js'
+} from '../src/retry-busy.js'
 
 import t from 'tap'
 
@@ -21,14 +21,14 @@ t.matchSnapshot(
 
 t.test('basic working operation when no errors happen', async t => {
   let calls = 0
-  const arg = {} as unknown as string
+  const arg: string = 'path'
   const opt = {}
-  const method = (a: typeof arg, b?: any) => {
+  const method = (a: string, b?: unknown) => {
     t.equal(a, arg, 'got first argument')
     t.equal(b, undefined, 'did not get another argument')
     calls++
   }
-  const asyncMethod = async (a: typeof arg, b?: any) => method(a, b)
+  const asyncMethod = async (a: string, b?: unknown) => method(a, b)
   const rBS = retryBusySync(method)
   rBS(arg, opt)
   t.equal(calls, 1)
@@ -43,9 +43,9 @@ t.test('retry when known error code thrown', t => {
     t.test(code, async t => {
       let thrown = false
       let calls = 0
-      const arg = {} as unknown as string
+      const arg = 'path'
       const opt = {}
-      const method = (a: string, b?: any) => {
+      const method = (a: string, b?: unknown) => {
         t.equal(a, arg, 'got first argument')
         t.equal(b, undefined, 'did not get another argument')
         if (!thrown) {
@@ -59,7 +59,7 @@ t.test('retry when known error code thrown', t => {
           thrown = false
         }
       }
-      const asyncMethod = async (a: string, b?: any) => method(a, b)
+      const asyncMethod = async (a: string, b?: unknown) => method(a, b)
       const rBS = retryBusySync(method)
       rBS(arg, opt)
       t.equal(calls, 2)
@@ -80,14 +80,14 @@ t.test('retry and eventually give up', t => {
   for (const code of codes) {
     t.test(code, async t => {
       let calls = 0
-      const arg = {} as unknown as string
-      const method = (a: string, b?: any) => {
+      const arg = 'path'
+      const method = (a: string, b?: unknown) => {
         t.equal(a, arg, 'got first argument')
         t.equal(b, undefined, 'did not get another argument')
         calls++
         throw Object.assign(new Error(code), { path: a, code })
       }
-      const asyncMethod = async (a: string, b?: any) => method(a, b)
+      const asyncMethod = async (a: string, b?: unknown) => method(a, b)
       const rBS = retryBusySync(method)
       t.throws(() => rBS(arg, opt), { path: arg, code })
       t.equal(calls, 3)
@@ -99,16 +99,16 @@ t.test('retry and eventually give up', t => {
 })
 
 t.test('throw unknown error gives up right away', async t => {
-  const arg = {} as unknown as string
+  const arg = 'path'
   const opt = {}
-  const method = (a: string, b?: any) => {
+  const method = (a: string, b?: unknown) => {
     t.equal(a, arg, 'got first argument')
     t.equal(b, undefined, 'did not get another argument')
-    throw Object.assign(new Error('nope'), { path: a, code: 'nope' })
+    throw Object.assign(new Error('nope'))
   }
-  const asyncMethod = async (a: string, b?: any) => method(a, b)
+  const asyncMethod = async (a: string, b?: unknown) => method(a, b)
   const rBS = retryBusySync(method)
-  t.throws(() => rBS(arg, opt), { code: 'nope' })
+  t.throws(() => rBS(arg, opt), { message: 'nope' })
   const rB = retryBusy(asyncMethod)
-  await t.rejects(rB(arg, opt), { code: 'nope' })
+  await t.rejects(rB(arg, opt), { message: 'nope' })
 })
