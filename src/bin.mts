@@ -1,15 +1,16 @@
 #!/usr/bin/env node
 import type { RimrafAsyncOptions } from './index.js'
 import { rimraf } from './index.js'
-
 import { loadPackageJson } from 'package-json-from-dist'
 
-const { version } = loadPackageJson(import.meta.url, '../package.json')
+const { version } = loadPackageJson(import.meta.url, '../package.json') as {
+  version: string
+}
 
 const runHelpForUsage = () =>
   console.error('run `rimraf --help` for usage information')
 
-export const help = `rimraf version ${version}
+const help = `rimraf version ${version}
 
 Usage: rimraf <path> [<path> ...]
 Deletes all files and folders at "path", recursively.
@@ -84,7 +85,7 @@ const interactiveRimraf = async (
           return result
         })
       })
-      processQueue()
+      void processQueue()
       return p
     }
   const rl = createInterface({
@@ -125,10 +126,6 @@ const main = async (...args: string[]) => {
   const verboseFilter = (s: string) => {
     console.log(relative(cwd, s))
     return true
-  }
-
-  if (process.env.__RIMRAF_TESTING_BIN_FAIL__ === '1') {
-    throw new Error('simulated rimraf failure')
   }
 
   const opt: RimrafAsyncOptions = {}
@@ -257,18 +254,11 @@ const main = async (...args: string[]) => {
 
   return 0
 }
-main.help = help
-main.version = version
 
-export default main
-
-if (process.env.__TESTING_RIMRAF_BIN__ !== '1') {
-  const args = process.argv.slice(2)
-  main(...args).then(
-    code => process.exit(code),
-    er => {
-      console.error(er)
-      process.exit(1)
-    },
-  )
-}
+main(...process.argv.slice(2)).then(
+  code => process.exit(code),
+  er => {
+    console.error(er)
+    process.exit(1)
+  },
+)
