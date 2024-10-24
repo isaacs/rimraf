@@ -39,6 +39,8 @@ Hybrid module, load either with `import` or `require()`.
 // strategies exported as well.
 import { rimraf, rimrafSync, native, nativeSync } from 'rimraf'
 // or
+import { createRequire } from 'node:module'
+const require = createRequire(import.meta.url)
 const { rimraf, rimrafSync, native, nativeSync } = require('rimraf')
 ```
 
