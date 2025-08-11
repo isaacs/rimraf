@@ -31,7 +31,7 @@
   "description": "A deep deletion module for node (like `rm -rf`)",
   "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
   "license": "ISC",
-  "repository": "git://github.com/isaacs/rimraf.git",
+  "repository": "https://github.com/isaacs/rimraf.git",
   "scripts": {
     "preversion": "npm test",
     "postversion": "npm publish",
