@@ -1,3 +1,8 @@
+# 6.1
+
+- Move to native `fs/promises` usage instead of promisifying
+  manually.
+
 # 6.0
 
 - Drop support for nodes before v20
