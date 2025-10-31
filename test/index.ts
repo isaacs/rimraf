@@ -66,7 +66,8 @@ t.test('mocky unit tests to select the correct function', async t => {
       },
     },
   }
-  process.env.__TESTING_RIMRAF_PLATFORM__ = 'posix'
+  t.intercept(process, 'platform', { value: 'posix' })
+
   const { rimraf } = (await t.mockImport(
     '../dist/esm/index.js',
     mocks,
