@@ -5,7 +5,6 @@ import { statSync, mkdirSync, readdirSync } from '../../src/fs.js'
 import { writeFileSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { manual } from '../../src/index.js'
-import { setTimeout } from 'timers/promises'
 const cases = { manual }
 
 // run with RIMRAF_TEST_START_CHAR/_END_CHAR/_DEPTH environs to

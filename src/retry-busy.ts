@@ -1,6 +1,5 @@
 // note: max backoff is the maximum that any *single* backoff will do
 
-import { setTimeout } from 'timers/promises'
 import { RimrafAsyncOptions, RimrafOptions } from './index.js'
 import { isFsError } from './error.js'
 
