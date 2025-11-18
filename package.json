@@ -61,8 +61,8 @@
     "@types/node": "^24.9.2",
     "mkdirp": "^3.0.1",
     "prettier": "^3.6.2",
-    "tap": "^21.1.1",
-    "tshy": "^3.0.3",
+    "tap": "^21.1.4",
+    "tshy": "^3.1.0",
     "typedoc": "^0.28.14"
   },
   "funding": {
@@ -72,7 +72,7 @@
     "node": "20 || >=22"
   },
   "dependencies": {
-    "glob": "^11.0.3",
+    "glob": "^12.0.0",
     "package-json-from-dist": "^1.0.1"
   },
   "keywords": [
