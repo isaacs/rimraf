@@ -45,18 +45,6 @@
     "benchmark": "node benchmark/index.js",
     "typedoc": "typedoc --tsconfig .tshy/esm.json ./src/*.ts"
   },
-  "prettier": {
-    "experimentalTernaries": true,
-    "semi": false,
-    "printWidth": 80,
-    "tabWidth": 2,
-    "useTabs": false,
-    "singleQuote": true,
-    "jsxSingleQuote": false,
-    "bracketSameLine": true,
-    "arrowParens": "avoid",
-    "endOfLine": "lf"
-  },
   "devDependencies": {
     "@types/node": "^24.9.2",
     "mkdirp": "^3.0.1",
@@ -85,8 +73,5 @@
     "rmdir",
     "recursive"
   ],
-  "module": "./dist/esm/index.js",
-  "tap": {
-    "coverage-map": "map.js"
-  }
+  "module": "./dist/esm/index.js"
 }
