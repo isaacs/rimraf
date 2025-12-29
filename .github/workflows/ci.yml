@@ -12,6 +12,7 @@ on:
       - '*.ts'
       - 'lib/**'
       - 'scripts/**'
+      - '.github/workflows/ci.yml'
   workflow_dispatch:
 
 jobs:
