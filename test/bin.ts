@@ -5,7 +5,10 @@ import { RimrafOptions } from '../src/index.js'
 import { basename, join, resolve } from 'path'
 import { loadPackageJson } from 'package-json-from-dist'
 
-const { version } = loadPackageJson(import.meta.url, '../package.json') as {
+const { version } = loadPackageJson(
+  import.meta.url,
+  '../package.json',
+) as {
   version: string
 }
 

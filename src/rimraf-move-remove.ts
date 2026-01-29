@@ -14,7 +14,13 @@
 import { basename, parse, resolve } from 'path'
 import { defaultTmp, defaultTmpSync } from './default-tmp.js'
 import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'
-import { lstatSync, promises, renameSync, rmdirSync, unlinkSync } from './fs.js'
+import {
+  lstatSync,
+  promises,
+  renameSync,
+  rmdirSync,
+  unlinkSync,
+} from './fs.js'
 import { Dirent, Stats } from 'fs'
 import { RimrafAsyncOptions, RimrafSyncOptions } from './index.js'
 import { readdirOrError, readdirOrErrorSync } from './readdir-or-error.js'
@@ -23,7 +29,8 @@ import { errorCode } from './error.js'
 const { lstat, rename, unlink, rmdir } = promises
 
 // crypto.randomBytes is much slower, and Math.random() is enough here
-const uniqueFilename = (path: string) => `.${basename(path)}.${Math.random()}`
+const uniqueFilename = (path: string) =>
+  `.${basename(path)}.${Math.random()}`
 
 const unlinkFixEPERM = fixEPERM(unlink)
 const unlinkFixEPERMSync = fixEPERMSync(unlinkSync)
@@ -112,7 +119,10 @@ const tmpUnlink = async <T>(
   return await rm(tmpFile)
 }
 
-export const rimrafMoveRemoveSync = (path: string, opt: RimrafSyncOptions) => {
+export const rimrafMoveRemoveSync = (
+  path: string,
+  opt: RimrafSyncOptions,
+) => {
   opt?.signal?.throwIfAborted()
   return (
     ignoreENOENTSync(() =>

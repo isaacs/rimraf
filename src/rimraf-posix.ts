@@ -13,7 +13,10 @@ import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'
 import { errorCode } from './error.js'
 const { lstat, rmdir, unlink } = promises
 
-export const rimrafPosix = async (path: string, opt: RimrafAsyncOptions) => {
+export const rimrafPosix = async (
+  path: string,
+  opt: RimrafAsyncOptions,
+) => {
   opt?.signal?.throwIfAborted()
   return (
     (await ignoreENOENT(
@@ -25,8 +28,9 @@ export const rimrafPosix = async (path: string, opt: RimrafAsyncOptions) => {
 export const rimrafPosixSync = (path: string, opt: RimrafSyncOptions) => {
   opt?.signal?.throwIfAborted()
   return (
-    ignoreENOENTSync(() => rimrafPosixDirSync(path, opt, lstatSync(path))) ??
-    true
+    ignoreENOENTSync(() =>
+      rimrafPosixDirSync(path, opt, lstatSync(path)),
+    ) ?? true
   )
 }
 
@@ -59,7 +63,9 @@ const rimrafPosixDir = async (
 
   const removedAll = (
     await Promise.all(
-      entries.map(ent => rimrafPosixDir(resolve(path, ent.name), opt, ent)),
+      entries.map(ent =>
+        rimrafPosixDir(resolve(path, ent.name), opt, ent),
+      ),
     )
   ).every(v => v === true)
 

@@ -3,7 +3,10 @@ import type { RimrafAsyncOptions } from './index.js'
 import { rimraf } from './index.js'
 import { loadPackageJson } from 'package-json-from-dist'
 
-const { version } = loadPackageJson(import.meta.url, '../package.json') as {
+const { version } = loadPackageJson(
+  import.meta.url,
+  '../package.json',
+) as {
   version: string
 }
 
@@ -57,7 +60,10 @@ const prompt = async (rl: Interface, q: string) =>
   new Promise<string>(res => rl.question(q, res))
 
 const interactiveRimraf = async (
-  impl: (path: string | string[], opt?: RimrafAsyncOptions) => Promise<boolean>,
+  impl: (
+    path: string | string[],
+    opt?: RimrafAsyncOptions,
+  ) => Promise<boolean>,
   paths: string[],
   opt: RimrafAsyncOptions,
 ) => {
@@ -99,7 +105,10 @@ const interactiveRimraf = async (
       }
       while (!allRemaining) {
         const a = (
-          await prompt(rl, `rm? ${relative(cwd, path)}\n[(Yes)/No/All/Quit] > `)
+          await prompt(
+            rl,
+            `rm? ${relative(cwd, path)}\n[(Yes)/No/All/Quit] > `,
+          )
         ).trim()
         if (/^n/i.test(a)) {
           return false
@@ -227,7 +236,9 @@ const main = async (...args: string[]) => {
   if (opt.preserveRoot !== false) {
     for (const path of paths.map(p => resolve(p))) {
       if (path === parse(path).root) {
-        console.error(`rimraf: it is dangerous to operate recursively on '/'`)
+        console.error(
+          `rimraf: it is dangerous to operate recursively on '/'`,
+        )
         console.error('use --no-preserve-root to override this failsafe')
         return 1
       }

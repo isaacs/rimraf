@@ -44,7 +44,11 @@ t.test('create all fixtures', async t => {
     for (const type of ['sync', 'async']) {
       const path = `${base}/${name}/${type}/test`
       create(path)
-      t.equal(statSync(path).isDirectory(), true, `${name}/${type} created`)
+      t.equal(
+        statSync(path).isDirectory(),
+        true,
+        `${name}/${type} created`,
+      )
     }
   }
   await setTimeout(3000)
@@ -57,14 +61,22 @@ t.test('delete all fixtures', t => {
         const path = `${base}/${name}/async/test`
         await rimraf(path, {})
         t.throws(() => statSync(path), { code: 'ENOENT' }, 'fully removed')
-        t.same(readdirSync(dirname(path)), [], 'no temp entries left behind')
+        t.same(
+          readdirSync(dirname(path)),
+          [],
+          'no temp entries left behind',
+        )
       })
 
       t.test('sync', t => {
         const path = `${base}/${name}/sync/test`
         rimraf.sync(path, {})
         t.throws(() => statSync(path), { code: 'ENOENT' }, 'fully removed')
-        t.same(readdirSync(dirname(path)), [], 'no temp entries left behind')
+        t.same(
+          readdirSync(dirname(path)),
+          [],
+          'no temp entries left behind',
+        )
         t.end()
       })
 

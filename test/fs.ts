@@ -13,7 +13,11 @@ type MockCb = (e: Error | null, m?: string) => void
 type MockFsCb = Record<string, (cb: MockCb) => void>
 type MockFsPromise = Record<string, () => Promise<void>>
 
-const mockFs = async (t: Test, fs: MockFsCb = {}, fsp: MockFsPromise = {}) =>
+const mockFs = async (
+  t: Test,
+  fs: MockFsCb = {},
+  fsp: MockFsPromise = {},
+) =>
   (await t.mockImport('../src/fs.js', {
     fs: t.createMock(realFS, fs),
     'fs/promises': t.createMock(realFSP, fsp),
@@ -24,9 +28,8 @@ const mockFSMethodPass =
   (...args: unknown[]) => {
     process.nextTick(() => (args.at(-1) as MockCb)(null, method))
   }
-const mockFSPromiseMethodPass =
-  (_method: string) =>
-  () => new Promise<void>((resolve, _reject) => {
+const mockFSPromiseMethodPass = (_method: string) => () =>
+  new Promise<void>((resolve, _reject) => {
     resolve()
   })
 const mockFSMethodFail =
@@ -34,9 +37,8 @@ const mockFSMethodFail =
   (...args: unknown[]) => {
     process.nextTick(() => (args.at(-1) as MockCb)(new Error('oops')))
   }
-const mockFSPromiseMethodFail =
-  (_method: string) =>
-  () => new Promise<void>((_resolve, reject) => {
+const mockFSPromiseMethodFail = (_method: string) => () =>
+  new Promise<void>((_resolve, reject) => {
     reject(new Error('oops'))
   })
 
@@ -47,7 +49,6 @@ const mockFSPromisesFail: MockFsPromise = {}
 const mockFSPromisesPass: MockFsPromise = {}
 
 for (const method of Object.keys(fs.promises)) {
-
   // of course fs.rm is missing when we shouldn't use native :)
   // also, readdirSync is clubbed to always return file types
   if (method !== 'rm' || useNative()) {

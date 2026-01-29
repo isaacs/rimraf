@@ -15,6 +15,10 @@ for (const platform of ['win32', 'posix']) {
       : [rimrafPosix, rimrafPosixSync]
 
     t.equal(rimrafManual, expectManual, 'got expected implementation')
-    t.equal(rimrafManualSync, expectManualSync, 'got expected implementation')
+    t.equal(
+      rimrafManualSync,
+      expectManualSync,
+      'got expected implementation',
+    )
   })
 }

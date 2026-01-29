@@ -1,5 +1,8 @@
 import t from 'tap'
-import { readdirOrError, readdirOrErrorSync } from '../src/readdir-or-error.js'
+import {
+  readdirOrError,
+  readdirOrErrorSync,
+} from '../src/readdir-or-error.js'
 
 const path = t.testdir({
   file: 'file',
@@ -35,7 +38,11 @@ for (const [c, expect] of cases) {
         expect.sort(),
         'got async result',
       )
-      t.same(resSync.map(e => e.name).sort(), expect.sort(), 'got sync result')
+      t.same(
+        resSync.map(e => e.name).sort(),
+        expect.sort(),
+        'got sync result',
+      )
     } else {
       t.match(resAsync, expect, 'got async result')
       t.match(resSync, expect, 'got sync result')

@@ -26,7 +26,10 @@ t.test('sync', t => {
   const throwEperm = () => {
     throw eperm()
   }
-  t.doesNotThrow(() => ignoreENOENTSync(throwEnoent), 'enoent is fine sync')
+  t.doesNotThrow(
+    () => ignoreENOENTSync(throwEnoent),
+    'enoent is fine sync',
+  )
   t.throws(
     () => ignoreENOENTSync(throwEperm),
     { code: 'EPERM' },

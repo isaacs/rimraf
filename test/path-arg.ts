@@ -6,9 +6,12 @@ for (const platform of ['win32', 'posix'] as const) {
   t.test(platform, async t => {
     t.intercept(process, 'platform', { value: platform })
     const path = PATH[platform] || PATH
-    const { default: pathArg } = (await t.mockImport('../src/path-arg.js', {
-      path,
-    })) as typeof import('../src/path-arg.js')
+    const { default: pathArg } = (await t.mockImport(
+      '../src/path-arg.js',
+      {
+        path,
+      },
+    )) as typeof import('../src/path-arg.js')
 
     t.equal(pathArg('a/b/c'), path.resolve('a/b/c'))
     t.throws(

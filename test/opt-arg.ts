@@ -25,7 +25,12 @@ t.test('every kind of invalid option value', t => {
   // possible combination of the values here.
   const badBool = [undefined, 1, null, 'x', {}]
   const badNum = [undefined, true, false, null, 'x', '1', {}]
-  const badStr = [undefined, { toString: () => 'hi' }, /hi/, Symbol.for('hi')]
+  const badStr = [
+    undefined,
+    { toString: () => 'hi' },
+    /hi/,
+    Symbol.for('hi'),
+  ]
   for (const preserveRoot of badBool) {
     for (const tmp of badStr) {
       for (const maxRetries of badNum) {
@@ -102,7 +107,10 @@ t.test('glob option handling', t => {
   t.same(oa({ glob: true }), {
     glob: { absolute: true, withFileTypes: false },
   })
-  const gws = oa({ signal: { x: 1 } as unknown as AbortSignal, glob: true })
+  const gws = oa({
+    signal: { x: 1 } as unknown as AbortSignal,
+    glob: true,
+  })
   t.same(gws, {
     signal: { x: 1 },
     glob: { absolute: true, signal: { x: 1 }, withFileTypes: false },

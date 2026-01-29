@@ -13,7 +13,8 @@ export const isRimrafOptions = (o: any): o is RimrafOptions =>
   typeOrUndef(o.retryDelay, 'number') &&
   typeOrUndef(o.backoff, 'number') &&
   typeOrUndef(o.maxBackoff, 'number') &&
-  (typeOrUndef(o.glob, 'boolean') || (o.glob && typeof o.glob === 'object')) &&
+  (typeOrUndef(o.glob, 'boolean') ||
+    (o.glob && typeof o.glob === 'object')) &&
   typeOrUndef(o.filter, 'function')
 
 export const assertRimrafOptions: (o: any) => void = (

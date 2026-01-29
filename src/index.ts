@@ -7,7 +7,10 @@ import {
 } from './opt-arg.js'
 import pathArg from './path-arg.js'
 import { rimrafManual, rimrafManualSync } from './rimraf-manual.js'
-import { rimrafMoveRemove, rimrafMoveRemoveSync } from './rimraf-move-remove.js'
+import {
+  rimrafMoveRemove,
+  rimrafMoveRemoveSync,
+} from './rimraf-move-remove.js'
 import { rimrafNative, rimrafNativeSync } from './rimraf-native.js'
 import { rimrafPosix, rimrafPosixSync } from './rimraf-posix.js'
 import { rimrafWindows, rimrafWindowsSync } from './rimraf-windows.js'
@@ -57,13 +60,19 @@ const wrapSync =
   }
 
 export const nativeSync = wrapSync(rimrafNativeSync)
-export const native = Object.assign(wrap(rimrafNative), { sync: nativeSync })
+export const native = Object.assign(wrap(rimrafNative), {
+  sync: nativeSync,
+})
 
 export const manualSync = wrapSync(rimrafManualSync)
-export const manual = Object.assign(wrap(rimrafManual), { sync: manualSync })
+export const manual = Object.assign(wrap(rimrafManual), {
+  sync: manualSync,
+})
 
 export const windowsSync = wrapSync(rimrafWindowsSync)
-export const windows = Object.assign(wrap(rimrafWindows), { sync: windowsSync })
+export const windows = Object.assign(wrap(rimrafWindows), {
+  sync: windowsSync,
+})
 
 export const posixSync = wrapSync(rimrafPosixSync)
 export const posix = Object.assign(wrap(rimrafPosix), { sync: posixSync })

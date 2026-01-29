@@ -160,18 +160,21 @@ t.test('actually delete some stuff', t => {
 t.test('accept array of paths as first arg', async t => {
   const ASYNC_CALLS: any[] = []
   const SYNC_CALLS: any[] = []
-  const { rimraf, rimrafSync } = (await t.mockImport('../dist/esm/index.js', {
-    '../dist/esm/use-native.js': {
-      useNative: () => true,
-      useNativeSync: () => true,
+  const { rimraf, rimrafSync } = (await t.mockImport(
+    '../dist/esm/index.js',
+    {
+      '../dist/esm/use-native.js': {
+        useNative: () => true,
+        useNativeSync: () => true,
+      },
+      '../dist/esm/rimraf-native.js': {
+        rimrafNative: async (path: string, opt: RimrafOptions) =>
+          ASYNC_CALLS.push([path, opt]),
+        rimrafNativeSync: (path: string, opt: RimrafOptions) =>
+          SYNC_CALLS.push([path, opt]),
+      },
     },
-    '../dist/esm/rimraf-native.js': {
-      rimrafNative: async (path: string, opt: RimrafOptions) =>
-        ASYNC_CALLS.push([path, opt]),
-      rimrafNativeSync: (path: string, opt: RimrafOptions) =>
-        SYNC_CALLS.push([path, opt]),
-    },
-  })) as typeof import('../dist/esm/index.js')
+  )) as typeof import('../dist/esm/index.js')
   t.equal(await rimraf(['a', 'b', 'c']), true)
   t.equal(
     await rimraf(['i', 'j', 'k'], { x: 'ya' } as unknown as RimrafOptions),

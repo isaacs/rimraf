@@ -16,7 +16,10 @@ import { lstatSync, promises, rmdirSync, unlinkSync } from './fs.js'
 import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'
 import { readdirOrError, readdirOrErrorSync } from './readdir-or-error.js'
 import { retryBusy, retryBusySync } from './retry-busy.js'
-import { rimrafMoveRemove, rimrafMoveRemoveSync } from './rimraf-move-remove.js'
+import {
+  rimrafMoveRemove,
+  rimrafMoveRemoveSync,
+} from './rimraf-move-remove.js'
 import { errorCode } from './error.js'
 const { unlink, rmdir, lstat } = promises
 
@@ -66,7 +69,10 @@ const START = Symbol('start')
 const CHILD = Symbol('child')
 const FINISH = Symbol('finish')
 
-export const rimrafWindows = async (path: string, opt: RimrafAsyncOptions) => {
+export const rimrafWindows = async (
+  path: string,
+  opt: RimrafAsyncOptions,
+) => {
   opt?.signal?.throwIfAborted()
   return (
     (await ignoreENOENT(
@@ -75,7 +81,10 @@ export const rimrafWindows = async (path: string, opt: RimrafAsyncOptions) => {
   )
 }
 
-export const rimrafWindowsSync = (path: string, opt: RimrafSyncOptions) => {
+export const rimrafWindowsSync = (
+  path: string,
+  opt: RimrafSyncOptions,
+) => {
   opt?.signal?.throwIfAborted()
   return (
     ignoreENOENTSync(() =>
@@ -187,7 +196,9 @@ const rimrafWindowsDirSync = (
     if (opt.filter && !opt.filter(path, ent)) {
       return false
     }
-    ignoreENOENTSync(() => rimrafWindowsDirMoveRemoveFallbackSync(path, opt))
+    ignoreENOENTSync(() =>
+      rimrafWindowsDirMoveRemoveFallbackSync(path, opt),
+    )
   }
   return true
 }

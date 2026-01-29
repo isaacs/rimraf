@@ -58,7 +58,9 @@ t.test('throw unlink errors', async t => {
         },
         promises: {
           unlink: async () => {
-            throw Object.assign(new Error('cannot unlink'), { code: 'FOO' })
+            throw Object.assign(new Error('cannot unlink'), {
+              code: 'FOO',
+            })
           },
         },
       }),
@@ -99,7 +101,9 @@ t.test('throw unexpected readdir errors', async t => {
         {
           '../src/fs.js': t.createMock(fs, {
             readdirSync: () => {
-              throw Object.assign(new Error('cannot readdir'), { code: 'FOO' })
+              throw Object.assign(new Error('cannot readdir'), {
+                code: 'FOO',
+              })
             },
             promises: {
               readdir: async () => {

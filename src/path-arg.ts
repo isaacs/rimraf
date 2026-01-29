@@ -11,7 +11,8 @@ const pathArg = (path: string, opt: RimrafAsyncOptions = {}) => {
       : type === 'object' ? inspect(path)
       : `type ${type} ${path}`
     const msg =
-      'The "path" argument must be of type string. ' + `Received ${received}`
+      'The "path" argument must be of type string. ' +
+      `Received ${received}`
     throw Object.assign(new TypeError(msg), {
       path,
       code: 'ERR_INVALID_ARG_TYPE',
@@ -31,7 +32,8 @@ const pathArg = (path: string, opt: RimrafAsyncOptions = {}) => {
   const { root } = parse(path)
 
   if (path === root && opt.preserveRoot !== false) {
-    const msg = 'refusing to remove root directory without preserveRoot:false'
+    const msg =
+      'refusing to remove root directory without preserveRoot:false'
     throw Object.assign(new Error(msg), {
       path,
       code: 'ERR_PRESERVE_ROOT',
