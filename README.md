@@ -3,6 +3,35 @@ in a cross-platform implementation.
 
 Install with `npm install rimraf`.
 
+> [!CAUTION]
+>
+> ## Please Be Safe, this tool deletes and moves stuff, by design
+>
+> The _intended purpose_ of this tool is to remove files and
+> directories from the filesystem, aggressively and recursively
+> removing all items that it can find under a given target.
+>
+> It goes without saying that you _must not pass untrusted input
+> to this function or CLI tool_, just as you would not to the
+> `rm(1)` command or the `unlink(2)` function. It is very
+> challenging to guarantee that _any_ user input will be safe to
+> remove recursively in this way.
+>
+> Furthermore, note that if you allow untrusted parties to
+> provide arguments to the `rimraf` command line tool, they may
+> also specify the `--tmp=<dir>` folder used by the
+> `--impl=move-remove` strategy, which can move files to an
+> arbitrary place on disk.
+>
+> Because the intended purpose of this tool is the permanent
+> destruction of filesystem entries, any security reports that
+> rely on untrusted input being passed to the function or command
+> line tool will be rejected.
+>
+> **It is your responsibility as a user to never pass untrusted
+> user input to this module, or your system can be destroyed or
+> compromised.**
+
 ## Major Changes
 
 ### v5 to v6
