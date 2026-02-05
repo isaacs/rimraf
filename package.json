@@ -60,7 +60,7 @@
     "node": "20 || >=22"
   },
   "dependencies": {
-    "glob": "^13.0.0",
+    "glob": "^13.0.1",
     "package-json-from-dist": "^1.0.1"
   },
   "keywords": [
