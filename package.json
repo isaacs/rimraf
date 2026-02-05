@@ -46,7 +46,7 @@
     "typedoc": "typedoc --tsconfig .tshy/esm.json ./src/*.ts"
   },
   "devDependencies": {
-    "@types/node": "^24.9.2",
+    "@types/node": "^25.2.0",
     "mkdirp": "^3.0.1",
     "prettier": "^3.6.2",
     "tap": "^21.1.1",
@@ -60,7 +60,7 @@
     "node": "20 || >=22"
   },
   "dependencies": {
-    "glob": "^13.0.0",
+    "glob": "^13.0.1",
     "package-json-from-dist": "^1.0.1"
   },
   "keywords": [
