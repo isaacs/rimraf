@@ -18,6 +18,18 @@ for (const platform of ['win32', 'posix'] as const) {
       () => pathArg('a\0b'),
       Error('path must be a string without null bytes'),
     )
+
+    // Empty string validation - prevents accidental deletion of cwd
+    // Note: whitespace-only paths like ' ' or '\t' are valid filenames
+    t.throws(() => pathArg(''), {
+      code: 'ERR_INVALID_ARG_VALUE',
+      path: '',
+      message: 'path cannot be empty string',
+      name: 'TypeError',
+    })
+    // Whitespace-only paths are valid filenames and should resolve normally
+    t.equal(pathArg('   '), path.resolve('   '))
+    t.equal(pathArg('\t'), path.resolve('\t'))
     if (platform === 'win32') {
       const badPaths = [
         'c:\\a\\b:c',

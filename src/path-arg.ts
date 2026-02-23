@@ -28,6 +28,17 @@ const pathArg = (path: string, opt: RimrafAsyncOptions = {}) => {
     })
   }
 
+  // Prevent accidental deletion of cwd when empty string is passed
+  // resolve('') returns cwd, which would be catastrophic
+  // Note: whitespace-only paths like ' ' or '\t' are valid filenames
+  if (path === '') {
+    const msg = 'path cannot be empty string'
+    throw Object.assign(new TypeError(msg), {
+      path,
+      code: 'ERR_INVALID_ARG_VALUE',
+    })
+  }
+
   path = resolve(path)
   const { root } = parse(path)
 
