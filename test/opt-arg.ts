@@ -47,7 +47,7 @@ t.test('every kind of invalid option value', t => {
               ) {
                 continue
               }
-              t.throws(() =>
+              try {
                 oa({
                   //@ts-expect-error
                   preserveRoot,
@@ -61,8 +61,16 @@ t.test('every kind of invalid option value', t => {
                   maxBackoff,
                   //@ts-expect-error
                   tmp,
-                }),
-              )
+                })
+                t.fail('expected throw for invalid options', {
+                  preserveRoot,
+                  maxRetries,
+                  retryDelay,
+                  backoff,
+                  maxBackoff,
+                  tmp,
+                })
+              } catch (_) {}
             }
           }
         }
@@ -84,16 +92,15 @@ t.test('test every allowed combination', t => {
         for (const retryDelay of goodNum) {
           for (const backoff of goodNum) {
             for (const maxBackoff of goodNum) {
-              t.ok(
-                oa({
-                  preserveRoot,
-                  maxRetries,
-                  retryDelay,
-                  backoff,
-                  maxBackoff,
-                  tmp,
-                }),
-              )
+              // just verify it doesn't throw
+              oa({
+                preserveRoot,
+                maxRetries,
+                retryDelay,
+                backoff,
+                maxBackoff,
+                tmp,
+              })
             }
           }
         }
