@@ -82,6 +82,11 @@ something was omitted from the removal via a `filter` option.
 This first parameter is a path or array of paths. The second
 argument is an options object.
 
+If interpreted as `glob` patterns, then the paths must be
+normal `string` values. If not glob pattern matching, then you
+may also pass in `file:` URL objects, or `Buffer` objects, which
+will be turned into string paths in the normal ways.
+
 Options:
 
 - `preserveRoot`: If set to boolean `false`, then allow the

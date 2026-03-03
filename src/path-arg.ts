@@ -1,23 +1,43 @@
-import { parse, resolve } from 'path'
+import { parse, resolve, normalize } from 'path'
 import { inspect } from 'util'
 import { RimrafAsyncOptions } from './index.js'
+import { fileURLToPath } from 'url'
 
-const pathArg = (path: string, opt: RimrafAsyncOptions = {}) => {
-  const type = typeof path
-  if (type !== 'string') {
+const dotPattern = /(?:^|\\|\/)\.\.?(?:$|\\|\/)/
+const BufferToString = (b: ArrayBufferView) =>
+  Buffer.prototype.toString.call(b, 'utf8')
+
+export type PathLike = string | URL | ArrayBufferLike | Buffer
+
+export function pathArg(
+  path: PathLike,
+  opt: RimrafAsyncOptions = {},
+): string {
+  if (ArrayBuffer.isView(path)) {
+    path = BufferToString(path)
+  } else if (path instanceof URL && path.protocol === 'file:') {
+    path = fileURLToPath(path)
+  }
+  if (typeof path !== 'string') {
+    const type = typeof path
     const ctor = path && type === 'object' && path.constructor
     const received =
-      ctor && ctor.name ? `an instance of ${ctor.name}`
+      path instanceof URL ? `"${path.protocol}" URL object`
+      : ctor && ctor.name ? `an instance of ${ctor.name}`
       : type === 'object' ? inspect(path)
       : `type ${type} ${path}`
     const msg =
-      'The "path" argument must be of type string. ' +
+      'The "path" argument must be of type string, Buffer, or "file:" URL. ' +
       `Received ${received}`
     throw Object.assign(new TypeError(msg), {
       path,
       code: 'ERR_INVALID_ARG_TYPE',
     })
   }
+  if (dotPattern.test(path)) {
+    path = normalize(path)
+  }
+  if (path === '.') path = process.cwd()
 
   if (/\0/.test(path)) {
     // simulate same failure that node raises
@@ -28,10 +48,22 @@ const pathArg = (path: string, opt: RimrafAsyncOptions = {}) => {
     })
   }
 
-  path = resolve(path)
-  const { root } = parse(path)
+  if (path === '') {
+    throw Object.assign(
+      new Error("'ENOENT: no such file or directory, lstat ''"),
+      {
+        errno: -2,
+        code: 'ENOENT',
+        syscall: 'lstat',
+        path: '',
+      },
+    )
+  }
 
-  if (path === root && opt.preserveRoot !== false) {
+  const rpath = resolve(path)
+  const { root } = parse(rpath)
+
+  if (rpath === root && opt.preserveRoot !== false) {
     const msg =
       'refusing to remove root directory without preserveRoot:false'
     throw Object.assign(new Error(msg), {
@@ -42,8 +74,7 @@ const pathArg = (path: string, opt: RimrafAsyncOptions = {}) => {
 
   if (process.platform === 'win32') {
     const badWinChars = /[*|"<>?:]/
-    const { root } = parse(path)
-    if (badWinChars.test(path.substring(root.length))) {
+    if (badWinChars.test(rpath.substring(root.length))) {
       throw Object.assign(new Error('Illegal characters in path.'), {
         path,
         code: 'EINVAL',
@@ -53,5 +84,3 @@ const pathArg = (path: string, opt: RimrafAsyncOptions = {}) => {
 
   return path
 }
-
-export default pathArg

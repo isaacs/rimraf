@@ -1,11 +1,8 @@
 import { glob, globSync } from 'glob'
-import {
-  optArg,
-  optArgSync,
-  RimrafAsyncOptions,
-  RimrafSyncOptions,
-} from './opt-arg.js'
-import pathArg from './path-arg.js'
+import { optArg, optArgSync } from './opt-arg.js'
+import type { RimrafAsyncOptions, RimrafSyncOptions } from './opt-arg.js'
+import { pathArg } from './path-arg.js'
+import type { PathLike } from './path-arg.js'
 import { rimrafManual, rimrafManualSync } from './rimraf-manual.js'
 import {
   rimrafMoveRemove,
@@ -15,23 +12,27 @@ import { rimrafNative, rimrafNativeSync } from './rimraf-native.js'
 import { rimrafPosix, rimrafPosixSync } from './rimraf-posix.js'
 import { rimrafWindows, rimrafWindowsSync } from './rimraf-windows.js'
 import { useNative, useNativeSync } from './use-native.js'
+import { isStrings } from './is-strings.js'
 
-export {
-  assertRimrafOptions,
-  isRimrafOptions,
-  type RimrafAsyncOptions,
-  type RimrafOptions,
-  type RimrafSyncOptions,
+export type { PathLike } from './path-arg.js'
+
+export type {
+  RimrafAsyncOptions,
+  RimrafOptions,
+  RimrafSyncOptions,
 } from './opt-arg.js'
 
-const wrap =
-  (fn: (p: string, o: RimrafAsyncOptions) => Promise<boolean>) =>
-  async (
+export { assertRimrafOptions, isRimrafOptions } from './opt-arg.js'
+
+const wrap = (
+  fn: (p: string, o: RimrafAsyncOptions) => Promise<boolean>,
+) => {
+  const rimraf = async (
     path: string | string[],
     opt?: RimrafAsyncOptions,
   ): Promise<boolean> => {
     const options = optArg(opt)
-    if (options.glob) {
+    if (options.glob && isStrings(path)) {
       path = await glob(path, options.glob)
     }
     if (Array.isArray(path)) {
@@ -42,12 +43,16 @@ const wrap =
       return !!(await fn(pathArg(path, options), options))
     }
   }
+  return rimraf
+}
 
-const wrapSync =
-  (fn: (p: string, o: RimrafSyncOptions) => boolean) =>
-  (path: string | string[], opt?: RimrafSyncOptions): boolean => {
+const wrapSync = (fn: (p: string, o: RimrafSyncOptions) => boolean) => {
+  const rimraf = (
+    path: PathLike | PathLike[],
+    opt?: RimrafSyncOptions,
+  ): boolean => {
     const options = optArgSync(opt)
-    if (options.glob) {
+    if (options.glob && isStrings(path)) {
       path = globSync(path, options.glob)
     }
     if (Array.isArray(path)) {
@@ -58,6 +63,8 @@ const wrapSync =
       return !!fn(pathArg(path, options), options)
     }
   }
+  return rimraf
+}
 
 export const nativeSync = wrapSync(rimrafNativeSync)
 export const native = Object.assign(wrap(rimrafNative), {
