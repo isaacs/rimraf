@@ -46,12 +46,11 @@
     "typedoc": "typedoc --tsconfig .tshy/esm.json ./src/*.ts"
   },
   "devDependencies": {
-    "@types/node": "^25.2.0",
-    "mkdirp": "^3.0.1",
-    "prettier": "^3.6.2",
-    "tap": "^21.1.1",
-    "tshy": "^3.0.3",
-    "typedoc": "^0.28.14"
+    "@types/node": "^25.3.3",
+    "prettier": "^3.8.1",
+    "tap": "^21.6.2",
+    "tshy": "^3.3.2",
+    "typedoc": "^0.28.17"
   },
   "funding": {
     "url": "https://github.com/sponsors/isaacs"
