@@ -54,7 +54,3 @@ jobs:
 
       - name: Run Tests
         run: npm test -- -c -t0
-        env:
-          RIMRAF_TEST_START_CHAR: a
-          RIMRAF_TEST_END_CHAR: f
-          RIMRAF_TEST_DEPTH: 5
