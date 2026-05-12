@@ -1,9 +1,5 @@
-/node_modules/
-/.nyc_output
+/.tap
 /coverage
 /dist
-/.tap
-!/typedoc.json
-!/tsconfig-*.json
-!/.prettierignore
-/benchmark-*.json
+/docs
+/node_modules

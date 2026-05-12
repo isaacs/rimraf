@@ -7,7 +7,8 @@
     "exports": {
       "./package.json": "./package.json",
       ".": "./src/index.ts"
-    }
+    },
+    "selfLink": false
   },
   "bin": "./dist/esm/bin.mjs",
   "main": "./dist/commonjs/index.js",
@@ -43,14 +44,19 @@
     "snap": "tap",
     "format": "prettier --write . --log-level warn",
     "benchmark": "node benchmark/index.js",
-    "typedoc": "typedoc --tsconfig .tshy/esm.json ./src/*.ts"
+    "typedoc": "typedoc --tsconfig .tshy/esm.json ./src/*.ts",
+    "lint": "oxlint --fix src test",
+    "postsnap": "npm run lint",
+    "postlint": "npm run format"
   },
   "devDependencies": {
-    "@types/node": "^25.3.3",
-    "prettier": "^3.8.1",
-    "tap": "^21.6.2",
-    "tshy": "^3.3.2",
-    "typedoc": "^0.28.17"
+    "@types/node": "^25.7.0",
+    "oxlint": "^1.64.0",
+    "oxlint-tsgolint": "^0.22.1",
+    "prettier": "^3.8.3",
+    "tap": "^21.7.2",
+    "tshy": "^4.1.2",
+    "typedoc": "^0.28.19"
   },
   "funding": {
     "url": "https://github.com/sponsors/isaacs"
