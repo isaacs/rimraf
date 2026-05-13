@@ -1,19 +1,18 @@
 import * as PATH from 'path'
 import t from 'tap'
+import { pathToFileURL } from 'url'
 import { inspect } from 'util'
 
 for (const platform of ['win32', 'posix'] as const) {
   t.test(platform, async t => {
     t.intercept(process, 'platform', { value: platform })
     const path = PATH[platform] || PATH
-    const { default: pathArg } = (await t.mockImport(
-      '../src/path-arg.js',
-      {
-        path,
-      },
-    )) as typeof import('../src/path-arg.js')
+    const sep = path.sep
+    const { pathArg } = (await t.mockImport('../src/path-arg.js', {
+      path,
+    })) as typeof import('../src/path-arg.js')
 
-    t.equal(pathArg('a/b/c'), path.resolve('a/b/c'))
+    t.equal(pathArg('a/b/c'), 'a/b/c')
     t.throws(
       () => pathArg('a\0b'),
       Error('path must be a string without null bytes'),
@@ -42,15 +41,33 @@ for (const platform of ['win32', 'posix'] as const) {
     t.throws(() => pathArg('/', { preserveRoot: undefined }), {
       code: 'ERR_PRESERVE_ROOT',
     })
-    t.equal(pathArg('/', { preserveRoot: false }), path.resolve('/'))
+    t.equal(pathArg('/', { preserveRoot: false }), '/')
 
     //@ts-expect-error
     t.throws(() => pathArg({}), {
       code: 'ERR_INVALID_ARG_TYPE',
       path: {},
       message:
-        'The "path" argument must be of type string. ' +
+        'The "path" argument must be of type string, Buffer, or "file:" URL. ' +
         'Received an instance of Object',
+      name: 'TypeError',
+    })
+    t.equal(pathArg(pathToFileURL(process.cwd())), process.cwd())
+    t.equal(pathArg('.'), process.cwd())
+    t.equal(pathArg(Buffer.from('a/b/c/../.')), `a${sep}b`)
+    t.throws(() => pathArg(''), {
+      message: "'ENOENT: no such file or directory, lstat ''",
+      errno: -2,
+      code: 'ENOENT',
+      syscall: 'lstat',
+      path: '',
+    })
+    t.throws(() => pathArg(new URL('https://example.com/')), {
+      code: 'ERR_INVALID_ARG_TYPE',
+      path: {},
+      message:
+        'The "path" argument must be of type string, Buffer, or "file:" URL. ' +
+        `Received "https:" URL`,
       name: 'TypeError',
     })
     //@ts-expect-error
@@ -58,7 +75,7 @@ for (const platform of ['win32', 'posix'] as const) {
       code: 'ERR_INVALID_ARG_TYPE',
       path: [],
       message:
-        'The "path" argument must be of type string. ' +
+        'The "path" argument must be of type string, Buffer, or "file:" URL. ' +
         'Received an instance of Array',
       name: 'TypeError',
     })
@@ -67,7 +84,7 @@ for (const platform of ['win32', 'posix'] as const) {
       code: 'ERR_INVALID_ARG_TYPE',
       path: Object.create(null) as object,
       message:
-        'The "path" argument must be of type string. ' +
+        'The "path" argument must be of type string, Buffer, or "file:" URL. ' +
         `Received ${inspect(Object.create(null))}`,
       name: 'TypeError',
     })
@@ -76,7 +93,7 @@ for (const platform of ['win32', 'posix'] as const) {
       code: 'ERR_INVALID_ARG_TYPE',
       path: true,
       message:
-        'The "path" argument must be of type string. ' +
+        'The "path" argument must be of type string, Buffer, or "file:" URL. ' +
         `Received type boolean true`,
       name: 'TypeError',
     })

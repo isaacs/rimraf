@@ -1,3 +1,10 @@
+# 6.2
+
+- Handle `''`, `'..'` and `'.'` paths the same as Node's intended
+  behavior.
+- Add support for `file:` URL objects and Buffers. (Glob patterns
+  still have to be normal `string` types.)
+
 # 6.1
 
 - Move to native `fs/promises` usage instead of promisifying

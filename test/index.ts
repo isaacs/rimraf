@@ -1,5 +1,4 @@
 import { statSync } from 'fs'
-import { resolve } from 'path'
 import t from 'tap'
 import {
   rimraf,
@@ -26,9 +25,11 @@ t.test('mocky unit tests to select the correct function', async t => {
         return USE_NATIVE
       },
     },
-    '../dist/esm/path-arg.js': (path: string) => {
-      CALLS.push(['pathArg', path])
-      return path
+    '../dist/esm/path-arg.js': {
+      pathArg: (path: string) => {
+        CALLS.push(['pathArg', path])
+        return path
+      },
     },
     '../dist/esm/opt-arg.js': {
       ...OPTARG,
@@ -181,12 +182,12 @@ t.test('accept array of paths as first arg', async t => {
     true,
   )
   t.same(ASYNC_CALLS, [
-    [resolve('a'), {}],
-    [resolve('b'), {}],
-    [resolve('c'), {}],
-    [resolve('i'), { x: 'ya' }],
-    [resolve('j'), { x: 'ya' }],
-    [resolve('k'), { x: 'ya' }],
+    ['a', {}],
+    ['b', {}],
+    ['c', {}],
+    ['i', { x: 'ya' }],
+    ['j', { x: 'ya' }],
+    ['k', { x: 'ya' }],
   ])
 
   t.equal(rimrafSync(['x', 'y', 'z']), true)
@@ -197,12 +198,12 @@ t.test('accept array of paths as first arg', async t => {
     true,
   )
   t.same(SYNC_CALLS, [
-    [resolve('x'), {}],
-    [resolve('y'), {}],
-    [resolve('z'), {}],
-    [resolve('m'), { cat: 'chai' }],
-    [resolve('n'), { cat: 'chai' }],
-    [resolve('o'), { cat: 'chai' }],
+    ['x', {}],
+    ['y', {}],
+    ['z', {}],
+    ['m', { cat: 'chai' }],
+    ['n', { cat: 'chai' }],
+    ['o', { cat: 'chai' }],
   ])
 })
 
