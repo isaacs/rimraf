@@ -1,24 +1,26 @@
-import { Dirent, Stats } from 'fs'
-import { GlobOptions } from 'glob'
+import type { Dirent, Stats } from 'fs'
+import type { GlobOptions } from 'glob'
 
-const typeOrUndef = (val: any, t: string) =>
-  typeof val === 'undefined' || typeof val === t
+const typeOrUndef = (o: object, key: string, t: string) =>
+  !(key in o) ||
+  typeof o[key as keyof typeof o] === 'undefined' ||
+  typeof o[key as keyof typeof o] === t
 
-export const isRimrafOptions = (o: any): o is RimrafOptions =>
-  !!o &&
+export const isRimrafOptions = (o: unknown): o is RimrafOptions =>
   typeof o === 'object' &&
-  typeOrUndef(o.preserveRoot, 'boolean') &&
-  typeOrUndef(o.tmp, 'string') &&
-  typeOrUndef(o.maxRetries, 'number') &&
-  typeOrUndef(o.retryDelay, 'number') &&
-  typeOrUndef(o.backoff, 'number') &&
-  typeOrUndef(o.maxBackoff, 'number') &&
-  (typeOrUndef(o.glob, 'boolean') ||
-    (o.glob && typeof o.glob === 'object')) &&
-  typeOrUndef(o.filter, 'function')
+  !!o &&
+  typeOrUndef(o, 'preserveRoot', 'boolean') &&
+  typeOrUndef(o, 'tmp', 'string') &&
+  typeOrUndef(o, 'maxRetries', 'number') &&
+  typeOrUndef(o, 'retryDelay', 'number') &&
+  typeOrUndef(o, 'backoff', 'number') &&
+  typeOrUndef(o, 'maxBackoff', 'number') &&
+  (typeOrUndef(o, 'glob', 'boolean') ||
+    ('glob' in o && typeof o.glob === 'object' && !!o.glob)) &&
+  typeOrUndef(o, 'filter', 'function')
 
-export const assertRimrafOptions: (o: any) => void = (
-  o: any,
+export const assertRimrafOptions: (o: unknown) => void = (
+  o: unknown,
 ): asserts o is RimrafOptions => {
   if (!isRimrafOptions(o)) {
     throw new Error('invalid rimraf options')

@@ -8,9 +8,9 @@
 //
 // Note: "move then remove" is 2-10 times slower, and just as unreliable.
 
-import { Dirent, Stats } from 'fs'
+import type { Dirent, Stats } from 'fs'
 import { parse, resolve } from 'path'
-import { RimrafAsyncOptions, RimrafSyncOptions } from './index.js'
+import type { RimrafAsyncOptions, RimrafSyncOptions } from './index.js'
 import { fixEPERM, fixEPERMSync } from './fix-eperm.js'
 import { lstatSync, promises, rmdirSync, unlinkSync } from './fs.js'
 import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'

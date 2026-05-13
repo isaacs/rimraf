@@ -1,4 +1,4 @@
-import { RimrafAsyncOptions, RimrafOptions } from './index.js'
+import type { RimrafAsyncOptions, RimrafOptions } from './index.js'
 
 /* c8 ignore next */
 const [major = 0, minor = 0] = process.version

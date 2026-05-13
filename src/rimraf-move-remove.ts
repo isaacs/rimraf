@@ -21,8 +21,8 @@ import {
   rmdirSync,
   unlinkSync,
 } from './fs.js'
-import { Dirent, Stats } from 'fs'
-import { RimrafAsyncOptions, RimrafSyncOptions } from './index.js'
+import type { Dirent, Stats } from 'fs'
+import type { RimrafAsyncOptions, RimrafSyncOptions } from './index.js'
 import { readdirOrError, readdirOrErrorSync } from './readdir-or-error.js'
 import { fixEPERM, fixEPERMSync } from './fix-eperm.js'
 import { errorCode } from './error.js'

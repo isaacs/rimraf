@@ -1,10 +1,6 @@
 import { glob, globSync } from 'glob'
-import {
-  optArg,
-  optArgSync,
-  RimrafAsyncOptions,
-  RimrafSyncOptions,
-} from './opt-arg.js'
+import type { RimrafAsyncOptions, RimrafSyncOptions } from './opt-arg.js'
+import { optArg, optArgSync } from './opt-arg.js'
 import pathArg from './path-arg.js'
 import { rimrafManual, rimrafManualSync } from './rimraf-manual.js'
 import {
@@ -34,13 +30,13 @@ const wrap =
     if (options.glob) {
       path = await glob(path, options.glob)
     }
-    if (Array.isArray(path)) {
-      return !!(
-        await Promise.all(path.map(p => fn(pathArg(p, options), options)))
-      ).reduce((a, b) => a && b, true)
-    } else {
-      return !!(await fn(pathArg(path, options), options))
-    }
+    return Array.isArray(path) ?
+        !!(
+          await Promise.all(
+            path.map(p => fn(pathArg(p, options), options)),
+          )
+        ).reduce((a, b) => a && b, true)
+      : !!(await fn(pathArg(path, options), options))
   }
 
 const wrapSync =
@@ -50,13 +46,11 @@ const wrapSync =
     if (options.glob) {
       path = globSync(path, options.glob)
     }
-    if (Array.isArray(path)) {
-      return !!path
-        .map(p => fn(pathArg(p, options), options))
-        .reduce((a, b) => a && b, true)
-    } else {
-      return !!fn(pathArg(path, options), options)
-    }
+    return Array.isArray(path) ?
+        !!path
+          .map(p => fn(pathArg(p, options), options))
+          .reduce((a, b) => a && b, true)
+      : !!fn(pathArg(path, options), options)
   }
 
 export const nativeSync = wrapSync(rimrafNativeSync)

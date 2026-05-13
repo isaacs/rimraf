@@ -1,6 +1,6 @@
 import { parse, resolve } from 'path'
 import { inspect } from 'util'
-import { RimrafAsyncOptions } from './index.js'
+import type { RimrafAsyncOptions } from './index.js'
 
 const pathArg = (path: string, opt: RimrafAsyncOptions = {}) => {
   const type = typeof path

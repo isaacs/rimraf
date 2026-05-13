@@ -1,4 +1,5 @@
-import { Dirent, Stats, statSync } from 'fs'
+import type { Dirent, Stats } from 'fs'
+import { statSync } from 'fs'
 import * as PATH from 'path'
 import { basename, parse, relative } from 'path'
 import t from 'tap'

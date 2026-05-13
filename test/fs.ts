@@ -1,4 +1,5 @@
-import t, { Test } from 'tap'
+import type { Test } from 'tap'
+import t from 'tap'
 
 // verify that every function in the root is *Sync, and every
 // function is fs.promises is the promisified version of fs[method],

@@ -1,5 +1,6 @@
 import t from 'tap'
-import { Dirent, Mode, Stats, statSync } from 'fs'
+import type { Dirent, Mode, Stats } from 'fs'
+import { statSync } from 'fs'
 import * as PATH from 'path'
 import { basename, parse, relative } from 'path'
 import * as FS from '../src/fs.js'

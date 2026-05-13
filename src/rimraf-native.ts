@@ -1,4 +1,4 @@
-import { RimrafAsyncOptions, RimrafSyncOptions } from './index.js'
+import type { RimrafAsyncOptions, RimrafSyncOptions } from './index.js'
 import { promises, rmSync } from './fs.js'
 const { rm } = promises
 

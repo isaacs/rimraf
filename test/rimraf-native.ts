@@ -1,5 +1,8 @@
 import t from 'tap'
-import { RimrafAsyncOptions, RimrafSyncOptions } from '../src/index.js'
+import type {
+  RimrafAsyncOptions,
+  RimrafSyncOptions,
+} from '../src/index.js'
 
 const CALLS: any[] = []
 const fs = {

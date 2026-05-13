@@ -1,13 +1,12 @@
 import { statSync } from 'fs'
 import { resolve } from 'path'
 import t from 'tap'
-import {
-  rimraf,
+import type {
   RimrafAsyncOptions,
   RimrafOptions,
-  rimrafSync,
   RimrafSyncOptions,
 } from '../src/index.js'
+import { rimraf, rimrafSync } from '../src/index.js'
 
 import * as OPTARG from '../dist/esm/opt-arg.js'
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+//oxlint-disable no-console
 import type { RimrafAsyncOptions } from './index.js'
 import { rimraf } from './index.js'
 import { loadPackageJson } from 'package-json-from-dist'
@@ -188,23 +189,23 @@ const main = async (...args: string[]) => {
     } else if (arg === '--no-preserve-root') {
       opt.preserveRoot = false
       continue
-    } else if (/^--tmp=/.test(arg)) {
+    } else if (arg.startsWith('--tmp=')) {
       const val = arg.substring('--tmp='.length)
       opt.tmp = val
       continue
-    } else if (/^--max-retries=/.test(arg)) {
+    } else if (arg.startsWith('--max-retries=')) {
       const val = +arg.substring('--max-retries='.length)
       opt.maxRetries = val
       continue
-    } else if (/^--retry-delay=/.test(arg)) {
+    } else if (arg.startsWith('--retry-delay=')) {
       const val = +arg.substring('--retry-delay='.length)
       opt.retryDelay = val
       continue
-    } else if (/^--backoff=/.test(arg)) {
+    } else if (arg.startsWith('--backoff=')) {
       const val = +arg.substring('--backoff='.length)
       opt.backoff = val
       continue
-    } else if (/^--impl=/.test(arg)) {
+    } else if (arg.startsWith('--impl=')) {
       const val = arg.substring('--impl='.length)
       switch (val) {
         case 'rimraf':
@@ -224,7 +225,7 @@ const main = async (...args: string[]) => {
           runHelpForUsage()
           return 1
       }
-    } else if (/^-/.test(arg)) {
+    } else if (arg.startsWith('-')) {
       console.error(`unknown option: ${arg}`)
       runHelpForUsage()
       return 1
@@ -257,11 +258,9 @@ const main = async (...args: string[]) => {
     return 1
   }
 
-  if (interactive) {
-    await interactiveRimraf(impl, paths, opt)
-  } else {
-    await impl(paths, opt)
-  }
+  await (interactive ?
+    interactiveRimraf(impl, paths, opt)
+  : impl(paths, opt))
 
   return 0
 }

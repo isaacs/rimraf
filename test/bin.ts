@@ -1,7 +1,7 @@
 import { spawn, spawnSync } from 'child_process'
 import { Dirent, readdirSync, statSync } from 'fs'
 import t from 'tap'
-import { RimrafOptions } from '../src/index.js'
+import type { RimrafOptions } from '../src/index.js'
 import { basename, join, resolve } from 'path'
 import { loadPackageJson } from 'package-json-from-dist'
 

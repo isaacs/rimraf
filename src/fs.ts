@@ -1,4 +1,6 @@
-import fs, { Dirent, readdirSync as rdSync } from 'fs'
+import type { Dirent } from 'fs'
+import type fs from 'fs'
+import { readdirSync as rdSync } from 'fs'
 import fsPromises from 'fs/promises'
 
 // sync ones just take the sync version from node

@@ -7,8 +7,8 @@
 import { lstatSync, promises, rmdirSync, unlinkSync } from './fs.js'
 import { parse, resolve } from 'path'
 import { readdirOrError, readdirOrErrorSync } from './readdir-or-error.js'
-import { Dirent, Stats } from 'fs'
-import { RimrafAsyncOptions, RimrafSyncOptions } from './index.js'
+import type { Dirent, Stats } from 'fs'
+import type { RimrafAsyncOptions, RimrafSyncOptions } from './index.js'
 import { ignoreENOENT, ignoreENOENTSync } from './ignore-enoent.js'
 import { errorCode } from './error.js'
 const { lstat, rmdir, unlink } = promises
