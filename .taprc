@@ -1,1 +1,2 @@
-coverage-map: "map.js"
+# vim: set filetype=yaml :
+coverage-map: map.js
