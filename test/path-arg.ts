@@ -19,16 +19,17 @@ for (const platform of ['win32', 'posix'] as const) {
       Error('path must be a string without null bytes'),
     )
     if (platform === 'win32') {
-      // regression test for #325: a well-formed drive-letter path must
-      // NOT be flagged as containing illegal characters just because
-      // the drive prefix itself contains a colon (e.g. "C:")
+      // see #325: the colon in a drive root like "C:" is fine, only the
+      // part of the path after the root gets checked for bad characters
       const goodPaths = [
         'c:\\a\\b\\c',
         'C:\\Users\\name\\Documents',
+        'C:/a/b',
         '\\\\server\\share\\a\\b',
-        ]
-      for (const path of goodPaths) {
-        t.doesNotThrow(() => pathArg(path), `should not throw on ${path}`)
+        '\\\\?\\C:\\a\\b',
+      ]
+      for (const p of goodPaths) {
+        t.equal(pathArg(p), path.resolve(p), `accepts ${p}`)
       }
       const badPaths = [
         'c:\\a\\b:c',
