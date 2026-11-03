@@ -50,13 +50,13 @@
     "postlint": "npm run format"
   },
   "devDependencies": {
-    "@types/node": "^25.7.0",
-    "oxlint": "^1.64.0",
-    "oxlint-tsgolint": "^0.22.1",
-    "prettier": "^3.8.3",
-    "tap": "^21.7.4",
-    "tshy": "^4.1.2",
-    "typedoc": "^0.28.19"
+    "@types/node": "^26.6.6",
+    "oxlint": "^1.91.0",
+    "oxlint-tsgolint": "^7.0.2005",
+    "prettier": "^3.9.10",
+    "tap": "^21.8.0",
+    "tshy": "^4.1.3",
+    "typedoc": "^0.28.20"
   },
   "funding": {
     "url": "https://github.com/sponsors/isaacs"
@@ -65,7 +65,7 @@
     "node": "20 || >=22"
   },
   "dependencies": {
-    "glob": "^13.0.3",
+    "glob": "^14.0.3",
     "package-json-from-dist": "^1.0.1"
   },
   "keywords": [
